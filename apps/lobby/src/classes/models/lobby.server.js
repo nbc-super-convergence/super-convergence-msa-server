@@ -20,6 +20,9 @@ class LobbyServer extends TcpServer {
 
         const payload = packetParser(messageType, packet);
         console.log(' [ IceServer _onData ] payload ====>> ', payload);
+
+        const handler = getPayloadNameByMessageType(payload);
+        await handler({ socket, messageType, payload });
       } else {
         break;
       }
