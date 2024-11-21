@@ -3,12 +3,14 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "start": "turbo run start:ice --no-daemon", 
+    "start": "turbo run start:ice --no-daemon",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.3",
     "turbo": "^2.3.0"
   },
   "packageManager": "yarn@1.22.22",
