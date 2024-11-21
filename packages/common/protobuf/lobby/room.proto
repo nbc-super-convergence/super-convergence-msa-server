@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package room;
+
+message C2S_LeaveRoomRequest {
+}
+
+message S2C_LeaveRoomResponse {
+    bool success = 1;
+    GlobalFailCode failCode = 2;
+}
+
+message S2C_LeaveRoomNotification {
+    int64 userId = 1;
+}
+
+message C2S_GamePrepareRequest {
+}
+
+message S2C_GamePrepareResponse {
+    bool success = 1;
+    GlobalFailCode failCode = 2;
+} 
+
+message S2C_GamePrepareNotification {
+    int32 userId = 1;
+}
+
+message C2S_GameStartRequest {
+}
+
+message S2C_GameStartNotification {
+}

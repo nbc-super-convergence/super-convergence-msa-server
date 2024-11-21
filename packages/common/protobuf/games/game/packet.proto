@@ -1,29 +1,85 @@
 syntax = "proto3";
 
 package game;
+
 import '../ice/ice.proto';
 import '../../distributor/packet.proto';
+import '../../auth/auth.proto';
+import '../../lobby/lobby.proto';
+import '../../lobby/room.proto';
+import './board.proto';
 
 message GamePacket {
     oneof payload {
-
-        // * 빙판 게임 Request
-        C2S_IceJoinRequest iceJoinRequest = 1;
-        C2S_IceStartRequest iceStartRequest = 2;
-        C2S_IcePlayerMoveRequest icePlayerMoveRequest = 3; 
+        // Auth (1~9)
+        C2S_RegisterRequest registerRequest = 1;
+        S2C_RegisterResponse registerResponse = 2;
+        C2S_LoginRequest loginRequest = 3;
+        S2C_LoginResponse loginResponse = 4;
         
-        // * 빙판 게임 Notification
-        S2C_IceMoveNotification iceMoveNotification = 4;
-        S2C_IcePlayerSpawnNotification icePlayerSpawnNotification = 5;
-        S2C_IceStartNotification iceStartNotification = 6;
-        S2C_IcePlayersStateSyncNotification icePlayersStateSyncNotification = 7;
-        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 8;
-        S2C_IceMapStateSyncNotification iceMapStateSyncNotification = 9;
-        S2C_IceOverNotification iceOverNotification = 10;
-        S2C_IcePlayerMoveNotification icePlayerMoveNotification = 11;
+        // distributor noti (10)
+        S2S_ServerInfoNotification serverInfoNotification = 10;
 
-        
-        // * S2S
-        S2S_ServerInfoNotification serverInfoNotification = 20;
+        // Lobby (11-30)
+        C2S_LobbyJoinRequest lobbyJoinRequest = 11;
+        C2S_LobbyChatRequest lobbyChatRequest = 12;
+        S2C_LobbyChatResponse lobbyChatResponse = 13;
+        S2C_LobbyNotification lobbyNotification = 14;
+        S2C_LobbyUserListNotification lobbyUserListNotification = 15;
+        C2S_LobbyUserDetailRequest lobbyUserDetailRequest = 16;
+        S2C_LobbyUserDetailResponse lobbyUserDetailResponse = 17;
+
+        // Room (31-50)
+        C2S_RoomListRequest roomListRequest = 31;
+        S2C_RoomListResponse roomListResponse = 32;
+        C2S_CreateRoomRequest createRoomRequest = 33;
+        S2C_CreateRoomResponse createRoomResponse = 34;
+        C2S_JoinRoomRequest joinRoomRequest = 35;
+        S2C_JoinRoomResponse joinRoomResponse = 36;
+        S2C_JoinRoomNotification joinRoomNotification = 37;
+        C2S_LeaveRoomRequest leaveRoomRequest = 38;
+        S2C_LeaveRoomResponse leaveRoomResponse = 39;
+        S2C_LeaveRoomNotification leaveRoomNotification = 40;
+
+        // Game Preparation (51-60)
+        C2S_GamePrepareRequest gamePrepareRequest = 51;
+        S2C_GamePrepareResponse gamePrepareResponse = 52;
+        S2C_GamePrepareNotification gamePrepareNotification = 53;
+        C2S_GameStartRequest gameStartRequest = 54;
+        S2C_GameStartNotification gameStartNotification = 55;
+
+        // Game Play (61-90)
+        C2S_RollDiceRequest rollDiceRequest = 61;
+        S2C_RollDiceResponse rollDiceResponse = 62;
+        S2C_RollDiceNotification rollDiceNotification = 63;
+        C2S_MovePlayerBoardRequest movePlayerBoardRequest = 64;
+        S2C_MovePlayerBoardResponse movePlayerBoardResponse = 65;
+        S2C_MovePlayerBoardNotification movePlayerBoardNotification = 66;
+        C2S_PurchaseTileRequest purchaseTileRequest = 67;
+        S2C_PurchaseTileResponse purchaseTileResponse = 68;
+        S2C_PurchaseTileNotification purchaseTileNotification = 69;
+        S2C_GameEndNotification gameEndNotification = 70;
+
+        // Post Game (91-100)
+        C2S_BackToTheRoomRequest backToTheRoomRequest = 91;
+        S2C_BackToTheRoomResponse backToTheRoomResponse = 92;
+        S2C_BackToTheRoomNotification backToTheRoomNotification = 93;
+
+        // Mini Game (101-110)
+        C2S_StartMiniGameRequest startMiniGameRequest = 101;
+        S2C_StartMiniGameNotification startMiniGameNotification = 102;
+
+        // ice  (201)
+        C2S_IceJoinRequest iceJoinRequest = 201;
+        C2S_IceStartRequest iceStartRequest = 202;
+        C2S_IcePlayerMoveRequest icePlayerMoveRequest = 203; 
+        S2C_IceMoveNotification iceMoveNotification = 204;
+        S2C_IcePlayerSpawnNotification icePlayerSpawnNotification = 205;
+        S2C_IceStartNotification iceStartNotification = 206;
+        S2C_IcePlayersStateSyncNotification icePlayersStateSyncNotification = 207;
+        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 208;
+        S2C_IceMapStateSyncNotification iceMapStateSyncNotification = 209;
+        S2C_IceOverNotification iceOverNotification = 210;
+        S2C_IcePlayerMoveNotification icePlayerMoveNotification = 211;
     }
 }
