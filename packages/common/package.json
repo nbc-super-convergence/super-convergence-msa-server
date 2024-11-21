@@ -11,6 +11,26 @@
     "build": "yarn"
   },
   "dependencies": {
-    "protobufjs": "^7.4.0"
-  }
+    "protobufjs": "^7.4.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "exports": {
+    "./utils": "./utils/index.js",
+    "./classes": "./classes/index.js",
+    "./config": "./config/index.js",
+    "./header": "./constants/header.js",
+    "./handlers": "./handlers/index.js",
+    "./load.protos": "./init/load.protos.js",
+    "./protobuf": "./protobuf"
+  },
+  "files": [
+    "utils/**/*",
+    "classes/**/*",
+    "config/**/*",
+    "constants/**/*",
+    "handlers/**/*",
+    "init/**/*",
+    "protobuf/**/*.proto"
+  ]
 }

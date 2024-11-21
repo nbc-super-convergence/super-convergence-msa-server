@@ -1,12 +1,15 @@
-import TcpClient from "@repo/common/classes/models/client.class.js";
-import TcpServer from "@repo/common/classes/models/server.class.js";
-import { config } from "@repo/common/config/config.js";
-import { deserialize } from "@repo/common/utils/deserialize/deserialize.js";
+import { TcpServer, TcpClient } from "@repo/common/classes";
+import { config } from "@repo/common/config";
+import {
+  createServerInfoNotification,
+  deserialize,
+  packetParser,
+} from "@repo/common/utils";
 
 class GateServer extends TcpServer {
-  _mapClients = {};
+  _map = {};
   _mapMessageTypes = {
-    ICE: [1, 2, 3, 4],
+    ICE: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   };
   _isConnectedDistributor;
 
@@ -37,6 +40,8 @@ class GateServer extends TcpServer {
           ` [ _onData ] while:if - messageType : ${messageType}, version : ${version}, sequence : ${sequence}, offset : ${offset}, length : ${length} `
         );
 
+        // TODO: 수정해야함 !,
+        // TODO: distributor에서 받은 데이터를 기반으로 파싱하는 방식으로 !!
         if (this._mapMessageTypes.ICE.includes(messageType)) {
           console.log(
             ` [ _onData ] 22222 - messageType : ${messageType}, version : ${version}, sequence : ${sequence}, offset : ${offset}, length : ${length} `
@@ -45,7 +50,7 @@ class GateServer extends TcpServer {
            * 여기서 ice server로 어떻게 넘길 것인가...
            */
 
-          console.log("[ IFFF ] _mapClients =>>> ", this._mapClients);
+          console.log("[ IFFF ] _map =>>> ", this._map);
         }
 
         const packet = socket.buffer.subarray(offset, length);
@@ -57,35 +62,77 @@ class GateServer extends TcpServer {
     }
   };
 
-  _onDistribute = (data) => {
+  _onDistribute = (socket, data) => {
     console.log("[ _onDistribute ] data ===>> ", data);
-    for (var n in data.params) {
-      const node = data.params[n];
-      const key = node.host + ":" + node.port;
-      if (this._mapClients[key] == null && node.name != "gate") {
-        const client = new TcpClient(
-          node.host,
-          node.port,
-          this.onCreateClient,
-          this.onReadClient,
-          this.onEndClient,
-          this.onErrorClient
-        );
 
-        this._mapClients[key] = {
-          client: client,
-          info: node,
-        };
-        for (var m in node.urls) {
-          const key = node.urls[m];
-          if (this._mapMessageTypes[key] == null) {
-            this._mapMessageTypes[key] = [];
-          }
-          this._mapMessageTypes[key].push(client);
+    socket.buffer = Buffer.concat([socket.buffer, data]);
+
+    while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
+      // deserialized
+      const { messageType, version, sequence, offset, length } =
+        deserialize(data);
+
+      console.log(
+        `\n## messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`
+      );
+
+      // TODO: version check & sequnce check
+
+      if (socket.buffer.length >= length) {
+        const packet = socket.buffer.subarray(offset, length);
+        socket.buffer = socket.buffer.subarray(length);
+
+        const payload = packetParser(messageType, packet);
+
+        console.log(" [ _onDistribute ] payload ===>>> ", payload);
+
+        for (let i = 0; i < payload.params.length; i++) {
+          const param = payload.params[i];
+
+          const key = param.name + "_" + param.number;
+          // 서버정보 매핑
+          // socket.remoteAddress, socket.remotePort
+          this._map[key] = {
+            socket: socket,
+            name: param.name,
+            number: param.number,
+            host: param.host,
+            port: param.port,
+            types: param.types,
+          };
         }
-        client.connect();
+      } else {
+        break;
       }
     }
+
+    // for (var n in data.params) {
+    //   const node = data.params[n];
+    //   const key = node.host + ":" + node.port;
+    //   if (this._mapClients[key] == null && node.name != "gate") {
+    //     const client = new TcpClient(
+    //       node.host,
+    //       node.port,
+    //       this.onCreateClient,
+    //       this.onReadClient,
+    //       this.onEndClient,
+    //       this.onErrorClient
+    //     );
+
+    //     this._mapClients[key] = {
+    //       client: client,
+    //       info: node,
+    //     };
+    //     for (var m in node.urls) {
+    //       const key = node.urls[m];
+    //       if (this._mapMessageTypes[key] == null) {
+    //         this._mapMessageTypes[key] = [];
+    //       }
+    //       this._mapMessageTypes[key].push(client);
+    //     }
+    //     client.connect();
+    //   }
+    // }
   };
 
   // 마이크로서비스 접속 이벤트 처리
@@ -110,14 +157,29 @@ class GateServer extends TcpServer {
   };
 
   // *
-  start = () => {
+  start = async () => {
+    await this.initialize();
+
     this.server.listen(this.context.port, () => {
       console.log(
         `${this.context.name} server listening on port ${this.context.port}`
       );
 
+      const packet = createServerInfoNotification(
+        [
+          {
+            name: this.context.name,
+            number: 1,
+            host: "localhost",
+            port: this.context.port + "",
+            types: this.context.types,
+          },
+        ],
+        ++this._sequence
+      );
+      console.log(`\n [ start ]  packet ==>> ${packet} \n`);
+
       // * Distributor와 통신 처리
-      // const packet = "hi im gate server";
       this._isConnectedDistributor = false;
 
       this._clientDistributor = new TcpClient(
@@ -126,15 +188,15 @@ class GateServer extends TcpServer {
         (options) => {
           console.log(" onCreate ==>> ");
           this._isConnectedDistributor = true;
-          // this._clientDistributor.write(packet);
+          this._clientDistributor.write(packet);
         },
-        (options, data) => {
+        (socket, data) => {
           console.log(
             " [ _clientDistributor onData ] data tostring ==>> ",
             data.toString()
           );
 
-          this._onDistribute(data);
+          this._onDistribute(socket, data);
         },
         (options) => {
           console.log(" onEnd ==>> ", options);

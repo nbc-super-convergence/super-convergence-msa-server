@@ -4,7 +4,19 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["apps/*/dist/**"]
+      "outputs": ["dist/**"]
+    },
+    "start:distributor": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "start:gate": {
+      "dependsOn": ["start:distributor"],
+      "cache": false
+    },
+    "start:ice": {
+      "dependsOn": ["start:gate"],
+      "cache": false
     },
     "dev": {
       "cache": false,

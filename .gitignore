@@ -5,3 +5,7 @@ node_modules
 .turbo
 apps/*/.turbo
 apps/*/dist
+
+# logs 
+apps/*/logs
+apps/logs

@@ -4,10 +4,12 @@
   "main": "src/server.js",
   "license": "MIT",
   "type": "module",
+  "version": "1.0.0",
   "dependencies": {
     "@repo/common": "*"
   },
   "scripts": {
-    "build": "yarn"
+    "build": "yarn && node build.js",
+    "start:ice": "node dist/server.js"
   }
 }

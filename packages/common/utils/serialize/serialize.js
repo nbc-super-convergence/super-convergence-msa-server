@@ -24,11 +24,11 @@ export const serialize = (messageType, data, sequence) => {
 
   const protoMessages = getProtoMessages();
 
-  const serverInfo = protoMessages.distributor.S2S_ServerInfoNotification;
-  const data2 = serverInfo.create(data);
+  // const serverInfo = protoMessages.distributor.S2S_ServerInfoNotification;
+  // const data2 = serverInfo.create(data);
 
   const gamePacket = protoMessages.game.GamePacket;
-  const payload = { [getPayloadNameByMessageType(messageType)]: data2 };
+  const payload = { [getPayloadNameByMessageType(messageType)]: data };
 
   console.log("  [ serialize ] payload ===>>> ", payload);
 

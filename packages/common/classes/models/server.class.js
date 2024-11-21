@@ -1,13 +1,15 @@
 import net from "net";
-import TcpClient from "./client.class.js";
-import { getProtoMessages } from "../../init/load.protos.js";
-import { createServerInfoNotification } from "../../utils/notifications/distributor.notification.js";
-import { config } from "../../config/config.js";
-import { deserialize } from "../../utils/deserialize/deserialize.js";
-import { packetParser } from "../../utils/packets/packet.parser.js";
+import { TcpClient } from "@repo/common/classes";
+import { getProtoMessages, loadProtos } from "@repo/common/load.protos";
+import {
+  createServerInfoNotification,
+  packetParser,
+  deserialize,
+} from "@repo/common/utils";
+import { config } from "@repo/common/config";
 
 class TcpServer {
-  _protoMessages = getProtoMessages();
+  _protoMessages;
   _sequence;
 
   constructor(name, port, types = []) {
@@ -20,6 +22,11 @@ class TcpServer {
     };
     this._sequence = 1;
     this.server = net.createServer(this._onConnection);
+  }
+
+  async initialize() {
+    await loadProtos();
+    this._protoMessages = getProtoMessages();
   }
 
   _onConnection = (socket) => {
@@ -51,7 +58,9 @@ class TcpServer {
     console.error(" [ _onError ]  소켓 오류가 발생하였습니다. ", err);
   };
 
-  start = () => {
+  start = async () => {
+    await this.initialize();
+
     this.server.listen(this.context.port, () => {
       console.log(
         `${this.context.name} server listening on port ${this.context.port}`
@@ -65,13 +74,10 @@ class TcpServer {
    * @param {*} port
    * @param {*} onNoti
    */
-  connectToDistributor(host, port, onNoti) {
-    // const packet = {
-    //   uri: "/distributes",
-    //   method: "POST",
-    //   key: 0,
-    //   params: this.context,
-    // };
+  connectToDistributor = async (host, port, onNoti) => {
+    if (!this._protoMessages) {
+      await this.initialize();
+    }
 
     const packet = createServerInfoNotification(
       [
@@ -96,7 +102,6 @@ class TcpServer {
       (options) => {
         console.log(" onCreate ==>> ");
         this._isConnectedDistributor = true;
-        // this._clientDistributor.write(JSON.stringify(packet));
         this._clientDistributor.write(packet);
       },
       (socket, data) => {
@@ -142,7 +147,7 @@ class TcpServer {
         this._clientDistributor.connect();
       }
     }, 3000);
-  }
+  };
 }
 
 export default TcpServer;

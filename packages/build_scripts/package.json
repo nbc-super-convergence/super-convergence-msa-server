@@ -1,16 +1,20 @@
 {
   "name": "@repo/build",
   "version": "0.0.0",
+  "main": "./build.js",
   "type": "module",
   "private": true,
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "scripts": {
-    "build": "yarn"
-  },
   "devDependencies": {
     "esbuild": "^0.24.0"
-  }
+  },
+  "exports": {
+    ".": "./build.js"
+  },
+  "files": [
+    "*.js"
+  ]
 }
