@@ -65,6 +65,29 @@ class DistributorServer extends TcpServer {
     //
   };
 
+
+  /** 
+   * Distributor Server 는 Server 끼리만 연결
+   */
+
+    _onEnd = (socket) => () => {
+
+  const shutdownServer = Object.values(this._map).find((server) => server.socket === socket);
+    const key = shutdownServer.name + "_" + shutdownServer.number;
+    delete this._map[key]
+    console.log(`${shutdownServer.name} 서버가 종료되었습니다. `)
+
+    this.sendInfo();
+  };
+
+    _onError = (socket) => (err) => {
+    if (err.code === 'ECONNRESET') {
+       this._onEnd(socket)();
+      return;
+    }
+    console.error(" [ _onError ]  소켓 오류가 발생하였습니다. ", err);
+  };
+
   sendInfo(socket) {
     const params = [
       {
