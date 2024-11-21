@@ -1,0 +1,7 @@
+# modules
+node_modules
+
+# turborepo
+.turbo
+apps/*/.turbo
+apps/*/dist

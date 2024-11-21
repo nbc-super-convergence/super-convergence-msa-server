@@ -1,0 +1,16 @@
+syntax = 'proto3';
+
+package distributor;
+
+message S2S_ServerInfoNotification {
+    
+    repeated Params params = 1;
+    
+    message Params {
+        string name = 1;
+        int32 number = 2;
+        string host = 3;
+        string port = 4;
+        repeated int32 types = 5;
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@repo/common",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "yarn"
+  },
+  "dependencies": {
+    "protobufjs": "^7.4.0"
+  }
+}

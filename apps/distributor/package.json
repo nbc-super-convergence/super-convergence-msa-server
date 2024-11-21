@@ -1,0 +1,14 @@
+{
+  "name": "distributor",
+  "private": true,
+  "main": "src/server.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@repo/common": "*",
+    "@repo/build": "*"
+  },
+  "scripts": {
+    "build": "yarn && node ./build.js $npm_package_name"
+  }
+}

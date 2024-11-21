@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package game;
+import '../ice/ice.proto';
+import '../../distributor/packet.proto';
+
+message GamePacket {
+    oneof payload {
+
+        // * 빙판 게임 Request
+        C2S_IceJoinRequest iceJoinRequest = 1;
+        C2S_IceStartRequest iceStartRequest = 2;
+        C2S_IcePlayerMoveRequest icePlayerMoveRequest = 3; 
+        
+        // * 빙판 게임 Notification
+        S2C_IceMoveNotification iceMoveNotification = 4;
+        S2C_IcePlayerSpawnNotification icePlayerSpawnNotification = 5;
+        S2C_IceStartNotification iceStartNotification = 6;
+        S2C_IcePlayersStateSyncNotification icePlayersStateSyncNotification = 7;
+        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 8;
+        S2C_IceMapStateSyncNotification iceMapStateSyncNotification = 9;
+        S2C_IceOverNotification iceOverNotification = 10;
+        S2C_IcePlayerMoveNotification icePlayerMoveNotification = 11;
+
+        
+        // * S2S
+        S2S_ServerInfoNotification serverInfoNotification = 20;
+    }
+}

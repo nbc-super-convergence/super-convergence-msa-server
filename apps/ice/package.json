@@ -1,0 +1,13 @@
+{
+  "name": "ice",
+  "private": true,
+  "main": "src/server.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@repo/common": "*"
+  },
+  "scripts": {
+    "build": "yarn"
+  }
+}

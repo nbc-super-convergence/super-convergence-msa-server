@@ -1,0 +1,15 @@
+syntax = 'proto3';
+
+package common;
+
+message Vector {
+    float x = 1; 
+    float y = 2; 
+    float z = 3; 
+}
+
+enum State {
+    IDLE = 0;
+    MOVE = 1;
+    DIE = 2;
+}
