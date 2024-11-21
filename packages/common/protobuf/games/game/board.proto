@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package board;
+
+message C2S_RollDiceRequest {
+}
+
+message S2C_RollDiceResponse {
+  	bool success = 1;
+	int32 diceResult = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message S2C_RollDiceNotification {
+	int32 playerId = 1;
+	int32 diceResult = 2;
+}
+
+message  C2S_MovePlayerBoardRequest {
+    Vector  targetPoint = 1;
+}
+
+message  S2C_MovePlayerBoardResponse {
+  	bool success = 1;
+	GlobalFailCode failCode = 2;
+}
+
+message  S2C_MovePlayerBoardNotification {
+	int32 playerId = 1;
+	Vector targetPoint = 2;
+}
+
+message  C2S_PurchaseTileRequest {
+	int32 playerId = 1;
+	Vector tile = 2;
+}
+
+message  S2C_PurchaseTileResponse {
+  	bool success = 1;
+	Vector tile = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message  S2C_PurchaseTileNotification {
+	int32 playerId = 1;
+	Vector tile = 2;
+}
+
+message S2C_GameEndNotification {
+  	Rank rank = 1;
+}
+
+message C2S_BackToTheRoomRequest {
+	int32 userId = 1;
+}
+
+message S2C_BackToTheRoomResponse {
+	bool success = 1;
+	RoomData room = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message S2C_BackToTheRoomNotification {
+	int32 userId = 1;
+}
+
+message C2S_StartMiniGameRequest {
+}
+
+message S2C_StartMiniGameNotification {
+	int32 game = 1; // 랜덤으로 돌린 미니 게임 중 하나
+}
