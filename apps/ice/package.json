@@ -11,5 +11,8 @@
   "scripts": {
     "build": "yarn && node build.js",
     "start:ice": "node dist/server.js"
+  },
+  "devDependencies": {
+    "uuid": "^11.0.3"
   }
 }
