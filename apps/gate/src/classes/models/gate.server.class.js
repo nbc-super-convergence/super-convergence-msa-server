@@ -8,6 +8,7 @@ import {
 
 class GateServer extends TcpServer {
   _map = {};
+  _mapClients = {};
   _mapMessageTypes = {
     ICE: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   };
@@ -49,6 +50,27 @@ class GateServer extends TcpServer {
           /*
            * 여기서 ice server로 어떻게 넘길 것인가...
            */
+          const key = "ice_1";
+
+          const iceServerInfo = this._map[key];
+          const iceServerClient = this._mapClients[key];
+          console.log(" iceServerInfo ===>>>> ", iceServerInfo);
+          console.log(" iceServerClient ===>>>> ", iceServerClient);
+          console.log(
+            " iceServerClient typeof ===>>>> ",
+            typeof iceServerClient
+          );
+          // console.log(
+          //   " iceServerInfo ===>>>> ",
+          //   iceServerInfo.socket.remoteAddress
+          // );
+          // console.log(
+          //   " iceServerInfo ===>>>> ",
+          //   iceServerInfo.socket.remotePort
+          // );
+
+          // *
+          iceServerClient.client.write(socket.buffer);
 
           console.log("[ IFFF ] _map =>>> ", this._map);
         }
@@ -92,6 +114,25 @@ class GateServer extends TcpServer {
           const key = param.name + "_" + param.number;
           // 서버정보 매핑
           // socket.remoteAddress, socket.remotePort
+
+          // TODO: Client 만들어서 맵으로 저장
+          const client = new TcpClient(
+            param.host,
+            param.port,
+            this.onCreateClient,
+            this.onReadClient,
+            this.onEndClient,
+            this.onErrorClient
+          );
+
+          console.log(" client =>>>> ", client);
+          console.log(" client typeof =>>>> ", typeof client);
+
+          this._mapClients[key] = {
+            client: client,
+            info: param,
+          };
+
           this._map[key] = {
             socket: socket,
             name: param.name,
@@ -100,39 +141,18 @@ class GateServer extends TcpServer {
             port: param.port,
             types: param.types,
           };
+
+          // TODO: 임시
+          if (param.name === "ice") {
+            console.log(" ice client =>>>> ", client);
+            // * 정보받은 서버랑 연결
+            client.connect();
+          }
         }
       } else {
         break;
       }
     }
-
-    // for (var n in data.params) {
-    //   const node = data.params[n];
-    //   const key = node.host + ":" + node.port;
-    //   if (this._mapClients[key] == null && node.name != "gate") {
-    //     const client = new TcpClient(
-    //       node.host,
-    //       node.port,
-    //       this.onCreateClient,
-    //       this.onReadClient,
-    //       this.onEndClient,
-    //       this.onErrorClient
-    //     );
-
-    //     this._mapClients[key] = {
-    //       client: client,
-    //       info: node,
-    //     };
-    //     for (var m in node.urls) {
-    //       const key = node.urls[m];
-    //       if (this._mapMessageTypes[key] == null) {
-    //         this._mapMessageTypes[key] = [];
-    //       }
-    //       this._mapMessageTypes[key].push(client);
-    //     }
-    //     client.connect();
-    //   }
-    // }
   };
 
   // 마이크로서비스 접속 이벤트 처리
