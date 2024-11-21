@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package lobby;
+
+message C2S_LobbyJoinRequest {
+}
+
+message C2S_LobbyChatRequest {
+    int32 target = 1; // 전체? 귓?
+    string messge = 2;
+}
+
+message S2C_LobbyChatResponse {
+    bool success = 1;
+    string message = 2;
+    GlobalFailCode failCode = 3;
+}
+
+message S2C_LobbyNotification {
+    int32 target = 1; // 전체? 귓?
+    string messge = 2;
+}
+
+message S2C_LobbyUserListNotification {
+    repeated UserData userList = 1;
+   
+    message UserData {
+       int32 userId = 1;
+       string nickname = 2;
+    }
+}
+
+message C2S_LobbyUserDetailRequest {
+    int32 tartgetUserId = 1;
+}
+
+message S2C_LobbyUserDetailResponse {
+    UserDetail userDetail = 1;
+     
+    message UserDetail {
+        int32 userId = 1;
+        string nickname = 2;
+        string level = 3;
+    }
+}
+
+message C2S_RoomListRequest {
+
+}
+
+message S2C_RoomListResponse{
+    repeated RoomData rooms = 1;
+}
+
+message C2S_CreateRoomRequest {
+    string roomName = 1;
+}
+
+message S2C_CreateRoomResponse {
+    bool success = 1;
+    RoomData room = 2;
+    GlobalFailCode failCode = 3;
+}
+
+message C2S_JoinRoomRequest {
+    int32 roomId = 1;
+}
+
+ message S2C_JoinRoomResponse {
+    bool success = 1;
+    RoomData room = 2;
+    GlobalFailCode failCode = 3; 
+}
+
+message S2C_JoinRoomNotification {
+    UserData joinUser = 1;
+}
