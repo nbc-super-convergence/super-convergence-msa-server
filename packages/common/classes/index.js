@@ -5,3 +5,5 @@ export { default as Game } from './models/game.class.js';
 export { default as User } from './models/user.class.js';
 export { default as Vector } from './models/vector.class.js';
 export { default as Player } from './models/player.class.js';
+export { default as RedisClient } from './models/redisClient.class.js';
+export { default as RedisUtil } from './models/redisUtil.class.js';
