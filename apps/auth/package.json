@@ -8,11 +8,14 @@
   "dependencies": {
     "@repo/common": "*",
     "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
     "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.4"
   },
   "scripts": {
     "build": "yarn && node build.js",
-    "start:auth": "node dist/server.js"
+    "start:auth": "node dist/server.js",
+    "auth":"node src/server.js"
   }
 }

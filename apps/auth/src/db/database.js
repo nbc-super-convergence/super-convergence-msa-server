@@ -12,8 +12,6 @@ const createPool = () => {
   const originalQuery = pool.query;
 
   pool.query = (sql, params) => {
-    const date = new Date();
-
     return originalQuery.call(pool, sql, params);
   };
 

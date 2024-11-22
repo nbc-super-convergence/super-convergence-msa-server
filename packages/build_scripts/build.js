@@ -16,6 +16,8 @@ export const build = async (options) => {
       '@repo/common', // common도 번들링 제외
       'bcrypt',
       'mysql2',
+      'joi',
+      'jsonwebtoken',
     ],
     define: {
       'process.env.NODE_ENV': '"production"',

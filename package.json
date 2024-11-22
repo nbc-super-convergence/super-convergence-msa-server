@@ -6,7 +6,9 @@
     "start": "turbo run start:auth --no-daemon", 
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "auth": "turbo run auth --no-daemon"
+
   },
   "devDependencies": {
     "eslint": "^9.15.0",

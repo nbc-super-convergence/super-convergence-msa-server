@@ -1,7 +1,7 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { deserialize, packetParser } from '@repo/common/utils';
-import { getHandlerByMessageType } from '../../handlers/index.js';
+import { getHandlerByMessageType, getPayloadNameByMessageType } from '../../handlers/index.js';
 
 class AuthServer extends TcpServer {
   _onData = (socket) => async (data) => {
@@ -20,7 +20,9 @@ class AuthServer extends TcpServer {
           const packet = socket.buffer.subarray(offset, length);
           socket.buffer = socket.buffer.subarray(length);
 
-          const payload = packetParser(messageType, packet);
+          const payloadType = getPayloadNameByMessageType(messageType);
+
+          const payload = packetParser(messageType, packet, payloadType);
           console.log(' [ AuthServer _onData ] payload ====>> ', payload);
 
           const handler = getHandlerByMessageType(messageType);

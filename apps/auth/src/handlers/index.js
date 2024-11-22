@@ -1,5 +1,5 @@
 import { MESSAGE_TYPE } from '../constants/header.js';
-import { registerRequestHandler } from './auth/auth.handler.js';
+import { loginRequestHandler, registerRequestHandler } from './auth/auth.handler.js';
 
 const handlers = {
   // * REQUEST
@@ -9,7 +9,7 @@ const handlers = {
     payload: 'registerRequest',
   },
   [MESSAGE_TYPE.LOGIN_REQUEST]: {
-    handler: undefined,
+    handler: loginRequestHandler,
     message: 'auth.C2S_LoginRequest',
     payload: 'loginRequest',
   },
