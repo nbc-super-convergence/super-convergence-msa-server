@@ -13,7 +13,7 @@ export const iceJoinRequestHandler = ({ socket, payload }) => {
 
   /**
    * TODO: 유저에게 게임 세션 아이디를 언제 줄 것인가?
-   *
+   * TODO: 유저의 상태 동기화, 맵 동기화 필요!
    */
   let user = getUserBySocket(socket);
 

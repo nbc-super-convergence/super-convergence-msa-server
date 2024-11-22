@@ -1,6 +1,7 @@
 import { serialize } from '@repo/common/utils';
 import { Player } from '@repo/common/classes';
 import { User } from '@repo/common/classes';
+import { getPayloadNameByMessageType } from '../../handlers/index.js';
 
 class iceUser extends User {
   constructor(socket, id) {
@@ -25,7 +26,8 @@ class iceUser extends User {
    */
   sendPacket(packet) {
     const { type, payload } = packet;
-    const buffer = serialize(type, payload, this.getNextSequence()); // 직렬화
+    const payloadType = getPayloadNameByMessageType(type);
+    const buffer = serialize(type, payload, this.getNextSequence(), payloadType); // 직렬화
     this.socket.write(buffer);
   }
 }
