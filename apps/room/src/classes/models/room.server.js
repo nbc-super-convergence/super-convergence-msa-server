@@ -2,7 +2,7 @@ import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { deserialize, packetParser } from '@repo/common/utils';
 
-class LobbyServer extends TcpServer {
+class RoomServer extends TcpServer {
   _onData = (socket) => async (data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
     console.log(' [ _onData ]  data ', data);
@@ -19,7 +19,7 @@ class LobbyServer extends TcpServer {
         socket.buffer = socket.buffer.subarray(length);
 
         const payload = packetParser(messageType, packet);
-        console.log(' [ Lobby_onData ] payload ====>> ', payload);
+        console.log(' [ Room_onData ] payload ====>> ', payload);
 
         const handler = getPayloadNameByMessageType(payload);
         await handler({ socket, messageType, payload });
@@ -30,4 +30,4 @@ class LobbyServer extends TcpServer {
   };
 }
 
-export default LobbyServer;
+export default RoomServer;

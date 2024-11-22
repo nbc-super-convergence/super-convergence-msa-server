@@ -6,41 +6,56 @@ import {
 } from '@repo/common/handlers';
 
 const handlers = {
-  // * lobby
-  [MESSAGE_TYPE.LOBBY_JOIN_REQUEST]: {
+  // * room
+  [MESSAGE_TYPE.ROOM_LIST_REQUEST]: {
     handler: undefined,
-    message: 'lobby.C2S_LobbyJoinRequest',
-    payload: 'lobbyJoinRequest',
+    message: 'room.C2S_RoomListRequest',
+    payload: 'roomListRequest',
   },
-  [MESSAGE_TYPE.LOBBY_NOTIFICATION]: {
+  [MESSAGE_TYPE.ROOM_LIST_RESPONSE]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyNotification',
-    payload: 'lobbyNotification',
+    message: 'room.S2C_RoomListResponse',
+    payload: 'roomListResponse',
   },
-  [MESSAGE_TYPE.LOBBY_CHAT_REQUEST]: {
+  [MESSAGE_TYPE.CREATE_ROOM_REQUEST]: {
     handler: undefined,
-    message: 'lobby.C2S_LobbyChatRequest',
-    payload: 'lobbyChatRequest',
+    message: 'room.C2S_CreateRoomRequest',
+    payload: 'createRoomRequest',
   },
-  [MESSAGE_TYPE.LOBBY_CHAT_RESPONSE]: {
+  [MESSAGE_TYPE.CREATE_ROOM_RESPONSE]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyChatResponse',
-    payload: 'lobbyChatResponse',
+    message: 'room.S2C_CreateRoomResponse',
+    payload: 'createRoomResponse',
   },
-  [MESSAGE_TYPE.LOBBY_USER_LIST_NOTIFICATION]: {
+  [MESSAGE_TYPE.JOIN_ROOM_REQUEST]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyUserListNotification',
-    payload: 'lobbyUserListNotification',
+    message: 'room.C2S_JoinRoomRequest',
+    payload: 'joinRoomRequest',
   },
-  [MESSAGE_TYPE.LOBBY_USER_DETAIL_REQUEST]: {
+  [MESSAGE_TYPE.JOIN_ROOM_RESPONSE]: {
     handler: undefined,
-    message: 'lobby.C2S_LobbyUserDetailRequest',
-    payload: 'lobbyUserDetailRequest',
+    message: 'room.S2C_JoinRoomResponse',
+    payload: 'joinRoomResponse',
   },
-  [MESSAGE_TYPE.LOBBY_USER_DETAIL_RESPONSE]: {
+  [MESSAGE_TYPE.JOIN_ROOM_NOTIFICATION]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyUserDetailResponse',
-    payload: 'lobbyUserDetailResponse',
+    message: 'room.S2C_JoinRoomNotification',
+    payload: 'joinRoomNotification',
+  },
+  [MESSAGE_TYPE.LEAVE_ROOM_REQUEST]: {
+    handler: undefined,
+    message: 'room.C2S_LeaveRoomRequest',
+    payload: 'leaveRoomRequest',
+  },
+  [MESSAGE_TYPE.LEAVE_ROOM_RESPONSE]: {
+    handler: undefined,
+    message: 'room.S2C_LeaveRoomResponse',
+    payload: 'leaveRoomResponse',
+  },
+  [MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION]: {
+    handler: undefined,
+    message: 'room.S2C_LeaveRoomNotification',
+    payload: 'leaveRoomNotification',
   },
 };
 

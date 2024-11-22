@@ -1,5 +1,5 @@
 {
-  "name": "lobby",
+  "name": "room",
   "private": true,
   "main": "src/server.js",
   "license": "MIT",
@@ -10,6 +10,6 @@
   },
   "scripts": {
     "build": "yarn && node build.js",
-    "start:lobby": "node dist/server.js"
+    "start:room": "node dist/server.js"
   }
 }

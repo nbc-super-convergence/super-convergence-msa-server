@@ -1,7 +1,7 @@
 import LobbyServer from './classes/models/lobby.server.js';
 
 const SERVER_NAME = 'Lobby';
-const SERVER_PORT = 5570;
+const SERVER_PORT = 7000;
 const server = new LobbyServer(SERVER_NAME, SERVER_PORT);
 
 await server.start();
