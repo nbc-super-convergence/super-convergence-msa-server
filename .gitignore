@@ -10,3 +10,5 @@ apps/*/dist
 apps/*/logs
 apps/logs
 logs
+
+.env
