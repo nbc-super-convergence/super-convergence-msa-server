@@ -1,7 +1,5 @@
 import { Game } from '@repo/common/classes';
 
-iceMap;
-
 import {
   createIcePlayerSpawnNotification,
   iceMapSyncNotification,
@@ -10,6 +8,7 @@ import {
 } from '../../notifications/ice.notifications.js';
 import { serialize } from '@repo/common/utils';
 import { iceMap } from '../../map/ice.Map.js';
+import { getPayloadNameByMessageType } from '../../handlers/index.js';
 
 class iceGame extends Game {
   constructor(id, type) {
@@ -53,7 +52,9 @@ class iceGame extends Game {
       user.player.rotation,
     );
 
-    const playerSpawnPacket = serialize(type, payload, user.getNextSequence()); // 직렬화
+    const payloadType = getPayloadNameByMessageType(type);
+
+    const playerSpawnPacket = serialize(type, payload, user.getNextSequence(), payloadType); // 직렬화
 
     user.socket.write(playerSpawnPacket);
   }

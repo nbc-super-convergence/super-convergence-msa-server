@@ -2,6 +2,7 @@ import { MESSAGE_TYPE } from '@repo/common/header';
 import { loadProtos } from '@repo/common/load.protos';
 import { serialize } from '@repo/common/utils';
 import net from 'net';
+import { getPayloadNameByMessageType } from '../src/handlers/index.js';
 
 const gateOptions = {
   host: 'localhost',
@@ -14,7 +15,8 @@ const client = net.connect(gateOptions, async () => {
 
   const sequence = 0;
 
-  const gamePacket = serialize(messageType, packet, sequence);
+  const payloadType = getPayloadNameByMessageType(messageType);
+  const gamePacket = serialize(messageType, packet, sequence, payloadType);
 
   client.write(gamePacket);
 
