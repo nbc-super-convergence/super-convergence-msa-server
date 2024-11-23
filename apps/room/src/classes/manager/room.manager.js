@@ -3,10 +3,26 @@ import { v4 as uuidv4 } from 'uuid';
 
 class RoomManager {
   constructor() {
+    if (RoomManager.instance) {
+      return RoomManager.instance;
+    }
     /** @type {Map<string, Room>} roomId -> Room */
     this.rooms = new Map();
     /** @type {Map<string, string>} userId -> roomId */
     this.userRooms = new Map(); // 유저가 참여한 대기방
+
+    RoomManager.instance = this;
+  }
+
+  /**
+   * RoomManager 인스턴스 가져오기
+   * @returns {RoomManager}
+   */
+  static getInstance() {
+    if (!RoomManager.instance) {
+      RoomManager.instance = new RoomManager();
+    }
+    return RoomManager.instance;
   }
 
   /**
@@ -89,6 +105,9 @@ class RoomManager {
    */
   getRoomList() {
     const rooms = Array.from(this.rooms.values()).map((room) => room.getRoomData());
+    if (!rooms) {
+      return { success: false, data: {}, failCode: 1 };
+    }
 
     return {
       success: true,
@@ -99,16 +118,17 @@ class RoomManager {
 
   /**
    * 유저의 준비 상태 설정
-   * @param {string} userId - 준비할 유저 ID
+   * @param {string} userId - 준비/취소할 유저 ID
+   * @param {boolean} isReady - true: 준비, false: 준비 취소
    * @returns {RoomResponse} 준비 결과
    */
-  setReady(userId) {
+  updateReady(userId) {
     const room = this.getRoomByUserId(userId);
     if (!room) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: { isReady: false }, failCode: 1 };
     }
 
-    return room.setReady(userId);
+    return room.updateReady(userId, isReady);
   }
 
   /**
@@ -172,4 +192,7 @@ class RoomManager {
   }
 }
 
-export default RoomManager;
+const roomManagerInstance = RoomManager.getInstance();
+Object.freeze(roomManagerInstance);
+
+export default roomManagerInstance;
