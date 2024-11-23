@@ -2,6 +2,38 @@ syntax = "proto3";
 
 package room;
 
+message C2S_RoomListRequest {
+
+}
+
+message S2C_RoomListResponse{
+    repeated RoomData rooms = 1;
+}
+
+message C2S_CreateRoomRequest {
+    string roomName = 1;
+}
+
+message S2C_CreateRoomResponse {
+    bool success = 1;
+    RoomData room = 2;
+    GlobalFailCode failCode = 3;
+}
+
+message C2S_JoinRoomRequest {
+    int32 roomId = 1;
+}
+
+ message S2C_JoinRoomResponse {
+    bool success = 1;
+    RoomData room = 2;
+    GlobalFailCode failCode = 3; 
+}
+
+message S2C_JoinRoomNotification {
+    UserData joinUser = 1;
+}
+
 message C2S_LeaveRoomRequest {
 }
 
