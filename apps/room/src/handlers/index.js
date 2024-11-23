@@ -1,9 +1,14 @@
-import { MESSAGE_TYPE } from '@repo/common/header';
+import { MESSAGE_TYPE } from '../utils/constants.js';
+import { createRoomRequestHandler } from './room/create.room.handler.js';
+import { roomListHandler } from './room/room.list.handler.js';
+import { joinRoomRequestHandler } from './room/join.room.handler.js';
+import { leaveRoomRequestHandler } from './room/leave.room.handler.js';
+import { gamePrepareRequestHandler } from './room/game.prepare.handler.js';
 
 const handlers = {
   // * room
   [MESSAGE_TYPE.ROOM_LIST_REQUEST]: {
-    handler: undefined,
+    handler: roomListHandler,
     message: 'room.C2S_RoomListRequest',
     payload: 'roomListRequest',
   },
@@ -13,7 +18,7 @@ const handlers = {
     payload: 'roomListResponse',
   },
   [MESSAGE_TYPE.CREATE_ROOM_REQUEST]: {
-    handler: undefined,
+    handler: createRoomRequestHandler,
     message: 'room.C2S_CreateRoomRequest',
     payload: 'createRoomRequest',
   },
@@ -23,7 +28,7 @@ const handlers = {
     payload: 'createRoomResponse',
   },
   [MESSAGE_TYPE.JOIN_ROOM_REQUEST]: {
-    handler: undefined,
+    handler: joinRoomRequestHandler,
     message: 'room.C2S_JoinRoomRequest',
     payload: 'joinRoomRequest',
   },
@@ -38,7 +43,7 @@ const handlers = {
     payload: 'joinRoomNotification',
   },
   [MESSAGE_TYPE.LEAVE_ROOM_REQUEST]: {
-    handler: undefined,
+    handler: leaveRoomRequestHandler,
     message: 'room.C2S_LeaveRoomRequest',
     payload: 'leaveRoomRequest',
   },
@@ -51,6 +56,21 @@ const handlers = {
     handler: undefined,
     message: 'room.S2C_LeaveRoomNotification',
     payload: 'leaveRoomNotification',
+  },
+  [MESSAGE_TYPE.GAME_PREPARE_REQUEST]: {
+    handler: gamePrepareRequestHandler,
+    message: 'room.C2S_GamePrepareRequest',
+    payload: 'gamePrepareRequest',
+  },
+  [MESSAGE_TYPE.GAME_PREPARE_RESPONSE]: {
+    handler: undefined,
+    message: 'room.S2C_GamePrepareResponse',
+    payload: 'gamePrepareResponse',
+  },
+  [MESSAGE_TYPE.GAME_PREPARE_NOTIFICATION]: {
+    handler: undefined,
+    message: 'room.S2C_GamePrepareNotification',
+    payload: 'gamePrepareNotification',
   },
 };
 
