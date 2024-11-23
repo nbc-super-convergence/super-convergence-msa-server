@@ -1,12 +1,16 @@
-syntax = "proto3";
+syntax = 'proto3';
 
 package auth;
+import '../common.proto';
+
+// * [ Auth ] 
+// 
 
 message C2S_RegisterRequest {
     string loginId = 1;            
     string password = 2;
     string passwordConfirm = 3;
-    string nickName = 4;           
+    string nickname = 4;           
 }
 
 message S2C_RegisterResponse {
@@ -24,6 +28,6 @@ message S2C_LoginResponse {
     bool success = 1;
     string message = 2;
     string token = 3;         // JWT
-    UserData info = 4;        // [ userId, nickName, 게임플레이 수, 랭킹?점수? ] 
+    UserData info = 4;        // [ userId, nickname, 게임플레이 수, 랭킹?점수? ] 
     GlobalFailCode failCode = 5;
 }
