@@ -14,6 +14,7 @@
     "mysql2": "^3.11.4"
   },
   "scripts": {
+        "clean": "if exist dist rmdir /s /q dist",
     "build": "yarn && node build.js",
     "start:auth": "node dist/server.js",
     "auth":"node src/server.js"

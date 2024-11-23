@@ -28,6 +28,9 @@
     },
     "auth": {
       "cache":false
+    },
+    "cache": {
+      "cache":false
     }
   }
 }

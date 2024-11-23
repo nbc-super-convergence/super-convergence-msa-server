@@ -18,12 +18,14 @@ export const build = async (options) => {
       'mysql2',
       'joi',
       'jsonwebtoken',
+      'dotenv',
     ],
     define: {
       'process.env.NODE_ENV': '"production"',
     },
     loader: {
       '.proto': 'file', // .proto도 파일로 처리
+      '.env': 'file',
     },
   };
 
