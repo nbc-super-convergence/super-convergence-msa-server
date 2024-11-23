@@ -68,32 +68,22 @@ class Room {
 
   /**
    * 유저의 준비 상태 설정
-   * @param {string} userId - 준비할 유저의 ID
+   * @param {string} userId - 준비/취소할 유저의 ID
+   * @param {boolean} isReady - true: 준비, false: 준비 취소
    * @returns {RoomResponse} 준비 결과
    */
-  setReady(userId) {
+  updateReady(userId, isReady) {
     if (!this.users.has(userId)) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: { isReady: false }, failCode: 1 };
     }
 
-    this.readyUsers.add(userId);
-
-    return { success: true, data: {}, failCode: 0 };
-  }
-
-  /**
-   * 유저의 준비 상태 취소
-   * @param {string} userId - 준비 취소할 유저의 ID
-   * @returns {RoomResponse} 준비 취소 결과
-   */
-  cancelReady(userId) {
-    if (!this.users.has(userId)) {
-      return { success: false, data: {}, failCode: 1 };
+    if (isReady) {
+      this.readyUsers.add(userId);
+    } else {
+      this.readyUsers.delete(userId);
     }
 
-    this.readyUsers.delete(userId);
-
-    return { success: true, data: {}, failCode: 0 };
+    return { success: true, data: { isReady: this.readyUsers.has(userId) }, failCode: 0 };
   }
 
   /**
