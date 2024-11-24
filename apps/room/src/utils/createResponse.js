@@ -20,14 +20,14 @@ export const createResponse = (result, messageType) => {
     case MESSAGE_TYPE.CREATE_ROOM_RESPONSE:
       response = {
         ...response,
-        room: result.data,
+        room: result.data.room,
       };
       break;
 
     case MESSAGE_TYPE.JOIN_ROOM_RESPONSE:
       response = {
         ...response,
-        room: result.data,
+        room: result.data.room,
       };
       break;
 
