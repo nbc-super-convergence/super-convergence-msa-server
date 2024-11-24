@@ -6,7 +6,7 @@ import '../ice/ice.proto';
 import '../../distributor/packet.proto';
 import '../../auth/auth.proto';
 import '../../lobby/lobby.proto';
-import '../../lobby/room.proto';
+import '../../room/room.proto';
 import './board.proto';
 
 message GamePacket {
@@ -45,12 +45,9 @@ message GamePacket {
         S2C_GamePrepareResponse gamePrepareResponse = 42;
         S2C_GamePrepareNotification gamePrepareNotification = 43;
 
-        // Game Preparation (51-60)
-        C2S_GamePrepareRequest gamePrepareRequest = 51;
-        S2C_GamePrepareResponse gamePrepareResponse = 52;
-        S2C_GamePrepareNotification gamePrepareNotification = 53;
-        C2S_GameStartRequest gameStartRequest = 54;
-        S2C_GameStartNotification gameStartNotification = 55;
+        // Game start (51-60)
+        C2S_GameStartRequest gameStartRequest = 51;
+        S2C_GameStartNotification gameStartNotification = 52;
 
         // Game Play (61-90)
         C2S_RollDiceRequest rollDiceRequest = 61;

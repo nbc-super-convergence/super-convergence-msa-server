@@ -2,6 +2,22 @@ syntax = "proto3";
 
 package board;
 
+message C2S_GameStartRequest {
+    string roomId = 1;
+}
+
+message S2C_GameStartNotification {
+    bool success = 1;
+    repeated PlayerData players = 2;
+	GlobalFailCode failCode = 3;
+    
+    message PlayerData {
+        string userId = 1;
+        string nickname = 2;
+        int32 position = 3;
+    }
+}
+
 message C2S_RollDiceRequest {
 }
 

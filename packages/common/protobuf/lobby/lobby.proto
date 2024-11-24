@@ -3,6 +3,7 @@ syntax = "proto3";
 package lobby;
 
 message C2S_LobbyJoinRequest {
+    UserData userData = 1;
 }
 
 message S2C_LobbyJoinResponse {
