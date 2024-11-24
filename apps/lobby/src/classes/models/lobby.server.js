@@ -1,5 +1,6 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
+import { getHandlerByMessageType } from '../../handlers/index.js';
 import { deserialize, packetParser } from '@repo/common/utils';
 
 class LobbyServer extends TcpServer {
@@ -21,7 +22,7 @@ class LobbyServer extends TcpServer {
         const payload = packetParser(messageType, packet);
         console.log(' [ Lobby_onData ] payload ====>> ', payload);
 
-        const handler = getPayloadNameByMessageType(payload);
+        const handler = getHandlerByMessageType(payload);
         await handler({ socket, messageType, payload });
       } else {
         break;
