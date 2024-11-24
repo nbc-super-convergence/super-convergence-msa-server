@@ -27,7 +27,7 @@ message C2S_JoinRoomRequest {
     string roomId = 2;
 }
 
- message S2C_JoinRoomResponse {
+message S2C_JoinRoomResponse {
     bool success = 1;
     RoomData room = 2;
     GlobalFailCode failCode = 3; 
@@ -58,7 +58,7 @@ message C2S_GamePrepareRequest {
 message S2C_GamePrepareResponse {
     bool success = 1;
     bool isReady = 2;
-    GlobalFailCode failCode = 2;
+    GlobalFailCode failCode = 3;
 } 
 
 message S2C_GamePrepareNotification {

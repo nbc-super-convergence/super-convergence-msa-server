@@ -2,6 +2,7 @@ import { MESSAGE_TYPE } from '../../utils/constants.js';
 import roomManager from '../../classes/manager/room.manager.js';
 import { createResponse } from '../../utils/createResponse.js';
 import { getPayloadNameByMessageType } from '../index.js';
+import { serialize } from '@repo/common/utils';
 
 export const gamePrepareRequestHandler = ({ socket, messageType, payload }) => {
   try {

@@ -7,7 +7,7 @@ import roomManager from '../../classes/manager/room.manager.js';
 export const leaveRoomRequestHandler = ({ socket, messageType, payload }) => {
   try {
     const { userId } = payload;
-    const result = roomManager.createRoom(userId, roomName);
+    const result = roomManager.leaveRoom(userId);
 
     // TODO: noti 구분 추가 필요
     const packet = createResponse(result, MESSAGE_TYPE.LEAVE_ROOM_RESPONSE);
