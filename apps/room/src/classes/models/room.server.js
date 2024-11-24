@@ -1,7 +1,7 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { deserialize, packetParser } from '@repo/common/utils';
-import { getHandlerByMessageType } from '../../handlers/index.js';
+import { getHandlerByMessageType, getPayloadNameByMessageType } from '../../handlers/index.js';
 
 class RoomServer extends TcpServer {
   _onData = (socket) => async (data) => {
@@ -19,10 +19,10 @@ class RoomServer extends TcpServer {
         const packet = socket.buffer.subarray(offset, length);
         socket.buffer = socket.buffer.subarray(length);
 
-        const payload = packetParser(messageType, packet);
+        const payload = packetParser(messageType, packet, getPayloadNameByMessageType);
         console.log(' [ Room_onData ] payload ====>> ', payload);
 
-        const handler = getHandlerByMessageType(payload);
+        const handler = getHandlerByMessageType(messageType);
         await handler({ socket, messageType, payload });
       } else {
         break;
