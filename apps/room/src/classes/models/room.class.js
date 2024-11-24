@@ -37,17 +37,31 @@ class Room {
    * @returns {RoomResponse} 참가 결과
    */
   joinUser(userData) {
-    if (this.users.size >= this.maxUsers) {
-      return { success: false, data: {}, failCode: 1 };
+    if (!userData || !userData?.userId) {
+      return { success: false, data: null, failCode: 1 };
     }
 
-    if (this.users.has(userData.userId)) {
-      return { success: false, data: {}, failCode: 1 };
+    if (this.users.size >= this.maxUsers) {
+      return { success: false, data: null, failCode: 1 };
+    }
+
+    if (this.users.has(userId)) {
+      return { success: false, data: null, failCode: 1 };
     }
 
     this.users.set(userData.userId, userData);
 
-    return { success: true, data: { room: this.getRoomData() }, failCode: 0 };
+    const room = {
+      id: this.id,
+      ownerId: this.ownerId,
+      name: this.name,
+      state: this.state,
+      users: Array.from(this.users.values()),
+      maxUsers: this.maxUsers,
+      readyUsers: Array.from(this.readyUsers),
+    };
+
+    return { success: true, data: room, failCode: 0 };
   }
 
   /**
@@ -57,13 +71,13 @@ class Room {
    */
   leaveUser(userId) {
     if (!this.users.has(userId)) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
     }
 
     this.users.delete(userId);
     this.readyUsers.delete(userId);
 
-    return { success: true, data: {}, failCode: 0 };
+    return { success: true, data: null, failCode: 0 };
   }
 
   /**
@@ -74,7 +88,7 @@ class Room {
    */
   updateReady(userId, isReady) {
     if (!this.users.has(userId)) {
-      return { success: false, data: { isReady: false }, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
     }
 
     if (isReady) {
@@ -83,7 +97,7 @@ class Room {
       this.readyUsers.delete(userId);
     }
 
-    return { success: true, data: { isReady: this.readyUsers.has(userId) }, failCode: 0 };
+    return { success: true, data: this.readyUsers.has(userId), failCode: 0 };
   }
 
   /**
@@ -131,12 +145,12 @@ class Room {
    */
   changeOwner(newOwnerId) {
     if (!this.users.has(newOwnerId)) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
     }
 
     this.ownerId = newOwnerId;
 
-    return { success: true, data: {}, failCode: 0 };
+    return { success: true, data: null, failCode: 0 };
   }
 
   /**
