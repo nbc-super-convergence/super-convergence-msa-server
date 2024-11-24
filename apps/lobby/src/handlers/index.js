@@ -1,34 +1,43 @@
-import { MESSAGE_TYPE } from '@repo/common/header';
+import { MESSAGE_TYPE } from '../utils/constants.js';
+import { lobbyJoinRequestHandler } from './lobby/lobby.join.handler.js';
+import { lobbyLeaveRequestHandler } from './lobby/lobby.leave.handler.js';
+import { lobbyUserDetailRequestHandler } from './lobby/lobby.user.detail.handler.js';
+import { lobbyUserListRequestHandler } from './lobby/lobby.user.list.handler.js';
 
 const handlers = {
   // * lobby
   [MESSAGE_TYPE.LOBBY_JOIN_REQUEST]: {
-    handler: undefined,
+    handler: lobbyJoinRequestHandler,
     message: 'lobby.C2S_LobbyJoinRequest',
     payload: 'lobbyJoinRequest',
   },
-  [MESSAGE_TYPE.LOBBY_NOTIFICATION]: {
+  [MESSAGE_TYPE.LOBBY_JOIN_RESPONSE]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyNotification',
-    payload: 'lobbyNotification',
+    message: 'lobby.S2C_LobbyJoinResponse',
+    payload: 'lobbyJoinResponse',
   },
-  [MESSAGE_TYPE.LOBBY_CHAT_REQUEST]: {
-    handler: undefined,
-    message: 'lobby.C2S_LobbyChatRequest',
-    payload: 'lobbyChatRequest',
+  [MESSAGE_TYPE.LOBBY_LEAVE_REQUEST]: {
+    handler: lobbyLeaveRequestHandler,
+    message: 'lobby.C2S_LobbyLeaveRequest',
+    payload: 'lobbyLeaveRequest',
   },
-  [MESSAGE_TYPE.LOBBY_CHAT_RESPONSE]: {
+  [MESSAGE_TYPE.LOBBY_LEAVE_RESPONSE]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyChatResponse',
-    payload: 'lobbyChatResponse',
+    message: 'lobby.S2C_LobbyLeaveResponse',
+    payload: 'lobbyLeaveResponse',
   },
-  [MESSAGE_TYPE.LOBBY_USER_LIST_NOTIFICATION]: {
+  [MESSAGE_TYPE.LOBBY_USER_LIST_REQUEST]: {
+    handler: lobbyUserListRequestHandler,
+    message: 'lobby.C2S_LobbyUserListRequest',
+    payload: 'lobbyUserListRequest',
+  },
+  [MESSAGE_TYPE.LOBBY_USER_LIST_RESPONSE]: {
     handler: undefined,
-    message: 'lobby.S2C_LobbyUserListNotification',
-    payload: 'lobbyUserListNotification',
+    message: 'lobby.S2C_LobbyUserListResponse',
+    payload: 'lobbyUserListResponse',
   },
   [MESSAGE_TYPE.LOBBY_USER_DETAIL_REQUEST]: {
-    handler: undefined,
+    handler: lobbyUserDetailRequestHandler,
     message: 'lobby.C2S_LobbyUserDetailRequest',
     payload: 'lobbyUserDetailRequest',
   },
