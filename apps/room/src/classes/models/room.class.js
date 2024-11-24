@@ -47,7 +47,7 @@ class Room {
 
     this.users.set(userData.userId, userData);
 
-    return { success: true, data: this.getRoomData(), failCode: 0 };
+    return { success: true, data: { room: this.getRoomData() }, failCode: 0 };
   }
 
   /**
