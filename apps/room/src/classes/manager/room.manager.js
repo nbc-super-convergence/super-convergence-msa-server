@@ -27,38 +27,43 @@ class RoomManager {
 
   /**
    * 대기방 생성
-   * @param {string} ownerId - 방장 ID
+   * @param {UserData} userData - 생성할 방장 정보
    * @param {string} name - 대기방 이름
    * @returns {RoomResponse} 생성 결과
    */
-  createRoom(ownerId, name) {
+  createRoom(userData, roomName) {
     const roomId = uuidv4();
-    const room = new Room(roomId, ownerId, name);
+    const room = new Room(roomId, userData.userId, roomName);
+    room.users.set(userData.userId, userData);
 
     this.rooms.set(roomId, room);
-    this.userRooms.set(ownerId, roomId);
+    this.userRooms.set(userData.userId, roomId);
 
-    return { success: true, data: { room: room.getRoomData() }, failCode: 0 };
+    return { success: true, data: room.getRoomData(), failCode: 0 };
   }
 
   /**
    * 대기방 참가
-   * @param {string} roomId - 방 ID
    * @param {UserData} userData - 참가할 유저 정보
+   * @param {string} roomId - 방 ID
    * @returns {RoomResponse} 참가 결과
    */
-  joinRoom(roomId, userData) {
+  joinRoom(userData, roomId) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
+    }
+
+    if (this.userRooms.has(userData.userId)) {
+      return { success: false, data: null, failCode: 1 };
     }
 
     if (room.users.size >= room.maxUsers) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
     }
 
     if (room.state !== 'wait') {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
     }
 
     const result = room.joinUser(userData);
@@ -77,7 +82,7 @@ class RoomManager {
   leaveRoom(userId) {
     const room = this.getRoomByUserId(userId);
     if (!room) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: null, failCode: 1 };
     }
 
     const result = room.leaveUser(userId);
@@ -106,12 +111,12 @@ class RoomManager {
   getRoomList() {
     const rooms = Array.from(this.rooms.values()).map((room) => room.getRoomData());
     if (!rooms) {
-      return { success: false, data: {}, failCode: 1 };
+      return { success: false, data: [], failCode: 1 };
     }
 
     return {
       success: true,
-      data: { rooms },
+      data: rooms,
       failCode: 0,
     };
   }
