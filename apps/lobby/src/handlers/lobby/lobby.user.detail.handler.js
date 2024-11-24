@@ -22,6 +22,7 @@ export const lobbyUserDetailRequestHandler = ({ socket, messageType, payload }) 
           userDetail: {},
           failCode: 1,
         },
+        0,
         getPayloadNameByMessageType,
       ),
     );

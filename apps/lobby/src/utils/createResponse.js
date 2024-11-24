@@ -28,5 +28,5 @@ export const createResponse = (result, messageType) => {
       break;
   }
 
-  return serialize(messageType, response, getPayloadNameByMessageType);
+  return serialize(messageType, response, 0, getPayloadNameByMessageType);
 };

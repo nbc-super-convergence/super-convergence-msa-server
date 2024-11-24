@@ -21,6 +21,7 @@ export const lobbyLeaveRequestHandler = ({ socket, messageType, payload }) => {
           success: false,
           failCode: 1,
         },
+        0,
         getPayloadNameByMessageType,
       ),
     );

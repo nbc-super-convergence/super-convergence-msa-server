@@ -13,28 +13,28 @@ export const createResponse = (result, messageType) => {
     case MESSAGE_TYPE.ROOM_LIST_RESPONSE:
       response = {
         ...response,
-        rooms: result.data.rooms,
+        rooms: result.data,
       };
       break;
 
     case MESSAGE_TYPE.CREATE_ROOM_RESPONSE:
       response = {
         ...response,
-        room: result.data.room,
+        room: result.data,
       };
       break;
 
     case MESSAGE_TYPE.JOIN_ROOM_RESPONSE:
       response = {
         ...response,
-        room: result.data.room,
+        room: result.data,
       };
       break;
 
     case MESSAGE_TYPE.GAME_PREPARE_RESPONSE:
       response = {
         ...response,
-        isReady: result.data.isReady,
+        isReady: result.data,
       };
       break;
 
@@ -44,5 +44,7 @@ export const createResponse = (result, messageType) => {
       break;
   }
 
-  return serialize(messageType, response, getPayloadNameByMessageType);
+  console.log('[ room ] ====> createResponse ', response);
+
+  return serialize(messageType, response, 0, getPayloadNameByMessageType);
 };

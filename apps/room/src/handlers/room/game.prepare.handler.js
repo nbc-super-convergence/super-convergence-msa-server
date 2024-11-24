@@ -23,6 +23,7 @@ export const gamePrepareRequestHandler = ({ socket, messageType, payload }) => {
           isReady: false,
           failCode: 1,
         },
+        0,
         getPayloadNameByMessageType,
       ),
     );

@@ -6,8 +6,8 @@ import roomManager from '../../classes/manager/room.manager.js';
 
 export const createRoomRequestHandler = ({ socket, messageType, payload }) => {
   try {
-    const { userId, roomName } = payload;
-    const result = roomManager.createRoom(userId, roomName);
+    const { userData, roomName } = payload;
+    const result = roomManager.createRoom(userData, roomName);
 
     // TODO: noti 구분 추가 필요
     const packet = createResponse(result, MESSAGE_TYPE.CREATE_ROOM_RESPONSE);
@@ -23,6 +23,7 @@ export const createRoomRequestHandler = ({ socket, messageType, payload }) => {
           room: {},
           failCode: 1,
         },
+        0,
         getPayloadNameByMessageType,
       ),
     );

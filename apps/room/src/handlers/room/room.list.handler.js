@@ -22,6 +22,7 @@ export const roomListHandler = ({ socket, messageType, payload }) => {
           rooms: [],
           failCode: 1,
         },
+        0,
         getPayloadNameByMessageType,
       ),
     );
