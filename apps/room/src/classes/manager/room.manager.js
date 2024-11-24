@@ -38,7 +38,7 @@ class RoomManager {
     this.rooms.set(roomId, room);
     this.userRooms.set(ownerId, roomId);
 
-    return { success: true, data: room.getRoomData(), failCode: 0 };
+    return { success: true, data: { room: room.getRoomData() }, failCode: 0 };
   }
 
   /**
@@ -122,7 +122,7 @@ class RoomManager {
    * @param {boolean} isReady - true: 준비, false: 준비 취소
    * @returns {RoomResponse} 준비 결과
    */
-  updateReady(userId) {
+  updateReady(userId, isReady) {
     const room = this.getRoomByUserId(userId);
     if (!room) {
       return { success: false, data: { isReady: false }, failCode: 1 };
