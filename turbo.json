@@ -14,20 +14,8 @@
       "dependsOn": ["start:distributor"],
       "cache": false
     },
-    "start:lobby": {
+    "start": {
       "dependsOn": ["start:gate"],
-      "cache": false
-    },
-    "start:room": {
-      "dependsOn": ["start:lobby"],
-      "cache": false
-    },
-    "start:ice": {
-      "dependsOn": ["start:room"],
-      "cache": false
-    },
-    "start:auth": {
-      "dependsOn": ["start:ice"],
       "cache": false
     },
     "dev": {
@@ -35,10 +23,10 @@
       "persistent": true
     },
     "auth": {
-      "cache":false
+      "cache": false
     },
     "cache": {
-      "cache":false
+      "cache": false
     }
   }
 }

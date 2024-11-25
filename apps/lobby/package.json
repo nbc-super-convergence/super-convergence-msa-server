@@ -11,6 +11,6 @@
   },
   "scripts": {
     "build": "yarn && node build.js",
-    "start:lobby": "node dist/server.js"
+    "start": "node dist/server.js"
   }
 }
