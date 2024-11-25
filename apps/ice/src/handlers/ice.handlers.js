@@ -27,7 +27,6 @@ export const iceJoinRequestHandler = ({ socket, payload }) => {
 
   const game = getGameSessionById(gameId);
 
-  console.log(`게임인데요`, game);
   game.addUser(user);
 };
 
@@ -37,7 +36,7 @@ export const iceJoinRequestHandler = ({ socket, payload }) => {
  */
 export const icePlayerMoveRequestHandler = ({ socket, payload }) => {
   try {
-    const { playerId, position, vector, rotation, state } = payload;
+    const { playerId, position, force, rotation, state } = payload;
 
     const user = getUserBySocket(socket); // 유저 찾기
     if (!user) {
@@ -45,14 +44,15 @@ export const icePlayerMoveRequestHandler = ({ socket, payload }) => {
     }
 
     const player = user.player; // 유저의 플레이어
-    player.updatePosition(position, vector, rotation); // 위치 업데이트
+
+    player.updatePosition(position, force, rotation); // 위치 업데이트
 
     const gameSession = getGameSessionById(user.gameId); // 유저가 참가한 게임 세션 찾기
     if (!gameSession) {
       throw new Error(`게임 세션를 찾을 수 없습니다.`);
     }
 
-    const userPositions = gameSession.getUserPosition(); // 세션 내 유저의 위치 정보 조회
+    const userPositions = gameSession.getUserPosition(user.id); // 세션 내 유저의 위치 정보 조회
 
     const packet = icePlayerMoveNotification(userPositions); // 이동 동기화 패킷 생성
 

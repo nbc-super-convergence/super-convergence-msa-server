@@ -48,7 +48,7 @@ class iceGame extends Game {
       user.player.id,
       user.player.type,
       user.player.position.get(),
-      user.player.vector.get(),
+      user.player.force.get(),
       user.player.rotation,
     );
 
@@ -78,12 +78,13 @@ class iceGame extends Game {
    * - rotation (number)
    * - state (number)
    */
-  getUserPosition() {
+  getUserPosition(userId) {
+    const users = this.users.filter((user) => user.id !== userId);
     return {
-      players: this.users.map((user) => ({
+      players: users.map((user) => ({
         playerId: user.player.id,
         position: user.player.position,
-        vector: user.player.vector,
+        force: user.player.force,
         rotation: user.player.rotation,
         state: user.player.state,
       })),

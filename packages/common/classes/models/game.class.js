@@ -38,7 +38,7 @@ class Game {
       players: this.users.map((user) => ({
         playerId: user.player.id,
         position: user.player.position,
-        vector: user.player.vector,
+        force: user.player.force,
         rotation: user.player.rotation,
         state: user.player.state,
       })),
