@@ -26,9 +26,19 @@
       "dependsOn": ["start:room"],
       "cache": false
     },
+    "start:auth": {
+      "dependsOn": ["start:ice"],
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "auth": {
+      "cache":false
+    },
+    "cache": {
+      "cache":false
     }
   }
 }
