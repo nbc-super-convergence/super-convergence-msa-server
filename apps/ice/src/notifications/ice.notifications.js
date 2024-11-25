@@ -23,11 +23,11 @@ export const createIcePlayerSpawnNotification = (
   playerId,
   playerType,
   position,
-  vector,
+  force,
   rotation,
 ) => {
   const type = MESSAGE_TYPE.ICE_PLAYER_SPAWN_NOTIFICATION;
-  const payload = { playerId, playerType, position, vector, rotation };
+  const payload = { playerId, playerType, position, force, rotation };
   return { type, payload };
 };
 
