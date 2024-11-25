@@ -6,7 +6,7 @@ import '../ice/ice.proto';
 import '../../distributor/packet.proto';
 import '../../auth/auth.proto';
 import '../../lobby/lobby.proto';
-import '../../lobby/room.proto';
+import '../../room/room.proto';
 import './board.proto';
 
 message GamePacket {
@@ -22,12 +22,13 @@ message GamePacket {
 
         // Lobby (11-30)
         C2S_LobbyJoinRequest lobbyJoinRequest = 11;
-        C2S_LobbyChatRequest lobbyChatRequest = 12;
-        S2C_LobbyChatResponse lobbyChatResponse = 13;
-        S2C_LobbyNotification lobbyNotification = 14;
-        S2C_LobbyUserListNotification lobbyUserListNotification = 15;
-        C2S_LobbyUserDetailRequest lobbyUserDetailRequest = 16;
-        S2C_LobbyUserDetailResponse lobbyUserDetailResponse = 17;
+        S2C_LobbyJoinResponse lobbyJoinResponse = 12;
+        C2S_LobbyLeaveRequest lobbyLeaveRequest = 13;
+        S2C_LobbyLeaveResponse lobbyLeaveResponse = 14;
+        C2S_LobbyUserListRequest lobbyUserListRequest = 15;
+        S2C_LobbyUserListResponse lobbyUserListResponse = 16;
+        C2S_LobbyUserDetailRequest lobbyUserDetailRequest = 17;
+        S2C_LobbyUserDetailResponse lobbyUserDetailResponse = 18;
 
         // Room (31-50)
         C2S_RoomListRequest roomListRequest = 31;
@@ -40,13 +41,13 @@ message GamePacket {
         C2S_LeaveRoomRequest leaveRoomRequest = 38;
         S2C_LeaveRoomResponse leaveRoomResponse = 39;
         S2C_LeaveRoomNotification leaveRoomNotification = 40;
+        C2S_GamePrepareRequest gamePrepareRequest = 41;
+        S2C_GamePrepareResponse gamePrepareResponse = 42;
+        S2C_GamePrepareNotification gamePrepareNotification = 43;
 
-        // Game Preparation (51-60)
-        C2S_GamePrepareRequest gamePrepareRequest = 51;
-        S2C_GamePrepareResponse gamePrepareResponse = 52;
-        S2C_GamePrepareNotification gamePrepareNotification = 53;
-        C2S_GameStartRequest gameStartRequest = 54;
-        S2C_GameStartNotification gameStartNotification = 55;
+        // Game start (51-60)
+        C2S_GameStartRequest gameStartRequest = 51;
+        S2C_GameStartNotification gameStartNotification = 52;
 
         // Game Play (61-90)
         C2S_RollDiceRequest rollDiceRequest = 61;

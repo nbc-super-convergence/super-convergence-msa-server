@@ -14,8 +14,16 @@
       "dependsOn": ["start:distributor"],
       "cache": false
     },
-    "start:ice": {
+    "start:lobby": {
       "dependsOn": ["start:gate"],
+      "cache": false
+    },
+    "start:room": {
+      "dependsOn": ["start:lobby"],
+      "cache": false
+    },
+    "start:ice": {
+      "dependsOn": ["start:room"],
       "cache": false
     },
     "start:auth": {

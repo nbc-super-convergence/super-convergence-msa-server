@@ -1,0 +1,16 @@
+{
+  "name": "lobby",
+  "private": true,
+  "main": "src/server.js",
+  "license": "MIT",
+  "type": "module",
+  "version": "1.0.0",
+  "dependencies": {
+    "@repo/common": "*",
+    "uuid": "^11.0.3"
+  },
+  "scripts": {
+    "build": "yarn && node build.js",
+    "start:lobby": "node dist/server.js"
+  }
+}
