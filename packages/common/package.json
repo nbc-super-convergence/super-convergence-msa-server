@@ -11,6 +11,7 @@
     "build": "yarn"
   },
   "dependencies": {
+    "ioredis": "^5.4.1",
     "protobufjs": "^7.4.0",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^5.0.0"

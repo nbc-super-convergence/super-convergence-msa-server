@@ -3,12 +3,11 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "start": "turbo run cache && turbo run start:auth --no-daemon",
+    "start": "turbo run cache && turbo run start --no-daemon",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "auth": "turbo run auth --no-daemon"
-
   },
   "devDependencies": {
     "eslint": "^9.15.0",

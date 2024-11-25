@@ -148,7 +148,7 @@ class GateServer extends TcpServer {
 
       this._clientDistributor = new TcpClient(
         '127.0.0.1',
-        9000,
+        7010,
         (options) => {
           console.log(' onCreate ==>> ');
           this._isConnectedDistributor = true;
