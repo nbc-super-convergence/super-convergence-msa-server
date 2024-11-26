@@ -1,14 +1,20 @@
 import { TcpServer, TcpClient } from '@repo/common/classes';
 import { config } from '@repo/common/config';
-import { createServerInfoNotification, deserialize, packetParser } from '@repo/common/utils';
+import {
+  createServerInfoNotification,
+  deserialize,
+  packetParser,
+  packetParserForGate,
+} from '@repo/common/utils';
 
 class GateServer extends TcpServer {
   _map = {};
+  _mapServices = {};
   _mapClients = {};
-  _mapMessageTypes = {
-    ICE: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-  };
+
   _isConnectedDistributor;
+
+  _clientBuffer = Buffer.alloc(0);
 
   constructor(name, port) {
     super(name, port, []);
@@ -30,11 +36,20 @@ class GateServer extends TcpServer {
       );
 
       if (socket.buffer.length >= length) {
-        // TODO: _map 뒤져서 찾기
+        // * 로비 입장 시 sessionId로 socket 저장 [ LOBBY_JOIN_REQUEST: 11, ]
+        if (messageType === 11) {
+          //
+          const packet = socket.buffer.subarray(offset, length);
+          const payload = packetParser(messageType, packet);
+          console.log('[ Gate - _onData ] payload ===>>> \n', payload);
+          // * sessionId를 키값으로 socket 저장
+          this._mapClients[payload.sessionId].socket = socket;
+        }
+        // * 연결되어있는 서비스서버의 type에 맞는 메세지 전달
         for (const [key, value] of Object.entries(this._map)) {
           if (value.types.includes(messageType)) {
             // * messageType에 맞는 Client
-            const targetService = this._mapClients[key];
+            const targetService = this._mapServices[key];
             targetService.client.write(socket.buffer);
           }
         }
@@ -74,7 +89,7 @@ class GateServer extends TcpServer {
             this.onErrorClient,
           );
 
-          this._mapClients[key] = {
+          this._mapServices[key] = {
             client: client,
             info: param,
           };
@@ -106,15 +121,29 @@ class GateServer extends TcpServer {
   };
 
   // 마이크로서비스 응답 처리
+  // * 서비스 서버에게 받은 데이터
   onReadClient = (options, packet) => {
-    console.log('onReadClient', packet);
-    this._socket.write(packet);
+    console.log('[ gate - onReadClient ] =========> \n', packet);
+    this._clientBuffer = Buffer.concat([this._clientBuffer, packet]);
+
+    while (this._clientBuffer.length >= config.PACKET.TOTAL_LENGTH) {
+      const { messageType, version, sequence, offset, length } = deserialize(this._clientBuffer);
+
+      if (this._clientBuffer.length >= length) {
+        const packetV2 = this._clientBuffer.subarray(offset, length);
+        this._clientBuffer = this._clientBuffer.subarray(length);
+
+        const payload = packetParserForGate(messageType, packetV2);
+        console.log(`[ gate - onReadClient ]payload=========> \n`, payload);
+        this._socket.write(packet);
+      }
+    }
   };
 
   // 마이크로서비스 접속 종료 처리
   onEndClient = (options) => {
     var key = options.host + ':' + options.port;
-    console.log('onEndClient', this._mapClients[key]);
+    console.log('onEndClient', this._mapServices[key]);
   };
 
   // 마이크로서비스 접속 에러 처리
