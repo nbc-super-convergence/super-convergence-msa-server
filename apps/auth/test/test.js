@@ -23,10 +23,10 @@ const runClient = async () => {
 
       //   // 회원가입 테스트
       //   const payload = {
-      //     loginId: 'test004',
+      //     loginId: 'test005',
       //     password: '1234qwer',
       //     passwordConfirm: '1234qwer',
-      //     nickname: 'testnick004',
+      //     nickname: 'testnick005',
       //   };
       //   const buffer = serialize(1, payload, 0, 'registerRequest');
       //   client.write(buffer);
@@ -35,7 +35,7 @@ const runClient = async () => {
 
       // 로그인 테스트
       const payload = {
-        loginId: 'haha13',
+        loginId: 'hahahaho',
         password: '1234qwer',
       };
       const buffer = serialize(3, payload, 0, 'loginRequest');

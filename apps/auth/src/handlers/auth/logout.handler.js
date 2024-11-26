@@ -1,4 +1,4 @@
-import { redis } from '../../redis';
+import { redis } from '../../redis.js';
 
 /**
  *  로그아웃 핸들러 (임시)

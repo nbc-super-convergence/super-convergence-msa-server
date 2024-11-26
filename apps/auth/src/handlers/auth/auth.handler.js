@@ -6,40 +6,36 @@ import { getPayloadNameByMessageType } from '../index.js';
 import bcrypt from 'bcrypt';
 import { redis } from '../../redis.js';
 import { v4 as uuidv4 } from 'uuid';
+import { FAIL_CODE } from '@repo/common/failcodes';
 
 /**
  * 회원가입 핸들러
- * TODO : globalFailCode
  */
 export const registerRequestHandler = async ({ socket, payload }) => {
   try {
     let packet = {
       success: false,
-      failCode: 0,
+      failCode: FAIL_CODE.NONE_FAILCODE,
     };
 
     if (payload.password !== payload.passwordConfirm) {
-      // 패스워드 확인 불일치
-      packet.failCode = 14;
+      packet.failCode = FAIL_CODE.ID_OR_PASSWORD_MISS;
     }
 
     const { loginId, password, passwordConfirm, nickname } = await JoiUtils.validateSignUp(payload);
 
     const checkExistId = await findUserId(loginId);
     if (checkExistId) {
-      // 이미 존재하는 아이디
-      packet.failCode = 15;
+      packet.failCode = FAIL_CODE.ID_OR_PASSWORD_MISS;
     }
 
-    if (packet.failCode === 0) {
+    if (packet.failCode === FAIL_CODE.NONE_FAILCODE) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await createUser(loginId, hashedPassword, nickname);
-
       packet.success = true;
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.REGISTER_RESPONSE);
-
     const registerResponse = serialize(MESSAGE_TYPE.REGISTER_RESPONSE, packet, payloadType);
     socket.write(registerResponse);
   } catch (error) {
@@ -52,7 +48,6 @@ export const registerRequestHandler = async ({ socket, payload }) => {
  * 로그인 핸들러
  */
 export const loginRequestHandler = async ({ socket, payload }) => {
-  //
   try {
     const { loginId, password } = await JoiUtils.validateSignIn(payload);
 
@@ -60,49 +55,43 @@ export const loginRequestHandler = async ({ socket, payload }) => {
 
     let packet = {
       success: false,
-      info: '',
-      failCode: 0,
+      sessionId: '',
+      failCode: FAIL_CODE.NONE_FAILCODE,
     };
 
     if (!checkExistId) {
-      // 없는 아이디
-      packet.failCode = 13;
+      packet.failCode = FAIL_CODE.ID_OR_PASSWORD_MISS;
     } else {
       const checkPassword = await bcrypt.compare(password, checkExistId.password);
       if (!checkPassword) {
-        // 비밀번호 틀림
-        packet.failCode = 13;
+        packet.failCode = FAIL_CODE.ID_OR_PASSWORD_MISS;
       }
     }
 
-    // TODO : 중복 로그인 체크
+    // 중복 로그인 CHECK
     const checkRedundant = await redis.getUserToLogin(loginId);
 
     if (checkRedundant === 1) {
-      // 중복 로그인 확인=> 로그인 실패 처리
-      console.log('중복 로그인 확인');
-      packet.failCode = 16;
+      packet.failCode = FAIL_CODE.ALREADY_LOGGED_IN_ID;
     }
 
     // 로그인 처리
-    const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
-
-    if (packet.failCode === 0) {
+    if (packet.failCode === FAIL_CODE.NONE_FAILCODE) {
       const sessionId = uuidv4();
 
-      const userData = {
-        id: sessionId,
+      const redisData = {
         loginId: checkExistId.login_id,
         nickname: checkExistId.nickname,
-        location: 'user',
+        location: '',
       };
 
       packet.success = true;
-      packet.info = userData;
-      await redis.createUserToSession(sessionId, userData);
+      packet.sessionId = sessionId;
+      await redis.createUserToSession(sessionId, redisData);
       await redis.createUserLogin(checkExistId.login_id);
     }
 
+    const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
     const loginResponse = serialize(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, payloadType);
     socket.write(loginResponse);
   } catch (error) {

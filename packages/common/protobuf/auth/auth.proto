@@ -25,6 +25,6 @@ message C2S_LoginRequest {
 
 message S2C_LoginResponse {
     bool success = 1;
-    UserData info = 2;        // [ userId, nickname, 게임플레이 수, 랭킹?점수? ] 
+    string sessionId = 2;
     GlobalFailCode failCode = 3;
 }

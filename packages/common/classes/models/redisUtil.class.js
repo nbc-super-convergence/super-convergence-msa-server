@@ -62,7 +62,6 @@ class RedisUtil {
   async createUserLogin(loginId) {
     const key = `${this.prefix.LOGIN}`;
     await this.client.sadd(key, loginId);
-    await this.client.expire(key, 1800);
   }
 
   /**
@@ -172,7 +171,7 @@ class RedisUtil {
       nickname: userData.nickname,
       location: userData.location,
     });
-    await this.client.expire(key, 60 * 60);
+    await this.client.expire(key, 60 * 60 * 24);
   }
 
   /**
@@ -193,7 +192,7 @@ class RedisUtil {
   async updateUserToSessionfield(sessionId, userField, value) {
     const key = `${this.prefix.USER}:${sessionId}`;
     await this.client.hset(key, userField, value);
-    await this.client.expire(key, 60 * 60);
+    await this.client.expire(key, 60 * 60 * 24);
   }
 
   /**
