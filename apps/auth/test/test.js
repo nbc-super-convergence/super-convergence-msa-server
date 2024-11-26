@@ -21,27 +21,27 @@ const runClient = async () => {
     client.connect(PORT, HOST, () => {
       console.log(`Connected to server at ${HOST}:${PORT}`);
 
-      // 회원가입 테스트
+      //   // 회원가입 테스트
+      //   const payload = {
+      //     loginId: 'test004',
+      //     password: '1234qwer',
+      //     passwordConfirm: '1234qwer',
+      //     nickname: 'testnick004',
+      //   };
+      //   const buffer = serialize(1, payload, 0, 'registerRequest');
+      //   client.write(buffer);
+      //   console.log(`Sent Buffer`, buffer);
+      // });
+
+      // 로그인 테스트
       const payload = {
-        loginId: 'test004',
+        loginId: 'haha13',
         password: '1234qwer',
-        passwordConfirm: '1234qwer',
-        nickname: 'testnick004',
       };
-      const buffer = serialize(1, payload, 0, 'registerRequest');
+      const buffer = serialize(3, payload, 0, 'loginRequest');
       client.write(buffer);
       console.log(`Sent Buffer`, buffer);
     });
-
-    //   // 로그인 테스트
-    //   const payload = {
-    //     loginId: 'haha13',
-    //     password: '1234qwer',
-    //   };
-    //   const buffer = serialize(3, payload, 0, 'loginRequest');
-    //   client.write(buffer);
-    //   console.log(`Sent Buffer`, buffer);
-    // });
 
     // 서버로부터 데이터 수신
     client.on('data', (data) => {

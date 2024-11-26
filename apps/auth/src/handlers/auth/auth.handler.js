@@ -91,6 +91,7 @@ export const loginRequestHandler = async ({ socket, payload }) => {
       const sessionId = uuidv4();
 
       const userData = {
+        id: sessionId,
         loginId: checkExistId.login_id,
         nickname: checkExistId.nickname,
         location: 'user',

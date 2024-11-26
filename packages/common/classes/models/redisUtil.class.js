@@ -222,6 +222,15 @@ class RedisUtil {
     return findUser;
   }
 
+  /**
+   * 중복 로그인 세션에서 유저 삭제
+   */
+
+  async deleteUserToLogin(loginId) {
+    const key = `${this.prefix.LOGIN}`;
+    await this.client.srem(key, loginId);
+  }
+
   // 로비 데이터
   /**
    * 로비에 접속한 유저 추가
