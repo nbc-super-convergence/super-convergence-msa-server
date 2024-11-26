@@ -3,7 +3,11 @@ import { addGameSession } from './sessions/game.session.js';
 
 const SERVER_NAME = 'ice';
 const SERVER_PORT = 7016;
-const server = new IceServer(SERVER_NAME, SERVER_PORT, [555]);
+const server = new IceServer(
+  SERVER_NAME,
+  SERVER_PORT,
+  [201, 2022, 203, 204, 205, 206, 207, 208, 209, 210, 211],
+);
 
 await server.start();
 

@@ -45,12 +45,43 @@ class RedisUtil {
     this.client = redisClient;
     this.prefix = {
       USER: 'user',
-      LOGIN: 'login',
       LOCATION: 'location',
       LOBBY_USERS: 'lobbyUsers',
       ROOM_LIST: 'roomList',
       ROOM: 'room',
+      LOGIN: 'login',
     };
+  }
+
+  /**
+   *
+   * 중복 로그인 검사 KEY 등록
+   *
+   */
+
+  async createUserLogin(loginId) {
+    const key = `${this.prefix.LOGIN}`;
+    await this.client.sadd(key, loginId);
+    await this.client.expire(key, 1800);
+  }
+
+  /**
+   * 중복 로그인 검사
+   */
+
+  async getUserToLogin(loginId) {
+    const key = `${this.prefix.LOGIN}`;
+    const findUser = await this.client.sismember(key, loginId);
+    return findUser;
+  }
+
+  /**
+   * 중복 로그인 세션에서 유저 삭제
+   */
+
+  async deleteUserToLogin(loginId) {
+    const key = `${this.prefix.LOGIN}`;
+    await this.client.srem(key, loginId);
   }
 
   // 유저 위치
@@ -198,37 +229,6 @@ class RedisUtil {
       nickname: userData.nickname,
       location: userData.location,
     };
-  }
-
-  /**
-   *
-   * 중복 로그인 검사 KEY 등록
-   *
-   */
-
-  async createUserLogin(loginId) {
-    const key = `${this.prefix.LOGIN}`;
-    await this.client.sadd(key, loginId);
-    await this.client.expire(key, 1800);
-  }
-
-  /**
-   * 중복 로그인 검사
-   */
-
-  async getUserToLogin(loginId) {
-    const key = `${this.prefix.LOGIN}`;
-    const findUser = await this.client.sismember(key, loginId);
-    return findUser;
-  }
-
-  /**
-   * 중복 로그인 세션에서 유저 삭제
-   */
-
-  async deleteUserToLogin(loginId) {
-    const key = `${this.prefix.LOGIN}`;
-    await this.client.srem(key, loginId);
   }
 
   // 로비 데이터
