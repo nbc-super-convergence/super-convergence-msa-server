@@ -21,10 +21,8 @@
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "auth": {
-      "cache": false
-    },
+    }
+    ,
     "cache": {
       "cache": false
     }

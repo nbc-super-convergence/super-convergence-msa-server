@@ -10,8 +10,8 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "joi": "^17.13.3",
-    "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.11.4"
+    "mysql2": "^3.11.4",
+    "uuid": "^11.0.3"
   },
   "scripts": {
     "clean": "if exist dist rmdir /s /q dist",

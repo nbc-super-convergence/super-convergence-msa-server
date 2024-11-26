@@ -9,7 +9,7 @@ message Vector {
 }
 
 message UserData {
-    int64 id = 1;
+    string id = 1;
     string nickname = 2;
 }
 message RoomData {
@@ -34,6 +34,10 @@ enum GlobalFailCode {
     TILE_PURCHASE_FAIL = 10;
     BACK_TO_THE_ROOM_FAIL = 11;
     INVALID_ROOM_STATE = 12;
+    ID_OR_PASSWORD_MISS = 13; // 13 ~ 16 AUTH SERVER ERROR
+    NOT_MATCH_PASSWORD_CONFIRM = 14;
+    ALREADY_EXIST_ID = 15;
+    ALREADY_LOGGED_IN_ID = 16;
 }
 
 enum RoomStateType  {

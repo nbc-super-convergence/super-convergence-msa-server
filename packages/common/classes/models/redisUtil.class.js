@@ -1,63 +1,179 @@
+/**
+ * @typedef userdata
+ * @property {string} loginId
+ * @property {string} nickname
+ * @property {string} location
+ */
+
+/**
+ * @typedef userField
+ * @property {string} loginId
+ * @property {string} nickname
+ * @property {string} location
+ */
+
+/**
+ * @typedef roomField
+ * @property {string} roomId
+ * @property {string} ownerId
+ * @property {string} roomName
+ * @property {string} state
+ * @property {number} maxUser
+ * @property {set} readyUsers
+ */
+
+/**
+ * @typedef locationField
+ * @property {string} lobby
+ * @property {string} roomId
+ * @property {string} boardId
+ * @property {string} miniGameId
+ */
+
+/**
+ * @typedef room
+ * @property {string} roomId
+ * @property {string} ownerSessionId
+ * @property {string} roomName
+ * @property {string} state
+ * @property {number} maxUser
+ * @property {set} readyUsers
+ */
+
 class RedisUtil {
   constructor(redisClient) {
     this.client = redisClient;
     this.prefix = {
       USER: 'user',
-      LOBBY_USER: 'lobbyUser',
-      LOBBY_ROOM: 'lobbyRoom',
+      LOGIN: 'login',
+      LOCATION: 'location',
+      LOBBY_USERS: 'lobbyUsers',
+      ROOM_LIST: 'roomList',
       ROOM: 'room',
     };
+  }
+
+  // 유저 위치
+  /**
+   * 유저의 위치 데이터 등록
+   * @param {string} sessionId
+   * @param {string} location
+   * @param {string} locationId
+   */
+  async createUserLocation(sessionId, location, locationId) {
+    const key = `${this.prefix.LOCATION}:${sessionId}`;
+    await this.client.hset(key, location, locationId);
+    await this.client.expire(key, 60 * 60);
+  }
+
+  /**
+   * 유저의 위치 데이터 삭제
+   * @param {string} sessionId
+   */
+  async deleteUserLocation(sessionId) {
+    const key = `${this.prefix.LOCATION}:${sessionId}`;
+    await this.client.del(key);
+  }
+
+  /**
+   * 유저의 특정 위치 데이터만 삭제
+   * @param {string} sessionId
+   * @param {string} locationField
+   */
+  async deleteUserLocationField(sessionId, locationField) {
+    const key = `${this.prefix.LOCATION}:${sessionId}`;
+    await this.client.hdel(key, locationField);
+  }
+
+  /**
+   * 유저의 특정 위치 데이터만 수정
+   * @param {string} sessionId
+   * @param {string} locationField
+   * @param {string} locationId
+   */
+  async updateUserLocationField(sessionId, locationField, locationId) {
+    const key = `${this.prefix.LOCATION}:${sessionId}`;
+    await this.client.hset(key, locationField, locationId);
+    await this.client.expire(key, 60 * 60);
+  }
+
+  /**
+   * 유저의 특정 위치 데이터만 조회
+   * @param {string} sessionId
+   * @param {string} locationField
+   * @returns {string} data
+   */
+  async getUserLocationField(sessionId, locationField) {
+    const key = `${this.prefix.LOCATION}:${sessionId}`;
+    const data = await this.client.hget(key, locationField);
+    if (!data) {
+      return null;
+    }
+
+    return data;
+  }
+
+  /**
+   * 유저의 위치 데이터 조회
+   * @param {string} sessionId
+   * @returns {locationField} data
+   */
+  async getUserLocation(sessionId) {
+    const key = `${this.prefix.LOCATION}:${sessionId}`;
+    const data = await this.client.hget(key);
+    if (!data) {
+      return null;
+    }
+
+    return data;
   }
 
   // 유저 데이터
   /**
    * 세션에 유저 데이터 등록
-   * @param {Object} userData
-   * @typeDef userData: { userId: String, nickname: String, location: String }
+   * @param {string} sessionId
+   * @param {userdata} userData
    */
-  async createUserToSession(userData) {
-    const key = `${this.prefix.USER}:${userData.userId}`;
+  async createUserToSession(sessionId, userData) {
+    const key = `${this.prefix.USER}:${sessionId}`;
     await this.client.hset(key, {
-      userId: userData.userId,
+      loginId: userData.loginId,
       nickname: userData.nickname,
       location: userData.location,
     });
-    await this.client.expire(key, 1800);
+    await this.client.expire(key, 60 * 60);
   }
 
   /**
    * 유저 데이터 삭제
-   * @param {String} userId
+   * @param {string} sessionId
    */
-  async deleteUserToSession(userId) {
-    const key = `${this.prefix.USER}:${userId}`;
+  async deleteUserToSession(sessionId) {
+    const key = `${this.prefix.USER}:${sessionId}`;
     await this.client.del(key);
   }
 
   /**
    * 유저 데이터 중 하나의 필드만 수정
-   * @param {String} userId
-   * @param {String} Enum field
-   * @param {String} value
-   * @typeDef field = "userId" || "nickname" || "location"
+   * @param {string} sessionId
+   * @param {userField} userField
+   * @param {string} value
    */
-  async updateUserToSessionField(userId, field, value) {
-    const key = `${this.prefix.USER}:${userId}`;
-    await this.client.hset(key, field, value);
-    await this.client.expire(key, 1800);
+  async updateUserToSessionfield(sessionId, userField, value) {
+    const key = `${this.prefix.USER}:${sessionId}`;
+    await this.client.hset(key, userField, value);
+    await this.client.expire(key, 60 * 60);
   }
 
   /**
    * 유저 데이터 중 하나의 필드만 조회
-   * @param {String} userId
-   * @param {String} Enum field
-   * @returns {String} field value
-   * @typeDef field = "userId" || "nickname" || "location"
-   * @typeDef location = "lobby" || "room" || "game" || "mini"
+   * @param {string} sessionId
+   * @param {userField} userField
+   * @returns {string} data
    */
-  async getUserToSessionField(userId, field) {
-    const key = `${this.prefix.USER}:${userId}`;
-    const data = await this.client.hget(key, field);
+  async getUserToSessionfield(sessionId, userField) {
+    const key = `${this.prefix.USER}:${sessionId}`;
+    const data = await this.client.hget(key, userField);
     if (!data) {
       return null;
     }
@@ -67,64 +183,61 @@ class RedisUtil {
 
   /**
    * 세션의 유저 데이터 조회
-   * @param {String} userId
-   * @returns {Object} userData
-   * @typeDef userData: { userId: String, nickname: String, location: String }
+   * @param {string} sessionId
+   * @returns {userdata} userData
    */
-  async getUserToSession(userId) {
-    const key = `${this.prefix.USER}:${userId}`;
+  async getUserToSession(sessionId) {
+    const key = `${this.prefix.USER}:${sessionId}`;
     const userData = await this.client.hget(key);
     if (!userData) {
       return null;
     }
 
     return {
-      userId: userData.userId,
+      loginId: userData.loginId,
       nickname: userData.nickname,
       location: userData.location,
     };
   }
 
   /**
-   * 세션의 유저 데이터 조회
-   * @param {String} userId
-   * @returns {Object} userData
-   * @typeDef userData: { userId: String, nickname: String, location: String }
+   *
+   * 중복 로그인 검사 KEY 등록
+   *
    */
-  async getUserToSession(userId) {
-    const key = `${this.prefix.USER}:${userId}`;
-    const userData = await this.client.hget(key);
-    if (!userData) {
-      return null;
-    }
 
-    return {
-      userId: userData.userId,
-      nickname: userData.nickname,
-      location: userData.location,
-    };
+  async createUserLogin(loginId) {
+    const key = `${this.prefix.LOGIN}`;
+    await this.client.sadd(key, loginId);
+    await this.client.expire(key, 1800);
+  }
+
+  /**
+   * 중복 로그인 검사
+   */
+
+  async getUserToLogin(loginId) {
+    const key = `${this.prefix.LOGIN}`;
+    const findUser = await this.client.sismember(key, loginId);
+    return findUser;
   }
 
   // 로비 데이터
   /**
    * 로비에 접속한 유저 추가
-   * @param {String} lobbyId
-   * @param {String} userId
+   * @param {string} sessionId
    */
-  async addLobbyUser(lobbyId, userId) {
-    const key = `${this.prefix.LOBBY_USER}:${lobbyId}`;
-    await this.client.sadd(key, userId);
-    await this.client.expire(key, 1800);
+  async addLobbyUsers(sessionId) {
+    const key = `${this.prefix.LOBBY_USERS}`;
+    await this.client.sadd(key, sessionId);
   }
 
   /**
    * 로비에 접속 중인 유저 목록 조회
-   * @param {String} lobbyId
-   * @returns {Array} userData
-   * @typeDef userData: { userId: String, nickname: String, location: String }
+   * @returns {Array<userdata>} userData
    */
-  async getLobbyUsers(lobbyId) {
-    const key = `${this.prefix.LOBBY_USER}:${lobbyId}`;
+  async getLobbyUserss() {
+    const key = `${this.prefix.LOBBY_USERS}`;
     const users = await this.client.smembers(key);
     if (!users) {
       return null;
@@ -136,47 +249,43 @@ class RedisUtil {
   // 룸 데이터
   /**
    * 대기방 생성
-   * @param {String} lobbyId
-   * @param {Object} room
-   * @param {String} userId
-   * @typeDef room: { ownerId: String, name: String, state: String, maxUser: Number, readyUsers: Object }
+   * @param {room} room
+   * @param {string} sessionId
    */
-  async createRoom(lobbyId, room, userId) {
+  async createRoom(room, sessionId) {
     const key = `${this.prefix.ROOM}:${room.roomId}`;
     await this.client.hset(key, {
-      ownerId: userId,
+      ownerId: sessionId,
       name: room.name,
       state: room.state,
       maxUser: room.maxUser,
       readyUsers: room.readyUsers,
     });
-    await this.client.expire(key, 1800);
-    await this.client.sadd(`${this.prefix.LOBBY_ROOM}:${lobbyId}`, key);
+    await this.client.expire(key, 60 * 60);
+    await this.client.sadd(`${this.prefix.ROOM_LIST}`, key);
   }
 
   /**
    * 대기방의 하나의 필드만 수정
-   * @param {String} roomId
-   * @param {String} Enum field
-   * @param {String || Number || Array} value
-   * @typeDef field = "ownerId" || "name" || "state" || "maxUser" || "readyUsers"
+   * @param {string} roomId
+   * @param {roomField} roomField
+   * @param {string | number | set} value
    */
-  async updateRoomField(roomId, field, value) {
+  async updateRoomfield(roomId, roomField, value) {
     const key = `${this.prefix.ROOM}:${roomId}`;
-    await this.client.hset(key, field, value);
-    await this.client.expire(key, 1800);
+    await this.client.hset(key, roomField, value);
+    await this.client.expire(key, 60 * 60);
   }
 
   /**
    * 대기방의 하나의 필드의 값 조회
-   * @param {String} roomId
-   * @param {String} Enum field
-   * @returns {String || Number || Array} value
-   * @typeDef field = "ownerId" || "name" || "state" || "maxUser" || "readyUsers"
+   * @param {string} roomId
+   * @param {roomField} roomField
+   * @returns {string | number | set} data
    */
-  async getRoomField(roomId, field) {
+  async getRoomfield(roomId, roomField) {
     const key = `${this.prefix.ROOM}:${roomId}`;
-    const data = await this.client.hget(key, field);
+    const data = await this.client.hget(key, roomField);
     if (!data) {
       return null;
     }
@@ -186,7 +295,7 @@ class RedisUtil {
 
   /**
    * 대기방 삭제
-   * @param {String} roomId
+   * @param {string} roomId
    */
   async deleteRoom(roomId) {
     const key = `${this.prefix.ROOM}:${roomId}`;

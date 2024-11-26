@@ -15,7 +15,6 @@ message C2S_RegisterRequest {
 
 message S2C_RegisterResponse {
     bool success = 1;
-    string message = 2;
 	GlobalFailCode failCode = 3;
 }
 
@@ -26,8 +25,6 @@ message C2S_LoginRequest {
 
 message S2C_LoginResponse {
     bool success = 1;
-    string message = 2;
-    string token = 3;         // JWT
-    UserData info = 4;        // [ userId, nickname, 게임플레이 수, 랭킹?점수? ] 
-    GlobalFailCode failCode = 5;
+    UserData info = 2;        // [ userId, nickname, 게임플레이 수, 랭킹?점수? ] 
+    GlobalFailCode failCode = 3;
 }
