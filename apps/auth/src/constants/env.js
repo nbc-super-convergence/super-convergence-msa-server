@@ -9,11 +9,11 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 
 // SQL_DB
-export const DB_NAME = process.env.DB_NAME;
-export const DB_USER = process.env.DB_USER;
-export const DB_PASSWORD = process.env.DB_PASSWORD;
-export const DB_HOST = process.env.DB_HOST;
-export const DB_PORT = process.env.DB_PORT;
+export const USER_DB1_NAME = process.env.USER_DB1_NAME;
+export const USER_DB1_USER = process.env.USER_DB1_USER;
+export const USER_DB1_PASSWORD = process.env.USER_DB1_PASSWORD;
+export const USER_DB1_HOST = process.env.USER_DB1_HOST;
+export const USER_DB1_PORT = process.env.USER_DB1_PORT;
 
 // REDIS
 export const REDIS_HOST = process.env.REDIS_HOST;
