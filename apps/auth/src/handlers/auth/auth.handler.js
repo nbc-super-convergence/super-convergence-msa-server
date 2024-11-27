@@ -98,13 +98,9 @@ export const loginRequestHandler = async ({ socket, payload }) => {
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
-    const loginResponse = serializeForGate(
-      MESSAGE_TYPE.LOGIN_RESPONSE,
-      packet,
-      0,
-      payloadType,
-      packet.sessionId,
-    );
+    const loginResponse = serializeForGate(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, payloadType, [
+      'self',
+    ]);
     socket.write(loginResponse);
   } catch (error) {
     console.error(` [ loginRequestHandler ] error =>>> `, error);
