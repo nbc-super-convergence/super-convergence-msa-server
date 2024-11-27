@@ -6,8 +6,7 @@
   "type": "module",
   "version": "1.0.0",
   "dependencies": {
-    "@repo/common": "*",
-    "uuid": "^11.0.3"
+    "@repo/common": "*"
   },
   "scripts": {
     "build": "yarn && node build.js",
