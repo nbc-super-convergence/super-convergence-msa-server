@@ -1,8 +1,9 @@
 import { MESSAGE_TYPE } from './constants.js';
-import { serialize } from '@repo/common/utils';
 import { getPayloadNameByMessageType } from '../handlers/index.js';
+import { serializeForGate } from '@repo/common/utils';
+import { logger } from '@repo/common/config';
 
-export const createResponse = (result, messageType) => {
+export const createResponse = (result, messageType, sessionId) => {
   let response = {
     success: result.success,
     failCode: result.failCode,
@@ -44,7 +45,9 @@ export const createResponse = (result, messageType) => {
       break;
   }
 
-  console.log('[ room ] ====> createResponse ', response);
+  logger.info('[ createResponse ] ====> result', { messageType, ...result });
 
-  return serialize(messageType, response, 0, getPayloadNameByMessageType);
+  return serializeForGate(messageType, response, 0, getPayloadNameByMessageType(messageType), [
+    sessionId,
+  ]);
 };
