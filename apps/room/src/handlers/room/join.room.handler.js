@@ -1,31 +1,33 @@
 import { MESSAGE_TYPE } from '../../utils/constants.js';
-import { serialize } from '@repo/common/utils';
-import { getPayloadNameByMessageType } from '../index.js';
-import { createResponse } from '../../utils/createResponse.js';
+import { createResponse } from '../../utils/create.response.js';
 import roomManager from '../../classes/manager/room.manager.js';
+import { handleError } from '../../utils/handle.error.js';
+import Room from '../../classes/models/room.class.js';
+import { createNotification } from '../../utils/create.notification.js';
 
-export const joinRoomRequestHandler = ({ socket, messageType, payload }) => {
+export const joinRoomRequestHandler = async ({ socket, payload }) => {
+  const { sessionId, roomId } = payload;
+
   try {
-    const { userData, roomId } = payload;
-    const result = roomManager.joinRoom(userData, roomId);
+    const result = await roomManager.joinRoom(sessionId, roomId);
 
-    // TODO: noti 구분 추가 필요
-    const packet = createResponse(result, MESSAGE_TYPE.JOIN_ROOM_RESPONSE);
+    const responsePacket = createResponse(result, MESSAGE_TYPE.JOIN_ROOM_RESPONSE, sessionId);
+    socket.write(responsePacket);
 
-    socket.write(packet);
+    // 요청이 성공했으면 noti
+    if (result.success) {
+      const otherSessionIds = Room.getOtherSessionIds(result.data, sessionId);
+
+      if (otherSessionIds.length > 0) {
+        const notificationPacket = createNotification(
+          { userData: result.userData },
+          MESSAGE_TYPE.JOIN_ROOM_NOTIFICATION,
+          otherSessionIds,
+        );
+        socket.write(notificationPacket);
+      }
+    }
   } catch (error) {
-    console.error('[ joinRoomRequestHandler ] ====>  error ', error.message, error);
-    socket.write(
-      serialize(
-        MESSAGE_TYPE.JOIN_ROOM_RESPONSE,
-        {
-          success: false,
-          room: {},
-          failCode: 1,
-        },
-        0,
-        getPayloadNameByMessageType,
-      ),
-    );
+    handleError(socket, MESSAGE_TYPE.JOIN_ROOM_RESPONSE, sessionId, error);
   }
 };
