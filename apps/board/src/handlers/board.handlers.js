@@ -1,5 +1,10 @@
-import { RedisClient } from '@repo/common/classes';
 import { serializeForGate } from '@repo/common/utils';
+import { redis } from '../utils/redis.js';
+import boardManager from '../classes/managers/board.manager.class.js';
+import { FAIL_CODE } from '@repo/common/failcodes';
+import { MESSAGE_TYPE } from '@repo/common/header';
+import { getPayloadNameByMessageType } from '@repo/common/handlers';
+import { handleError } from '../utils/errors/handle.error.js';
 
 /**
  * * 게임 시작 요청 (방장만 가능)
@@ -19,32 +24,36 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
    */
   const { sessionId } = payload;
   //
-  console.log(' [ gameStartRequestHandler ] sessionId ===>> ', sessionId);
+  console.log(' [ BOARD: gameStartRequestHandler ] sessionId ===>> ', sessionId);
 
-  // TODO: [ TEST : GATE ] ------------------------------
+  let sessionIds = [sessionId];
 
-  const packet = serializeForGate(
-    62,
-    {
-      success: true,
-      diceResult: 10,
-      failCode: 0,
-    },
-    1,
-    'rollDiceResponse',
-    [sessionId],
-  );
-  socket.write(packet);
+  try {
+    // * 보드 게임 방, 플레이어 리스트 생성 및 보드 채널 published
+    const result = await boardManager.createBoard(sessionId);
 
-  // ------------------------------
+    try {
+      sessionIds = JSON.parse(result.data.users);
+      console.log(' [ BOARD: gameStartRequestHandler ] users  ===>>> ', users);
+    } catch (e) {
+      sessionIds = [sessionId];
+    }
 
-  // * redis에서 유저 정보 조회
-  // userId, nickname, location
-  //   const userObj = redis.getUserToSession(sessionId);
-
-  // * redis에서 유저 roomId 조회
-
-  // * room 정보 조회
+    // * 게임 인원 전체에게 Noti
+    const notification = { success: result.success, players: [], failCode: result.failCode };
+    const messageType = MESSAGE_TYPE.GAME_START_NOTIFICATION;
+    const packet = serializeForGate(
+      messageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(messageType),
+      sessionIds,
+    );
+    socket.write(packet);
+  } catch (err) {
+    console.error('[ BOARD: gameStartRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.GAME_START_NOTIFICATION, sessionIds, err);
+  }
 };
 
 /**
