@@ -28,3 +28,7 @@ message S2C_LoginResponse {
     string sessionId = 2;
     GlobalFailCode failCode = 3;
 }
+
+message C2S_LoggoutRequest {
+    string sessionId = 1;
+}

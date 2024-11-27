@@ -1,5 +1,6 @@
 import { MESSAGE_TYPE } from '../constants/header.js';
 import { loginRequestHandler, registerRequestHandler } from './auth/auth.handler.js';
+import { logoutHandler } from './auth/logout.handler.js';
 
 const handlers = {
   // * REQUEST
@@ -12,6 +13,11 @@ const handlers = {
     handler: loginRequestHandler,
     message: 'auth.C2S_LoginRequest',
     payload: 'loginRequest',
+  },
+  [MESSAGE_TYPE.LOGOUT_REQUEST]: {
+    handler: logoutHandler,
+    message: 'auth.C2S_LoggoutRequest',
+    payload: 'logoutRequest',
   },
 
   // * RESPONSE [handler X]
@@ -27,11 +33,6 @@ const handlers = {
   },
 
   // * NOTIFICATION [handler X]
-  [MESSAGE_TYPE.LOGIN_NOTIFICATION]: {
-    handler: undefined,
-    message: 'auth.S2C_LoginNotification',
-    payload: 'loginNotification',
-  },
 };
 
 export const getHandlerByMessageType = (messageType) => {
