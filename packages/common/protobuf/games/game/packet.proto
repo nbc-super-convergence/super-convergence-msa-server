@@ -7,7 +7,7 @@ import '../../distributor/packet.proto';
 import '../../auth/auth.proto';
 import '../../lobby/lobby.proto';
 import '../../room/room.proto';
-import './board.proto';
+import '../../board/board.proto';
 
 message GamePacket {
     oneof payload {
@@ -16,6 +16,7 @@ message GamePacket {
         S2C_RegisterResponse registerResponse = 2;
         C2S_LoginRequest loginRequest = 3;
         S2C_LoginResponse loginResponse = 4;
+        C2S_LoggoutRequest logoutRequest = 5;
         
         // distributor noti (10)
         S2S_ServerInfoNotification serverInfoNotification = 10;

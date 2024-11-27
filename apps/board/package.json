@@ -1,0 +1,16 @@
+{
+  "name": "board",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/server.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@repo/common": "*",
+    "dotenv": "^16.4.5"
+  },
+  "scripts": {
+    "build": "yarn && node build.js",
+    "start": "node dist/server.js"
+  }
+}

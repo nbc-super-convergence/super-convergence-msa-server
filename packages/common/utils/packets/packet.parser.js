@@ -11,6 +11,7 @@ export const packetParser = (
     const protoMessages = getProtoMessages();
     const gamePacket = protoMessages.game.GamePacket;
     const decodedGamePacket = gamePacket.decode(data);
+    console.log('[ packetParser ] decodedGamePacket ===>> ', decodedGamePacket);
     const field = decodedGamePacket[payloadType];
     payload = { ...field };
   } catch (e) {

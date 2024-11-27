@@ -97,3 +97,28 @@ export const serializeForGate = (
     gatePayloadBuffer,
   ]);
 };
+
+export const serializeForClient = (messageType, sequence, gamePacketBuffer) => {
+  const messageTypeBuffer = Buffer.alloc(config.PACKET.MESSAGE_TYPE_LENGTH);
+  messageTypeBuffer.writeUintBE(messageType, 0, config.PACKET.MESSAGE_TYPE_LENGTH);
+
+  const version = config.CLIENT.VERSION;
+  const versionBuffer = Buffer.from(version);
+  const versionLengthBuffer = Buffer.alloc(config.PACKET.VERSION_LENGTH);
+  versionLengthBuffer.writeUintBE(versionBuffer.length, 0, config.PACKET.VERSION_LENGTH);
+
+  const sequenceBuffer = Buffer.alloc(config.PACKET.SEQUENCE_LENGTH);
+  sequenceBuffer.writeUintBE(sequence, 0, config.PACKET.SEQUENCE_LENGTH);
+
+  const payloadLengthBuffer = Buffer.alloc(config.PACKET.PAYLOAD_LENGTH);
+  payloadLengthBuffer.writeUintBE(gamePacketBuffer.length, 0, config.PACKET.PAYLOAD_LENGTH);
+
+  return Buffer.concat([
+    messageTypeBuffer,
+    versionLengthBuffer,
+    versionBuffer,
+    sequenceBuffer,
+    payloadLengthBuffer,
+    gamePacketBuffer,
+  ]);
+};
