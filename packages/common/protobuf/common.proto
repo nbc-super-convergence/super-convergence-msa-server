@@ -9,15 +9,26 @@ message Vector {
 }
 
 message UserData {
-    int64 id = 1;
+    string loginId = 1;
     string nickname = 2;
 }
+
 message RoomData {
-    int32 id = 1;
-    int64 ownerId = 2;
+    string id = 1;
+    string ownerId = 2;
     string name = 3;
-    RoomStateType state = 4; // WAIT 0, PREPARE 1, INAGAME 2
-    repeated UserData users = 5;
+    string lobbyId = 4;
+    RoomStateType state = 5;
+    repeated UserData users = 6;
+    int32 maxUser = 7;
+    repeated string readyUsers = 8;
+}
+
+enum RoomStateType  {
+	WAIT = 0;
+	PREPARE = 1;
+	BOARD = 2;
+    MINI = 3;
 }
 
 enum GlobalFailCode {
@@ -34,12 +45,6 @@ enum GlobalFailCode {
     TILE_PURCHASE_FAIL = 10;
     BACK_TO_THE_ROOM_FAIL = 11;
     INVALID_ROOM_STATE = 12;
-}
-
-enum RoomStateType  {
-	WAIT = 0;
-	PREPARE = 1;
-	INGAME = 2;
 }
 
 enum State {
