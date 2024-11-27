@@ -5,6 +5,7 @@ import {
   deserialize,
   packetParser,
   packetParserForGate,
+  serializeForClient,
 } from '@repo/common/utils';
 
 class GateServer extends TcpServer {
@@ -43,6 +44,7 @@ class GateServer extends TcpServer {
           const payload = packetParser(messageType, packet);
           console.log('[ Gate - _onData ] payload ===>>> \n', payload);
           // * sessionId를 키값으로 socket 저장
+          this._mapClients[payload.sessionId] = {};
           this._mapClients[payload.sessionId].socket = socket;
         }
         // * 연결되어있는 서비스서버의 type에 맞는 메세지 전달
@@ -135,7 +137,24 @@ class GateServer extends TcpServer {
 
         const payload = packetParserForGate(messageType, packetV2);
         console.log(`[ gate - onReadClient ]payload=========> \n`, payload);
-        this._socket.write(packet);
+
+        const packetForClient = serializeForClient(messageType, sequence, payload.gamePacket);
+
+        console.log(`[ gate - onReadClient ]payload.sessionIds =========> \n`, payload.sessionIds);
+        console.log('[ GATE: ] payload.sessionIds.length ===>>> ', payload.sessionIds.length);
+        if (payload.sessionIds && payload.sessionIds.length > 0) {
+          payload.sessionIds.forEach((sessionId) => {
+            console.log(
+              ` FOR ====>>> ${sessionId} ====>>> `,
+              this._mapClients[sessionId].socket.remoteAddress,
+              ':',
+              this._mapClients[sessionId].socket.remotePort,
+            );
+            this._mapClients[sessionId].socket.write(packetForClient);
+          });
+        } else {
+          this._socket.write(packetForClient);
+        }
       }
     }
   };

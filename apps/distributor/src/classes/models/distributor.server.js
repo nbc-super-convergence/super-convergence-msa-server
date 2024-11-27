@@ -65,11 +65,13 @@ class DistributorServer extends TcpServer {
 
   _onEnd = (socket) => () => {
     const shutdownServer = Object.values(this._map).find((server) => server.socket === socket);
-    const key = shutdownServer.name + '_' + shutdownServer.number;
-    delete this._map[key];
-    console.log(`${shutdownServer.name} 서버가 종료되었습니다. `);
-
-    this.sendInfo();
+    console.log('[ _onEnd ] shutdownServer ===>>> ', shutdownServer);
+    if (shutdownServer) {
+      const key = shutdownServer.name + '_' + shutdownServer.number;
+      delete this._map[key];
+      console.log(`${shutdownServer.name} 서버가 종료되었습니다. `);
+      this.sendInfo();
+    }
   };
 
   _onError = (socket) => (err) => {
