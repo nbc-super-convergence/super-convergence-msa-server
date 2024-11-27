@@ -17,7 +17,6 @@ export const build = async (options) => {
       'bcrypt',
       'mysql2',
       'joi',
-      'jsonwebtoken',
       'dotenv',
     ],
     define: {
