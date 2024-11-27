@@ -1,6 +1,7 @@
 import { config } from '../../config/config.js';
 import { getPayloadNameByMessageType } from '../../handlers/index.js'; // handlers/index.js
 import { getProtoMessages } from '../../init/load.protos.js';
+import { packetParser } from '../packets/packet.parser.js';
 
 export const serialize = (
   messageType,
@@ -27,6 +28,9 @@ export const serialize = (
   console.log('  [ serialize ] payload ===>>> ', payload);
 
   const payloadBuffer = gamePacket.encode(payload).finish();
+
+  const deserialized = packetParser(messageType, payloadBuffer, payloadType);
+  console.log(' [ test22 ] deserialized ===>> ', deserialized);
 
   const payloadLengthBuffer = Buffer.alloc(config.PACKET.PAYLOAD_LENGTH);
   payloadLengthBuffer.writeUintBE(payloadBuffer.length, 0, config.PACKET.PAYLOAD_LENGTH);

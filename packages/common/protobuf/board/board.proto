@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package board;
 
+import '../common.proto';
+
 message C2S_GameStartRequest {
-    string roomId = 1;
+    string sessionId = 1;
 }
 
 message S2C_GameStartNotification {
@@ -32,8 +34,9 @@ message S2C_RollDiceNotification {
 	int32 diceResult = 2;
 }
 
-message  C2S_MovePlayerBoardRequest {
-    Vector  targetPoint = 1;
+message C2S_MovePlayerBoardRequest {
+	string sessionId = 1;
+	Vector targetPoint = 2;
 }
 
 message  S2C_MovePlayerBoardResponse {
@@ -47,7 +50,7 @@ message  S2C_MovePlayerBoardNotification {
 }
 
 message  C2S_PurchaseTileRequest {
-	int32 playerId = 1;
+	string sessionId = 1;
 	Vector tile = 2;
 }
 
@@ -63,7 +66,7 @@ message  S2C_PurchaseTileNotification {
 }
 
 message S2C_GameEndNotification {
-  	Rank rank = 1;
+  	repeated Rank rank = 1;
 }
 
 message C2S_BackToTheRoomRequest {
@@ -77,10 +80,11 @@ message S2C_BackToTheRoomResponse {
 }
 
 message S2C_BackToTheRoomNotification {
-	int32 userId = 1;
+	int32 playerId = 1;
 }
 
 message C2S_StartMiniGameRequest {
+    string sessionId = 1;
 }
 
 message S2C_StartMiniGameNotification {

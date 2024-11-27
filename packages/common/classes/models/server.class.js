@@ -88,7 +88,10 @@ class TcpServer {
       ++this._sequence,
     );
 
-    console.log(`\n [ connectToDistributor ]  packet ==>> ${packet} \n`);
+    console.log(
+      `[ connectToDistributor : [ ${this.context.name} ] ] types ==>> `,
+      this.context.types,
+    );
 
     this._isConnectedDistributor = false;
 

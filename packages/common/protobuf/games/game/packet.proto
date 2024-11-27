@@ -7,7 +7,7 @@ import '../../distributor/packet.proto';
 import '../../auth/auth.proto';
 import '../../lobby/lobby.proto';
 import '../../room/room.proto';
-import './board.proto';
+import '../../board/board.proto';
 
 message GamePacket {
     oneof payload {
