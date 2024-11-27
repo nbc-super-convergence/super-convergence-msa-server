@@ -12,7 +12,7 @@ message C2S_IceJoinRequest {
 message C2S_IcePlayerMoveRequest {
     int32 playerId = 1; 
     Vector position = 2; 
-    Vector vector = 3;
+    Vector force = 3;
     float rotation = 4;
     State state = 5; 
 }
@@ -33,7 +33,7 @@ message S2C_IcePlayerSpawnNotification {
     int32 playerId = 1; 
     int32 playerType = 2;
     Vector position = 3; 
-    Vector vector = 4; 
+    Vector force = 4; 
     float rotation = 5;
 }
 
@@ -80,7 +80,7 @@ message S2C_IcePlayerMoveNotification {
     message PlayerData {
         int32 playerId = 1; 
         Vector position = 2; 
-        Vector vector = 3; 
+        Vector force = 3; 
         float rotation = 4;
         State state = 5;
     }
