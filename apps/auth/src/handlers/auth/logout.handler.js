@@ -14,8 +14,11 @@ export const logoutHandler = async ({ socket, payload }) => {
 
     if (findLoginId) {
       await redis.deleteUserToLogin(findLoginId);
+      await redis.deleteUserToSession(sessionId);
+    } else {
+      throw new Error('Wrong Session Id');
     }
   } catch (error) {
-    console.error(`[ logoutHandler ] error =>>> `, error);
+    console.error(`[ logoutHandler ] error =>>> `, error.message);
   }
 };

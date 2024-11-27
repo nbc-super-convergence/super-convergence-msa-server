@@ -6,7 +6,8 @@ import {
 } from '../constants/header.js';
 
 export const config = {
-  SERVER_NAME: 'SERVER_NAME',
+  SERVER_NAME: 'Auth',
+  SERVER_PORT: 7012,
   CLIENT: {
     VERSION: '1.0.0',
   },

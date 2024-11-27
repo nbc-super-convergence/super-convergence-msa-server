@@ -1,7 +1,7 @@
 import { MESSAGE_TYPE } from '../../constants/header.js';
 import JoiUtils from '../../utils/joi.util.js';
 import { createUser, findUserId } from '../../db/user/user.db.js';
-import { serialize } from '@repo/common/utils';
+import { serialize, serializeForGate } from '@repo/common/utils';
 import { getPayloadNameByMessageType } from '../index.js';
 import bcrypt from 'bcrypt';
 import { redis } from '../../redis.js';
@@ -36,7 +36,13 @@ export const registerRequestHandler = async ({ socket, payload }) => {
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.REGISTER_RESPONSE);
-    const registerResponse = serialize(MESSAGE_TYPE.REGISTER_RESPONSE, packet, payloadType);
+    const registerResponse = serializeForGate(
+      MESSAGE_TYPE.REGISTER_RESPONSE,
+      packet,
+      0,
+      payloadType,
+      ['self'],
+    );
     socket.write(registerResponse);
   } catch (error) {
     // logger.error(`[ icePlayerMoveRequestHandler ] error =>>> `, error.message, error);
@@ -92,7 +98,13 @@ export const loginRequestHandler = async ({ socket, payload }) => {
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
-    const loginResponse = serialize(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, payloadType);
+    const loginResponse = serializeForGate(
+      MESSAGE_TYPE.LOGIN_RESPONSE,
+      packet,
+      0,
+      payloadType,
+      packet.sessionId,
+    );
     socket.write(loginResponse);
   } catch (error) {
     console.error(` [ loginRequestHandler ] error =>>> `, error);
