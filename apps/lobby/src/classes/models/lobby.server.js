@@ -19,11 +19,11 @@ class LobbyServer extends TcpServer {
         const packet = socket.buffer.subarray(offset, length);
         socket.buffer = socket.buffer.subarray(length);
 
-        const payload = packetParser(messageType, packet, getPayloadNameByMessageType);
+        const payload = packetParser(messageType, packet, getPayloadNameByMessageType(messageType));
         console.log(' [ Lobby_onData ] payload ====>> ', payload);
 
         const handler = getHandlerByMessageType(messageType);
-        await handler({ socket, messageType, payload });
+        await handler({ socket, payload });
       } else {
         break;
       }

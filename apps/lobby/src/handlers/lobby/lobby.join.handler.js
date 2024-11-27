@@ -1,29 +1,18 @@
 import { MESSAGE_TYPE } from '../../utils/constants.js';
 import lobbyManager from '../../classes/manager/lobby.manager.js';
-import { createResponse } from '../../utils/createResponse.js';
-import { getPayloadNameByMessageType } from '../index.js';
-import { serialize } from '@repo/common/utils';
+import { createResponse } from '../../utils/create.response.js';
+import { handleError } from '../../utils/handle.error.js';
 
-export const lobbyJoinRequestHandler = ({ socket, messageType, payload }) => {
+export const lobbyJoinRequestHandler = async ({ socket, payload }) => {
+  const { sessionId } = payload;
+
   try {
-    const { userData } = payload;
-    const result = lobbyManager.joinUser(userData);
+    const result = await lobbyManager.joinUser(sessionId);
 
-    const packet = createResponse(result, MESSAGE_TYPE.LOBBY_JOIN_RESPONSE);
+    const packet = createResponse(result, MESSAGE_TYPE.LOBBY_JOIN_RESPONSE, sessionId);
 
     socket.write(packet);
   } catch (error) {
-    console.error('[ lobbyJoinRequestHandler ] ====>  error ', error.message, error);
-    socket.write(
-      serialize(
-        MESSAGE_TYPE.LOBBY_JOIN_RESPONSE,
-        {
-          success: false,
-          failCode: 1,
-        },
-        0,
-        getPayloadNameByMessageType,
-      ),
-    );
+    handleError(socket, MESSAGE_TYPE.LOBBY_JOIN_RESPONSE, sessionId, error);
   }
 };

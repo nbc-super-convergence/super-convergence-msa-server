@@ -4,22 +4,8 @@ package room;
 
 import '../common.proto';
 
-message UserData {
-    string userId = 1;
-    string nickname = 2;
-}
-
-message RoomData {
-    string id = 1;
-    string ownerId = 2;
-    string name = 3;
-    string state = 4;
-    repeated UserData users = 5;
-    int32 maxUsers = 6;
-    repeated string readyUsers = 7;
-}
-
 message C2S_RoomListRequest {
+    string sessionId = 1;
 }
 
 message S2C_RoomListResponse{
@@ -29,7 +15,7 @@ message S2C_RoomListResponse{
 }
 
 message C2S_CreateRoomRequest {
-    UserData userData = 1;
+    string sessionId = 1;
     string roomName = 2;
 }
 
@@ -40,35 +26,35 @@ message S2C_CreateRoomResponse {
 }
 
 message C2S_JoinRoomRequest {
-    UserData userData = 1;
+    string sessionId = 1;
     string roomId = 2;
 }
 
 message S2C_JoinRoomResponse {
-    bool success = 1;
-    RoomData room = 2;
-    GlobalFailCode failCode = 3; 
+	bool success = 1;
+	RoomData room = 2;
+	GlobalFailCode failCode = 3;
 }
 
 message S2C_JoinRoomNotification {
-    UserData joinUser = 1;
+    UserData userData = 1;
 }
 
-message C2S_LeaveRoomRequest {
-    string userId = 1;
+message C2S_LeaveRoomRequest{
+    string sessionId = 1;
 }
 
-message S2C_LeaveRoomResponse {
+message S2C_LeaveRoomResponse{
     bool success = 1;
     GlobalFailCode failCode = 2;
 }
 
 message S2C_LeaveRoomNotification {
-    string userId = 1;
+    UserData userData = 1;
 }
 
 message C2S_GamePrepareRequest {
-    string userId = 1;
+    string sessionId = 1;
     bool isReady = 2;
 }
 
@@ -78,7 +64,8 @@ message S2C_GamePrepareResponse {
     GlobalFailCode failCode = 3;
 } 
 
-message S2C_GamePrepareNotification {
-    string userId = 1;
+message S2C_GamePrepareNotification{
+    UserData userData = 1;
     bool isReady = 2;
+    RoomStateType state = 3;
 }

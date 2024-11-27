@@ -1,182 +1,228 @@
+import { logger } from '@repo/common/config';
+
 /**
- * @typedef {Object} UserData
- * @property {string} userId - 유저 ID
- * @property {string} nickname - 유저 닉네임
+ * @typedef UserData
+ * @property {string} loginId
+ * @property {string} nickname
  */
 
 /**
- * @typedef {Object} RoomResponse
- * @property {boolean} success - 성공 여부
- * @property {Object} data - 성공 시 반환할 데이터
- * @property {number} failCode - 실패 코드 (0: 성공)
+ * @typedef {'wait' | 'prepare' | 'board' | 'mini'} RoomState
+ */
+
+/**
+ * @typedef RoomData
+ * @property {string} roomId
+ * @property {string} ownerId
+ * @property {string} name
+ * @property {string} lobbyId
+ * @property {RoomState} state
+ * @property {Set<string>} users
+ * @property {number} maxUser
+ * @property {Set<string>} readyUsers
+ */
+
+/**
+ * @typedef RoomReponse
+ * @property {bool} success
+ * @property {object} data
+ * @property {number} failCode
  */
 
 class Room {
   /**
-   * @param {string} id - 대기방 ID
-   * @param {string} ownerId - 방장 ID
-   * @param {string} name - 대기방 이름
+   * 유저의 대기방 입장 가능 여부를 검증
+   * @param {RoomData} roomData - 대기방 데이터
+   * @param {string} sessionId - 입장하려는 유저의 세션 ID
+   * @param {UserData} userData - 입장하려는 유저의 데이터
+   * @returns {boolean} 입장 가능 여부
    */
-  constructor(id, ownerId, name) {
-    this.id = id;
-    this.ownerId = ownerId;
-    this.name = name;
-    /** @type {'wait'|'prepare'|'board'|'mini'} */
-    this.state = 'wait';
-    /** @type {Map<string, UserData>} userId -> userData */
-    this.users = new Map();
-    this.maxUsers = 4; // TODO: 생성 때 변경가능해지면 수정 / option.maxUsers
-    /** @type {Set<string>} userId */
-    this.readyUsers = new Set();
-    // TODO: 생성 때 변경가능해지면 수정 / this.password = option.password
-  }
-
-  /**
-   * 유저의 대기방 참가
-   * @param {UserData} userData - 참가할 유저의 데이터
-   * @returns {RoomResponse} 참가 결과
-   */
-  joinUser(userData) {
-    if (!userData || !userData?.userId) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    if (this.users.size >= this.maxUsers) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    if (this.users.has(userId)) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    this.users.set(userData.userId, userData);
-
-    const room = {
-      id: this.id,
-      ownerId: this.ownerId,
-      name: this.name,
-      state: this.state,
-      users: Array.from(this.users.values()),
-      maxUsers: this.maxUsers,
-      readyUsers: Array.from(this.readyUsers),
-    };
-
-    return { success: true, data: room, failCode: 0 };
-  }
-
-  /**
-   * 유저의 대기방 퇴장
-   * @param {string} userId - 퇴장할 유저의 ID
-   * @returns {RoomResponse} 퇴장 결과
-   */
-  leaveUser(userId) {
-    if (!this.users.has(userId)) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    this.users.delete(userId);
-    this.readyUsers.delete(userId);
-
-    return { success: true, data: null, failCode: 0 };
-  }
-
-  /**
-   * 유저의 준비 상태 설정
-   * @param {string} userId - 준비/취소할 유저의 ID
-   * @param {boolean} isReady - true: 준비, false: 준비 취소
-   * @returns {RoomResponse} 준비 결과
-   */
-  updateReady(userId, isReady) {
-    if (!this.users.has(userId)) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    if (isReady) {
-      this.readyUsers.add(userId);
-    } else {
-      this.readyUsers.delete(userId);
-    }
-
-    return { success: true, data: this.readyUsers.has(userId), failCode: 0 };
-  }
-
-  /**
-   * 대기방 정보 조회
-   * @returns {{
-   *   id: string,
-   *   ownerId: string,
-   *   name: string,
-   *   state: string,
-   *   users: UserData[],
-   *   maxUsers: number,
-   *   readyUsers: string[]
-   * }}
-   */
-  getRoomData() {
-    return {
-      id: this.id,
-      ownerId: this.ownerId,
-      name: this.name,
-      state: this.state,
-      users: Array.from(this.users.values()),
-      maxUsers: this.maxUsers,
-      readyUsers: Array.from(this.readyUsers),
-    };
-  }
-
-  /**
-   * 모든 유저가 준비했는지 확인
-   * @returns {boolean} 모든 유저가 준비되었는지 여부
-   */
-  isAllReady() {
-    if (this.readyUsers.size === this.users.size) {
-      this.state = 'prepare';
+  static validateJoin(roomData, sessionId, userData) {
+    try {
+      if (!roomData || !sessionId || !userData) return false;
+      if (roomData.users.size >= roomData.maxUser) return false;
+      if (roomData.users.has(sessionId)) return false;
+      if (roomData.state !== 'wait' && roomData.state !== 'prepare') return false;
       return true;
+    } catch (error) {
+      logger.error('[ validateJoin ] ====> unknown error', error);
     }
-
-    return false;
   }
 
-  // TODO: 수동 변경시 패킷 추가가 필요해보임
   /**
-   * 방장 변경
-   * @param {string} newOwnerId - 새로운 방장 ID
-   * @returns {RoomResponse} 방장 변경 결과
+   * 유저를 대기방에 입장시킴
+   * @param {RoomData} roomData - 대기방 데이터
+   * @param {string} sessionId - 입장하려는 유저의 세션 ID
+   * @param {UserData} userData - 입장하려는 유저의 데이터
+   * @returns {RoomReponse} 입장 결과
    */
-  changeOwner(newOwnerId) {
-    if (!this.users.has(newOwnerId)) {
-      return { success: false, data: null, failCode: 1 };
+  static join(roomData, sessionId, userData) {
+    try {
+      // 입장 여부 검증
+      if (!this.validateJoin(roomData, sessionId, userData)) {
+        logger.error('[ join ] ====> validateJoin fail', { roomData, sessionId, userData });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      roomData.users.add(sessionId);
+
+      logger.info('[ join ] ====> success');
+      return { success: true, data: roomData, userData: userData, failCode: 0 };
+    } catch (error) {
+      logger.error('[ join ] ====> unknown error', error);
+      return { success: false, data: null, userData: null, failCode: 1 };
     }
-
-    this.ownerId = newOwnerId;
-
-    return { success: true, data: null, failCode: 0 };
   }
 
   /**
-   * 대기방 상태 변경
-   * @param {'wait'|'prepare'|'board'|'mini'} state - 변경할 상태
+   * 유저를 대기방에서 퇴장시킴
+   * @param {RoomData} roomData - 대기방 데이터
+   * @param {string} sessionId - 퇴장하려는 유저의 세션 ID
+   * @returns {RoomReponse} 퇴장 결과
    */
-  updateState(state) {
-    this.state = state;
+  static leave(roomData, sessionId, userData) {
+    try {
+      if (!roomData.users.has(sessionId)) {
+        logger.error('[ leave ] ====> roomData.users.has == false', { sessionId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      roomData.users.delete(sessionId);
+      roomData.readyUsers.delete(sessionId);
+
+      if (roomData.ownerId === sessionId && roomData.users.size > 0) {
+        roomData.ownerId = Array.from(roomData.users.keys())[0];
+
+        roomData.readyUsers.delete(roomData.ownerId);
+      }
+
+      // 방장이 나가는 경우
+      if (isOwner) {
+        // 남은 유저가 있으면 첫 번째 유저를 방장으로 설정
+        const remainingUsers = Array.from(roomData.users);
+        if (remainingUsers.length > 0) {
+          roomData.ownerId = remainingUsers[0];
+          // 방 상태를 'wait'로 변경
+          if (roomData.state === 'prepare') {
+            roomData.state = 'wait';
+          }
+        }
+      }
+
+      const stateChanged = prevState !== roomData.state;
+
+      logger.info('[ leave ] ====> success');
+
+      return { success: true, data: roomData, userData: userData, stateChanged, failCode: 0 };
+    } catch (error) {
+      logger.error('[ leave ] ====> unknown error', error);
+      return { success: false, data: null, userData: null, failCode: 1 };
+    }
   }
 
-  // TODO: 패킷 추가가 필요해보임
   /**
-   * 대기방 설정 변경
-   * @param {{name: string}} info - 변경할 방 정보
+   * 유저의 준비 상태를 변경
+   * @param {RoomData} roomData - 대기방 데이터
+   * @param {string} sessionId - 준비 상태를 변경할 유저의 세션 ID
+   * @param {boolean} isReady - 준비 상태 여부
+   * @returns {RoomReponse} 준비 상태 변경 결과
    */
-  updateInfo(info) {
-    this.name = info.name;
-    // TODO: maxUsers, password 등도 추가 가능성 있음
+  static updateReady(roomData, sessionId, isReady, userData) {
+    try {
+      if (sessionId === roomData.ownerId) {
+        logger.error('[ updateReady ] ====> owner can not prepare', { sessionId });
+        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+      }
+
+      if (!roomData.users.has(sessionId)) {
+        logger.error('[ updateReady ] ====> roomData.users.has == false', { sessionId });
+        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+      }
+
+      if (roomData.state !== 'wait' && roomData.state !== 'prepare') {
+        logger.error('[ updateReady ] ====> state must be wait or prepare', { sessionId });
+        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+      }
+
+      if (roomData.state === 'prepare' && !isReady) {
+        roomData.state = 'wait';
+      }
+
+      if (isReady) {
+        roomData.readyUsers.add(sessionId);
+      } else {
+        roomData.readyUsers.delete(sessionId);
+      }
+
+      const allUsersReady = Array.from(roomData.users.keys())
+        .filter((id) => id !== roomData.ownerId)
+        .every((id) => roomData.readyUsers.has(id));
+
+      roomData.state = allUsersReady ? 'prepare' : 'wait';
+
+      const prevState = roomData.state;
+      logger.info('[ updateReady ] ====> success');
+
+      if (prevState !== roomData.state) {
+        logger.info('[ updateReady ] ====> change state', {
+          roomId: roomData.roomId,
+          prevState,
+          newState: roomData.state,
+        });
+      }
+
+      return {
+        success: true,
+        data: { isReady: roomData.readyUsers.has(sessionId) },
+        userData,
+        state: roomData.state,
+        failCode: 0,
+      };
+    } catch (error) {
+      logger.error('[ updateReady ] ====> unknown error', error);
+      return { success: false, data: null, userData: null, failCode: 1 };
+    }
   }
 
   /**
-   * 유저가 없는지 확인
-   * @returns {boolean} 방이 비어있는지 여부
+   * 방 상태값 유효성 검사
+   * @param {RoomState} state - 검증할 방 상태값
+   * @returns {boolean} 유효성 여부
    */
-  isEmpty() {
-    return this.users.size === 0;
+  static validateState(state) {
+    return ['wait', 'prepare', 'board', 'mini'].includes(state);
+  }
+
+  /**
+   * 새로운 대기방 데이터 생성
+   * @param {string} roomId - 대기방 ID
+   * @param {string} ownerId - 방장 세션 ID
+   * @param {string} name - 대기방 이름
+   * @param {string} lobbyId - 로비 ID
+   * @returns {RoomData} 생성된 대기방 데이터
+   */
+  static createRoomData(roomId, ownerId, name, lobbyId) {
+    return {
+      roomId,
+      ownerId,
+      name,
+      lobbyId,
+      state: 'wait',
+      maxUser: 4,
+      users: new Set([ownerId]),
+      readyUsers: new Set(),
+    };
+  }
+
+  /**
+   * 특정 세션을 제외한 대기방의 모든 유저 세션 ID 목록을 반환
+   * @param {RoomData} roomData - 대기방 데이터
+   * @param {string} excludeSessionId - 제외할 세션 ID
+   * @returns {string[]} 다른 유저들의 세션 ID 배열
+   */
+  static getOtherSessionIds(roomData, excludeSessionId) {
+    if (!roomData || !roomData.users) return [];
+    return Array.from(roomData.users.keys()).filter((id) => id !== excludeSessionId);
   }
 }
 

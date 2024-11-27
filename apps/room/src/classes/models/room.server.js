@@ -1,17 +1,17 @@
 import { TcpServer } from '@repo/common/classes';
-import { config } from '@repo/common/config';
+import { config, logger } from '@repo/common/config';
 import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType, getPayloadNameByMessageType } from '../../handlers/index.js';
 
 class RoomServer extends TcpServer {
   _onData = (socket) => async (data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
-    console.log(' [ _onData ]  data ', data);
+    logger.info(' [ _onData ] ====> ', data);
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
+      logger.info(
         `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
@@ -19,11 +19,11 @@ class RoomServer extends TcpServer {
         const packet = socket.buffer.subarray(offset, length);
         socket.buffer = socket.buffer.subarray(length);
 
-        const payload = packetParser(messageType, packet, getPayloadNameByMessageType);
-        console.log(' [ Room_onData ] payload ====>> ', payload);
+        const payload = packetParser(messageType, packet, getPayloadNameByMessageType(messageType));
+        logger.info(' [ Room_onData ] payload ====> ', payload);
 
         const handler = getHandlerByMessageType(messageType);
-        await handler({ socket, messageType, payload });
+        await handler({ socket, payload });
       } else {
         break;
       }

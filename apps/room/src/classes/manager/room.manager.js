@@ -1,23 +1,18 @@
 import Room from '../models/room.class.js';
 import { v4 as uuidv4 } from 'uuid';
+import { redis } from '../../init/redis.js';
+import RoomDTO from '../models/room.dto.js';
+import { logger } from '@repo/common/config';
+import { MESSAGE_TYPE } from '../../utils/constants.js';
 
 class RoomManager {
   constructor() {
     if (RoomManager.instance) {
       return RoomManager.instance;
     }
-    /** @type {Map<string, Room>} roomId -> Room */
-    this.rooms = new Map();
-    /** @type {Map<string, string>} userId -> roomId */
-    this.userRooms = new Map(); // 유저가 참여한 대기방
-
     RoomManager.instance = this;
   }
 
-  /**
-   * RoomManager 인스턴스 가져오기
-   * @returns {RoomManager}
-   */
   static getInstance() {
     if (!RoomManager.instance) {
       RoomManager.instance = new RoomManager();
@@ -26,174 +21,272 @@ class RoomManager {
   }
 
   /**
-   * 대기방 생성
-   * @param {UserData} userData - 생성할 방장 정보
-   * @param {string} name - 대기방 이름
-   * @returns {RoomResponse} 생성 결과
+   * 새로운 대기방을 생성
+   * @param {string} sessionId - 대기방을 생성하는 유저의 세션 ID
+   * @param {string} roomName - 생성할 대기방 이름
+   * @returns {RoomReponse} 대기방 생성 결과
    */
-  createRoom(userData, roomName) {
-    const roomId = uuidv4();
-    const room = new Room(roomId, userData.userId, roomName);
-    room.users.set(userData.userId, userData);
-
-    this.rooms.set(roomId, room);
-    this.userRooms.set(userData.userId, roomId);
-
-    return { success: true, data: room.getRoomData(), failCode: 0 };
-  }
-
-  /**
-   * 대기방 참가
-   * @param {UserData} userData - 참가할 유저 정보
-   * @param {string} roomId - 방 ID
-   * @returns {RoomResponse} 참가 결과
-   */
-  joinRoom(userData, roomId) {
-    const room = this.rooms.get(roomId);
-    if (!room) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    if (this.userRooms.has(userData.userId)) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    if (room.users.size >= room.maxUsers) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    if (room.state !== 'wait') {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    const result = room.joinUser(userData);
-    if (result.success) {
-      this.userRooms.set(userData.userId, roomId);
-    }
-
-    return result;
-  }
-
-  /**
-   * 대기방 퇴장
-   * @param {string} userId - 퇴장할 유저 ID
-   * @returns {RoomResponse} 퇴장 결과
-   */
-  leaveRoom(userId) {
-    const room = this.getRoomByUserId(userId);
-    if (!room) {
-      return { success: false, data: null, failCode: 1 };
-    }
-
-    const result = room.leaveUser(userId);
-    if (result.success) {
-      this.userRooms.delete(userId);
-
-      // 방장이 나간 경우
-      if (room.ownerId === userId && room.users.size > 0) {
-        const newOwnerId = Array.from(room.users.keys())[0];
-        room.changeOwner(newOwnerId);
+  async createRoom(sessionId, roomName) {
+    try {
+      //* 유저 세션 검증
+      const userData = await redis.getUserToSession(sessionId);
+      if (!userData) {
+        logger.error('[ createRoom ] ====> userData is undefined', { sessionId });
+        return { success: false, data: null, failCode: 1 };
       }
 
-      // 빈 방이 된 경우
-      if (room.isEmpty()) {
-        this.rooms.delete(room.id);
+      //* 로비에 있는지 검증
+      const lobbyId = await redis.getUserLocationField(sessionId, 'lobby');
+      if (!lobbyId) {
+        logger.error('[ createRoom ] ====> lobbyId is undefined', { sessionId });
+        return { success: false, data: null, failCode: 1 };
       }
-    }
 
-    return result;
+      //* 대기방 생성
+      const roomData = Room.createRoomData('some-room-id', sessionId, roomName, lobbyId);
+      const redisData = RoomDTO.toRedis(roomData);
+      await redis.createRoom(redisData);
+      await redis.createUserLocation(sessionId, 'room', roomData.roomId);
+
+      logger.info('[ createRoom ] ====> success');
+
+      return { success: true, data: RoomDTO.toResponse(roomData), failCode: 0 };
+    } catch (error) {
+      logger.error('[ createRoom ] ====> unknown error', error);
+      return { success: false, data: null, failCode: 1 };
+    }
   }
 
   /**
-   * 대기방 목록 조회
-   * @returns {RoomResponse} 대기방 목록
+   * 대기방에 유저 입장
+   * @param {string} sessionId - 입장하려는 유저의 세션 ID
+   * @param {string} roomId - 입장하려는 대기방 ID
+   * @returns {RoomReponse} 입장 결과
    */
-  getRoomList() {
-    const rooms = Array.from(this.rooms.values()).map((room) => room.getRoomData());
-    if (!rooms) {
-      return { success: false, data: [], failCode: 1 };
-    }
+  async joinRoom(sessionId, roomId) {
+    try {
+      //* 이미 대기방에 있는 유저인지 검증
+      const currentRoomId = await redis.getUserLocationField(sessionId, 'room');
+      if (currentRoomId) {
+        logger.error('[ joinRoom ] ====> user is already in another room', {
+          sessionId,
+          currentRoomId,
+        });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
 
-    return {
-      success: true,
-      data: rooms,
-      failCode: 0,
-    };
+      //* 입장하려는 대기방이 있는지 검증
+      const redisData = await redis.getRoom(roomId);
+      if (!redisData) {
+        logger.error('[ joinRoom ] ====> redisData is undefined', { roomId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      //* 대기방이 있는 로비에 위치하는 유저인지 검증
+      const lobbyId = await redis.getUserLocationField(sessionId, 'lobby');
+      if (lobbyId !== redisData.lobbyId) {
+        logger.error('[ joinRoom ] ====> user is in another lobby', { sessionId, lobbyId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      //* 유저 세션 검증
+      const userData = await redis.getUserToSession(sessionId);
+      if (!userData) {
+        logger.error('[ joinRoom ] ====> userData is undefined', { sessionId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      //* 입장
+      const roomData = RoomDTO.fromRedis(redisData);
+      const result = Room.join(roomData, sessionId, userData);
+
+      if (result.success) {
+        await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
+        await redis.createUserLocation(sessionId, 'room', roomId);
+
+        logger.info('[ joinRoom ] ====> success');
+      }
+
+      return result;
+    } catch (error) {
+      logger.error('[ joinRoom ] ====> unknown error', error);
+      return { success: false, data: null, userData: null, failCode: 1 };
+    }
   }
 
   /**
-   * 유저의 준비 상태 설정
-   * @param {string} userId - 준비/취소할 유저 ID
-   * @param {boolean} isReady - true: 준비, false: 준비 취소
-   * @returns {RoomResponse} 준비 결과
+   * 대기방에서 유저 퇴장
+   * @param {string} sessionId - 퇴장하려는 유저의 세션 ID
+   * @returns {RoomReponse} 퇴장 결과
    */
-  updateReady(userId, isReady) {
-    const room = this.getRoomByUserId(userId);
-    if (!room) {
-      return { success: false, data: { isReady: false }, failCode: 1 };
-    }
+  async leaveRoom(sessionId) {
+    try {
+      //* 대기방에 있는 유저가 맞는지 검증
+      const roomId = await redis.getUserLocationField(sessionId, 'room');
+      if (!roomId) {
+        logger.error('[ leaveRoom ] ====> not a user in the room', { sessionId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
 
-    return room.updateReady(userId, isReady);
+      //* 유저 세션 검증
+      const userData = await redis.getUserToSession(sessionId);
+      if (!userData) {
+        logger.error('[ leaveRoom ] ====> userData is undefined', { sessionId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      //* 대기방이 있는지 검증
+      const redisData = await redis.getRoom(roomId);
+      if (!redisData) {
+        logger.error('[ leaveRoom ] ====> redisData is undefined', { roomId });
+        return { success: false, data: null, userData: null, failCode: 1 };
+      }
+
+      //* 퇴장
+      const roomData = RoomDTO.fromRedis(redisData);
+      const result = Room.leave(roomData, sessionId, userData);
+
+      if (result.success) {
+        if (roomData.users.size === 0) {
+          //* 남은 인원이 없으면 대기방 삭제
+          await redis.deleteRoom(roomId);
+        } else {
+          await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
+        }
+        await redis.deleteUserLocationField(sessionId, 'room');
+
+        logger.info('[ leaveRoom ] ====> success');
+      }
+
+      return {
+        success: true,
+        data: roomData,
+        userData,
+        stateChanged: result.stateChanged || false,
+        failCode: 0,
+      };
+    } catch (error) {
+      logger.error('[ leaveRoom ] ====> unknown error', error);
+      return { success: false, data: null, userData: null, failCode: 1 };
+    }
+  }
+
+  /**
+   * 유저의 준비 상태 변경
+   * @param {string} sessionId - 준비 상태를 변경할 유저의 세션 ID
+   * @param {boolean} isReady - 준비 상태 여부
+   * @returns {RoomReponse} 준비 상태 변경 결과
+   */
+  async updateReady(sessionId, isReady) {
+    try {
+      //* 대기방에 있는 유저가 맞는지 검증
+      const roomId = await redis.getUserLocationField(sessionId, 'room');
+      if (!roomId) {
+        logger.error('[ updateReady ] ====> roomId is undefined', { sessionId });
+        return { success: false, data: { isReady: false }, failCode: 1 };
+      }
+
+      //* 유저 세션 검증
+      const userData = await redis.getUserToSession(sessionId);
+      if (!userData) {
+        logger.error('[ updateReady ] ====> userData is undefined', { sessionId });
+        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+      }
+
+      //* 대기방이 있는지 검증
+      const redisData = await redis.getRoom(roomId);
+      if (!redisData) {
+        logger.error('[ updateReady ] ====> redisData is undefined', { roomId });
+        return { success: false, data: { isReady: false }, failCode: 1 };
+      }
+
+      //* 현재 대기방에 있는 유저가 맞는지 검증
+      if (roomId !== redisData.roomId) {
+        logger.error('[ updateReady ] ====> invalid user', { roomId });
+        return { success: false, data: { isReady: false }, failCode: 1 };
+      }
+
+      //* 준비 상태 설정
+      const roomData = RoomDTO.fromRedis(redisData);
+      const result = Room.updateReady(roomData, sessionId, isReady, userData);
+
+      if (result.success) {
+        await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
+
+        logger.info('[ updateReady ] ====> success');
+      }
+
+      return result;
+    } catch (error) {
+      logger.error('[ updateReady ] ====> unknown error', error);
+      return { success: false, data: null, userData: null, failCode: 1 };
+    }
+  }
+
+  /**
+   * 로비의 대기방 목록 조회
+   * @param {string} sessionId - 조회하는 유저의 세션 ID
+   * @returns {RoomReponse} 대기방 목록 조회 결과
+   */
+  async getRoomList(sessionId) {
+    try {
+      //* 로비가 존재하는지 검증
+      const lobbyId = await redis.getUserLocationField(sessionId, 'lobby');
+      if (!lobbyId) {
+        logger.error('[ getRoomList ] ====> lobbyId is undefined', { sessionId });
+        return { success: false, data: null, failCode: 1 };
+      }
+
+      //* 로비에 있는 대기방 목록 조회
+      const redisDataList = await redis.getRoomsByLobby(lobbyId);
+      const roomList = redisDataList
+        .map((redisData) => RoomDTO.fromRedis(redisData))
+        .map((roomData) => RoomDTO.toResponse(roomData))
+        .filter((room) => room !== null);
+
+      logger.info('[ getRoomList ] ====> success');
+
+      return { success: true, data: roomList, failCode: 0 };
+    } catch (error) {
+      logger.error('[ getRoomList ] ====> unknown error', error);
+      return { success: false, data: null, failCode: 1 };
+    }
   }
 
   /**
    * 대기방 상태 변경
-   * @param {string} roomId - 대기방 ID
-   * @param {string} state - 변경할 상태
+   * @param {string} roomId - 상태를 변경할 방 ID
+   * @param {RoomState} state - 변경할 상태
+   * @returns {RoomReponse} 상태 변경 결과
    */
-  updateRoomState(roomId, state) {
-    const room = this.rooms.get(roomId);
-    if (!room) {
-      return;
+  async updateRoomState(roomId, state) {
+    try {
+      //* 대기방의 상태값이 맞는지 확인
+      if (!Room.validateState(state)) {
+        logger.error('[ updateRoomState ] ====> validateState fail', { state });
+        return { success: false, failCode: 1 };
+      }
+
+      //* 대기방이 존재하는지 확인
+      const redisData = await redis.getRoom(roomId);
+      if (!redisData) {
+        logger.error('[ updateRoomState ] ====> redisData is undefined', { roomId });
+        return { success: false, failCode: 1 };
+      }
+
+      //* 상태 변경
+      const roomData = RoomDTO.fromRedis(redisData);
+      roomData.state = state;
+
+      await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
+
+      logger.info('[ updateRoomState ] ====> success');
+
+      return { success: true, data: RoomDTO.toResponse(roomData), failCode: 0 };
+    } catch (error) {
+      logger.error('[ updateRoomState ] ====> unknown error', error);
+      return { success: false, data: null, failCode: 1 };
     }
-    room.updateState(state);
-  }
-
-  /**
-   * 대기방 설정 변경
-   * @param {string} roomId
-   * @param {Object} info
-   */
-  updateRoomInfo(roomId, info) {
-    const room = this.rooms.get(roomId);
-    if (!room) {
-      return;
-    }
-
-    room.updateInfo(info);
-  }
-
-  /**
-   * 유저 ID로 대기방 조회
-   * @param {string} userId - 조회할 유저 ID
-   * @returns {Room} room - 대기방
-   */
-  getRoomByUserId(userId) {
-    const roomId = this.userRooms.get(userId);
-    if (!roomId) {
-      return;
-    }
-
-    const room = this.rooms.get(roomId);
-    if (!room) {
-      return;
-    }
-
-    return room;
-  }
-
-  /**
-   * 유저 ID로 대기방 ID 조회
-   * @param {string} userId - 조회할 유저 ID
-   * @returns {string} roomId - 대기방 ID
-   */
-  getRoomIdByUserId(userId) {
-    const roomId = this.userRooms.get(userId);
-    if (!roomId) {
-      return;
-    }
-
-    return roomId;
   }
 }
 

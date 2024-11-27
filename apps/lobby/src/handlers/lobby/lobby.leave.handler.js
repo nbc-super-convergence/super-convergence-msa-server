@@ -1,29 +1,18 @@
 import { MESSAGE_TYPE } from '../../utils/constants.js';
 import lobbyManager from '../../classes/manager/lobby.manager.js';
-import { createResponse } from '../../utils/createResponse.js';
-import { getPayloadNameByMessageType } from '../index.js';
-import { serialize } from '@repo/common/utils';
+import { createResponse } from '../../utils/create.response.js';
+import { handleError } from '../../utils/handle.error.js';
 
-export const lobbyLeaveRequestHandler = ({ socket, messageType, payload }) => {
+export const lobbyLeaveRequestHandler = async ({ socket, payload }) => {
+  const { sessionId } = payload;
+
   try {
-    const { userId } = payload;
-    const result = lobbyManager.leaveUser(userId);
+    const result = await lobbyManager.leaveUser(sessionId);
 
-    const packet = createResponse(result, MESSAGE_TYPE.LOBBY_LEAVE_RESPONSE);
+    const packet = createResponse(result, MESSAGE_TYPE.LOBBY_LEAVE_RESPONSE, sessionId);
 
     socket.write(packet);
   } catch (error) {
-    console.error('[ lobbyLeaveRequestHandler ] ====>  error ', error.message, error);
-    socket.write(
-      serialize(
-        MESSAGE_TYPE.LOBBY_LEAVE_RESPONSE,
-        {
-          success: false,
-          failCode: 1,
-        },
-        0,
-        getPayloadNameByMessageType,
-      ),
-    );
+    handleError(socket, MESSAGE_TYPE.LOBBY_LEAVE_RESPONSE, sessionId, error);
   }
 };

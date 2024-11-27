@@ -3,16 +3,17 @@ syntax = "proto3";
 package lobby;
 
 message C2S_LobbyJoinRequest {
-    UserData userData = 1;
+    string sessionId = 1;
 }
 
 message S2C_LobbyJoinResponse {
     bool success = 1;
-    GlobalFailCode failCode = 2;
+    UserData userData = 2;
+    GlobalFailCode failCode = 3;
 }
 
 message C2S_LobbyLeaveRequest {
-    string userId = 1; 
+    string sessionId = 1; 
 }
 
 message S2C_LobbyLeaveResponse {
@@ -21,32 +22,23 @@ message S2C_LobbyLeaveResponse {
 }
 
 message C2S_LobbyUserListRequest {
+    string sessionId = 1;
 }
 
 message S2C_LobbyUserListResponse {
     bool success = 1;
-    repeated UserData userList = 2;
+    repeated string userList = 2;
     GlobalFailCode failCode = 3;
-   
-    message UserData {
-       string userId = 1;
-       string nickname = 2;
-    }
 }
 
 message C2S_LobbyUserDetailRequest {
-    string tartgetUserId = 1;
+    string sessionId = 1;
+    string targetSessionId = 2; 
 }
 
 message S2C_LobbyUserDetailResponse {
     bool success = 1;
-    UserDetail userDetail = 2;
+    UserData UserData = 2;
     GlobalFailCode failCode = 3;
-     
-    message UserDetail {
-        string userId = 1;
-        string nickname = 2;
-        string level = 3;
-    }
 }
 

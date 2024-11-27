@@ -1,30 +1,18 @@
 import { MESSAGE_TYPE } from '../../utils/constants.js';
 import lobbyManager from '../../classes/manager/lobby.manager.js';
-import { createResponse } from '../../utils/createResponse.js';
-import { getPayloadNameByMessageType } from '../index.js';
-import { serialize } from '@repo/common/utils';
+import { createResponse } from '../../utils/create.response.js';
+import { handleError } from '../../utils/handle.error.js';
 
-export const lobbyUserDetailRequestHandler = ({ socket, messageType, payload }) => {
+export const lobbyUserDetailRequestHandler = async ({ socket, payload }) => {
+  const { sessionId, targetSessionId } = payload;
+
   try {
-    const { tartgetUserId } = payload;
-    const result = lobbyManager.getUserDetail(tartgetUserId);
+    const result = await lobbyManager.getUserDetail(targetSessionId);
 
-    const packet = createResponse(result, MESSAGE_TYPE.LOBBY_USER_DETAIL_RESPONSE);
+    const packet = createResponse(result, MESSAGE_TYPE.LOBBY_USER_DETAIL_RESPONSE, sessionId);
 
     socket.write(packet);
   } catch (error) {
-    console.error('[ lobbyUserDetailRequestHandler ] ====>  error ', error.message, error);
-    socket.write(
-      serialize(
-        MESSAGE_TYPE.LOBBY_USER_DETAIL_RESPONSE,
-        {
-          success: false,
-          userDetail: {},
-          failCode: 1,
-        },
-        0,
-        getPayloadNameByMessageType,
-      ),
-    );
+    handleError(socket, MESSAGE_TYPE.LOBBY_USER_DETAIL_RESPONSE, sessionId, error);
   }
 };

@@ -1,30 +1,48 @@
 import { MESSAGE_TYPE } from '../../utils/constants.js';
-import { serialize } from '@repo/common/utils';
-import { getPayloadNameByMessageType } from '../index.js';
-import { createResponse } from '../../utils/createResponse.js';
+import { createResponse } from '../../utils/create.response.js';
 import roomManager from '../../classes/manager/room.manager.js';
+import { handleError } from '../../utils/handle.error.js';
+import Room from '../../classes/models/room.class.js';
+import { createNotification } from '../../utils/create.notification.js';
 
-export const leaveRoomRequestHandler = ({ socket, messageType, payload }) => {
+export const leaveRoomRequestHandler = async ({ socket, payload }) => {
+  const { sessionId } = payload;
+
   try {
-    const { userId } = payload;
-    const result = roomManager.leaveRoom(userId);
+    const result = await roomManager.leaveRoom(sessionId);
 
-    // TODO: noti 구분 추가 필요
-    const packet = createResponse(result, MESSAGE_TYPE.LEAVE_ROOM_RESPONSE);
+    const responsePacket = createResponse(result, MESSAGE_TYPE.LEAVE_ROOM_RESPONSE, sessionId);
+    socket.write(responsePacket);
 
-    socket.write(packet);
+    // 요청이 성공했으면 noti
+    if (result.success && result.data?.users.size > 0) {
+      const otherSessionIds = Room.getOtherSessionIds(result.data, sessionId);
+
+      if (otherSessionIds.length > 0) {
+        // 퇴장 알림
+        const leaveNotificationPacket = createNotification(
+          { userData: result.userData },
+          MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION,
+          otherSessionIds,
+        );
+        socket.write(leaveNotificationPacket);
+
+        // 상태가 변경되었다면 게임 준비 상태 알림도 전송
+        if (result.stateChanged) {
+          const gamePrepareNotificationPacket = createNotification(
+            {
+              userData: result.userData,
+              isReady: false,
+              state: result.data.state,
+            },
+            MESSAGE_TYPE.GAME_PREPARE_NOTIFICATION,
+            otherSessionIds,
+          );
+          socket.write(gamePrepareNotificationPacket);
+        }
+      }
+    }
   } catch (error) {
-    console.error('[ leaveRoomRequestHandler ] ====>  error ', error.message, error);
-    socket.write(
-      serialize(
-        MESSAGE_TYPE.LEAVE_ROOM_RESPONSE,
-        {
-          success: false,
-          failCode: 1,
-        },
-        0,
-        getPayloadNameByMessageType,
-      ),
-    );
+    handleError(socket, MESSAGE_TYPE.LEAVE_ROOM_RESPONSE, sessionId, error);
   }
 };
