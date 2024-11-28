@@ -15,7 +15,7 @@ message C2S_RegisterRequest {
 
 message S2C_RegisterResponse {
     bool success = 1;
-	GlobalFailCode failCode = 3;
+	GlobalFailCode failCode = 2;
 }
 
 message C2S_LoginRequest {

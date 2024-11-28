@@ -28,6 +28,7 @@ subScriber.on('message', (channel, message) => {
   console.log(`Received ${config.REDIS.CHANNEL} ===> ${channel}: ${message}`);
 
   // ! message = boardId
+  // TODO: 변경사항에 맞춰서 바꾸기
   const sessionId = subScriber.getBoardGameBySessionId(message);
 
   iceGameManager.addGame(sessionId);
@@ -35,7 +36,7 @@ subScriber.on('message', (channel, message) => {
 
 await server.start();
 
-server.connectToDistributor('127.0.0.1', 7010, (data) => {
+server.connectToDistributor(SERVER_HOST, 7010, (data) => {
   // Distributor 연결
   console.log('Distributor Notification', data);
 });
