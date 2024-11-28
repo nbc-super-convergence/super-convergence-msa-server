@@ -66,8 +66,9 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
 export const rollDiceRequestHandler = async ({ socket, payload }) => {
   /**
    * 1. 주사위를 던짐 randome값 처리 (dice.util)
-   * 2. 해당 값을 본인에게 전달
-   * 3. 해당 값을 나머지 인원에게 전달
+   * 2. 해당 값을 나머지 인원에게 전달
+   * 3. 해당 값을 본인에게 전달
+   * 4. 업적용 이력 저장
    */
   const { sessionId } = payload;
 
@@ -75,22 +76,6 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
   try {
     // * 주사위 던짐
     const result = await boardManager.rollDice(sessionId);
-
-    // * RESPONSE
-    const responseMessageType = MESSAGE_TYPE.ROLL_DICE_RESPONSE;
-    const response = {
-      success: result.success,
-      diceResult: result.data.diceResult,
-      failCode: result.failCode,
-    };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
-    socket.write(responsePacket);
 
     // * 나머지 NOTIFICATION
     sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
@@ -108,9 +93,28 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
       sessionIds,
     );
     socket.write(notificationPacket);
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.ROLL_DICE_RESPONSE;
+    const response = {
+      success: result.success,
+      diceResult: result.data.diceResult,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+
+    // * 업적용 이력 저장
   } catch (err) {
     console.error('[ BOARD: rollDiceRequestHandler ] ERROR ==>> ', err);
-    handleError(socket, MESSAGE_TYPE.ROLL_DICE_NOTIFICATION, sessionIds, err);
+    handleError(socket, MESSAGE_TYPE.ROLL_DICE_RESPONSE, sessionIds, err);
   }
 };
 
@@ -122,8 +126,55 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
  * * => 응답 [ MESSAGE_TYPE.MOVE_PLAYER_BOARD_RESPONSE, board.S2C_MovePlayerBoardResponse]
  * * => 알림 [ MESSAGE_TYPE.MOVE_PLAYER_BOARD_NOTIFICATION, board.S2C_MovePlayerBoardNotification]
  */
-export const movePlayerBoardRequestHandler = ({ socket, payload }) => {
-  //
+export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
+  /**
+   * 1. 여기로 이동하곘다 요청
+   * 2. 나머지 플레이어에게 알림 전달
+   * 3. 요청 플레이어에게 확인 응답
+   * 4. 플레이어 이동 위치 저장 ?
+   */
+  const { sessionId, targetPoint } = payload;
+
+  let sessionIds = [sessionId];
+  try {
+    const result = await boardManager.movePlayerInBoard(sessionId, targetPoint);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.MOVE_PLAYER_BOARD_NOTIFICATION;
+    const notification = {
+      sessionId: sessionId,
+      targetPoint: result.data.targetPoint,
+    };
+
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(notificationMessageType),
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.MOVE_PLAYER_BOARD_RESPONSE;
+    const response = {
+      success: result.success,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+  } catch (err) {
+    console.error('[ BOARD: movePlayerBoardRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.MOVE_PLAYER_BOARD_RESPONSE, sessionIds, err);
+  }
 };
 
 /**
@@ -135,8 +186,57 @@ export const movePlayerBoardRequestHandler = ({ socket, payload }) => {
  * * => 응답 [ MESSAGE_TYPE.PURCHASE_TILE_RESPONSE, board.S2C_PurchaseTileResponse]
  * * => 알림 [ MESSAGE_TYPE.PURCHASE_TILE_NOTIFICATION, board.S2C_PurchaseTileNotification]
  */
-export const purchaseTileRequestHandler = ({ socket, payload }) => {
-  //
+export const purchaseTileRequestHandler = async ({ socket, payload }) => {
+  /**
+   * 1. 타일 구매 요청
+   * TODO: 2. 구매에 따른 로직 처리 [ 골드 감소, 타일 정보 수정 등 ]
+   * 3. 타일 구매 알림
+   * 4. 타일 구매 응답
+   */
+
+  const { sessionId, tile } = payload;
+
+  let sessionIds = [sessionId];
+  try {
+    const result = await boardManager.purchaseTileInBoard(sessionId, tile);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.PURCHASE_TILE_NOTIFICATION;
+    const notification = {
+      sessionId: sessionId,
+      tile: result.data.tile,
+    };
+
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(notificationMessageType),
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.PURCHASE_TILE_RESPONSE;
+    const response = {
+      success: result.success,
+      tile: result.data.tile,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+  } catch (err) {
+    console.error('[ BOARD: purchaseTileRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.PURCHASE_TILE_RESPONSE, sessionIds, err);
+  }
 };
 
 /**

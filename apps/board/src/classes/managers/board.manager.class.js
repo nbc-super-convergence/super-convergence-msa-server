@@ -57,6 +57,7 @@ class BoardManager {
         return { success: false, data: null, failCode: FAIL_CODE.INVALID_REQUEST };
       }
     } catch (e) {
+      console.error('[ BOARD : createBoard ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -73,8 +74,9 @@ class BoardManager {
 
       const diceResult = getRollDiceResult(DICE_MAX_VALUE, DICE_COUNT);
 
-      const boardId = await redis.getUserLocationField(sessionId, 'board');
-      const sessionIds = await redis.getBoardPlayers(boardId);
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+
+      // TODO: [업적용] 플레이어 주사위 이력
 
       return {
         success: true,
@@ -85,10 +87,62 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
+      console.error('[ BOARD : rollDice ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
-}
+
+  /**
+   * 플레이어 이동
+   * @param {*} sessionId - 플레이어 세션 아이디
+   * @param {*} targetPoint - 이동할 위치
+   */
+  async movePlayerInBoard(sessionId, targetPoint) {
+    try {
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+
+      // TODO: [업적용] 플레이어 이동 이력
+
+      return {
+        success: true,
+        data: {
+          targetPoint,
+          sessionIds,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      console.error('[ BOARD : movePlayerInBoard ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 타일 구매 이벤트
+   * @param {String} sessionId
+   * @param {Number} tile
+   */
+  async purchaseTileInBoard(sessionId, tile) {
+    //
+    try {
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+
+      // TODO: [업적용] 타일 구매이력
+
+      return {
+        success: true,
+        data: {
+          tile,
+          sessionIds,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      console.error('[ BOARD : purchaseTileInBoard ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+} //* class end
 
 const boardManagerInstance = BoardManager.getInstance();
 Object.freeze(boardManagerInstance);

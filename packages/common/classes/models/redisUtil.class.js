@@ -556,7 +556,7 @@ class RedisUtil {
 
   /**
    * 보드 전체 플레이어 조회
-   * @param {*} boardId
+   * @param {String} boardId
    * @returns
    */
   async getBoardPlayers(boardId) {
@@ -564,6 +564,16 @@ class RedisUtil {
     const result = this.client.lrange(key, 0, -1);
 
     return result;
+  }
+
+  /**
+   * 참여한 보드게임의 플레이어 목록 조회
+   * @param {String} sessionId
+   * @returns
+   */
+  async getBoardPlayersBySessionId(sessionId) {
+    const boardId = await this.getUserLocationField(sessionId, 'board');
+    return await this.getBoardPlayers(boardId);
   }
 }
 
