@@ -7,6 +7,7 @@ import {
   packetParserForGate,
   serializeForClient,
 } from '@repo/common/utils';
+import { SERVER_HOST } from '../../constants/env.js';
 
 class GateServer extends TcpServer {
   _map = {};
@@ -190,7 +191,7 @@ class GateServer extends TcpServer {
           {
             name: this.context.name,
             number: 1,
-            host: 'localhost',
+            host: SERVER_HOST,
             port: this.context.port + '',
             types: this.context.types,
           },
@@ -203,7 +204,7 @@ class GateServer extends TcpServer {
       this._isConnectedDistributor = false;
 
       this._clientDistributor = new TcpClient(
-        '127.0.0.1',
+        SERVER_HOST,
         7010,
         (options) => {
           console.log(' onCreate ==>> ');
