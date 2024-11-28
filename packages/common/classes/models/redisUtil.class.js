@@ -1,3 +1,5 @@
+import redisTransaction from './redisTransaction.class.js';
+
 /**
  * @typedef userdata
  * @property {string} loginId
@@ -16,7 +18,7 @@
  * @typedef room
  * @property {string} roomId
  * @property {string} ownerSessionId
- * @property {string} roomName
+ * @property {string} name
  * @property {string} lobbyId
  * @property {string} state
  * @property {string} users
@@ -37,12 +39,14 @@ class RedisUtil {
       BOARD: 'board',
       BOARD_PLAYERS: 'boardPlayers',
     };
-    console.log('Redis prefix:', this.prefix);
+
     this.expire = 60 * 60;
 
     this.channel = {
       BOARD: 'boardChannel',
     };
+
+    this.transaction = new redisTransaction(this);
   }
   //* 유저 위치
   /**
@@ -389,13 +393,19 @@ class RedisUtil {
   //* 룸 데이터
 
   async getRoomsByLobby(lobbyId) {
-    const roomKeys = await this.client.smembers(`${this.prefix.LOBBY_ROOM_LIST}:${lobbyId}`);
-    if (!roomKeys || roomKeys.length === 0) return [];
+    const pipeline = this.client.pipeline();
 
-    const roomIds = roomKeys.map((key) => key.replace(`${this.prefix.ROOM}:`, ''));
-    const rooms = await Promise.all(roomIds.map((roomId) => this.getRoom(roomId)));
+    pipeline.smembers(`${this.prefix.LOBBY_ROOM_LIST}:${lobbyId}`);
+    const [[err, roomKeys]] = await pipeline.exec();
 
-    return rooms.filter((room) => room !== null);
+    if (err || !roomKeys || roomKeys.length === 0) return [];
+
+    roomKeys.forEach((key) => {
+      pipeline.hgetall(key);
+    });
+
+    const results = await pipeline.exec();
+    return results.map(([err, room]) => (err || !room ? null : room)).filter(Boolean);
   }
 
   /**
@@ -431,7 +441,6 @@ class RedisUtil {
    */
   async getRoom(roomId) {
     const key = `${this.prefix.ROOM}:${roomId}`;
-    console.log('Redis Key:', key);
     const roomData = await this.client.hgetall(key);
     if (!roomData) {
       return null;
