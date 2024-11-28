@@ -161,6 +161,7 @@ class RoomManager {
         data: roomData,
         userData,
         stateChanged: result.stateChanged || false,
+        ownerId: result.ownerId,
         failCode: 0,
       };
     } catch (error) {

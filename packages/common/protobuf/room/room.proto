@@ -51,6 +51,7 @@ message S2C_LeaveRoomResponse{
 
 message S2C_LeaveRoomNotification {
     UserData userData = 1;
+    string ownerId = 2;
 }
 
 message C2S_GamePrepareRequest {

@@ -113,7 +113,14 @@ class Room {
 
       logger.info('[ leave ] ====> success');
 
-      return { success: true, data: roomData, userData: userData, stateChanged, failCode: 0 };
+      return {
+        success: true,
+        data: roomData,
+        userData: userData,
+        stateChanged,
+        ownerId: roomData.ownerId,
+        failCode: 0,
+      };
     } catch (error) {
       logger.error('[ leave ] ====> unknown error', error);
       return { success: false, data: null, userData: null, failCode: 1 };
