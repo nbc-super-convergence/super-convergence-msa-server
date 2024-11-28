@@ -38,6 +38,7 @@ class RedisUtil {
       LOGIN: 'login',
       BOARD: 'board',
       BOARD_PLAYERS: 'boardPlayers',
+      LOCK: 'lock',
     };
 
     this.expire = 60 * 60;
@@ -552,6 +553,17 @@ class RedisUtil {
     const result = this.client.hget(boardKey, `${field}`);
 
     return result;
+  }
+
+  async createLockKey(key, id) {
+    const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
+    const lockAcquired = await this.client.set(lockKey, 'LOCK', 'NX', 'EX', 2);
+    return lockAcquired;
+  }
+
+  async deleteLockKey(key, id) {
+    const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
+    await this.client.del(lockKey);
   }
 }
 
