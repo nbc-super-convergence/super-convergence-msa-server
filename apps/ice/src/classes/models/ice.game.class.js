@@ -1,4 +1,4 @@
-import { Game, User } from '@repo/common/classes';
+import { Game } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
 import iceUserManager from '../managers/ice.user.manager.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
@@ -7,8 +7,8 @@ import { serializeForGate } from '@repo/common/utils';
 import { gameState } from '../../constants/gameState.js';
 
 class iceGame extends Game {
-  constructor(id, type) {
-    super(id, type);
+  constructor(id) {
+    super(id);
 
     this.map = iceMap;
     this.gameTimer = iceMap.timer;
@@ -21,20 +21,14 @@ class iceGame extends Game {
       //TODO: user.loginId? user.nickName??
       const newUser = iceUserManager.addUser(user.loginId, sessionId, user.sessionId);
 
-      const playerId = index + 1;
       const position = this.startPosition[index].pos;
       const rotation = this.startPosition[index].rot;
 
-      newUser.setPlayer(playerId, position, rotation);
+      newUser.setPlayer(position, rotation);
       this.users.push(newUser);
     });
 
     console.log(`게임내 유저들`, this.users);
-  }
-
-  // ! id === loginId
-  getUserById(id) {
-    return this.users.find((user) => user.id === id);
   }
 
   getAllUser() {
@@ -43,11 +37,6 @@ class iceGame extends Game {
 
   getOtherUsers(id) {
     return this.users.filter((user) => user.id !== id);
-  }
-
-  // ! 방장의 세션아이디로 전체 유저들을 조회할 때 사용
-  getAllUserBySessionId(sessionId) {
-    return this.users.filter((user) => user.player.gameId === sessionId);
   }
 
   getAllSessionIds() {
@@ -60,42 +49,38 @@ class iceGame extends Game {
     return users.map((user) => user.sessionId);
   }
 
-  getUserBySessionId(sessionId) {
-    return this.users.find((user) => user.sessionId === sessionId);
-  }
-
-  getReadyCounts() {
-    return this.users.filter((user) => user.player.isReady === true).length;
-  }
-
-  getUserByPlayerId(playerId) {
-    return this.users.find((user) => user.player.id === playerId);
+  isAllReady() {
+    return this.users.filter((user) => user.player.isReady === true).length === this.users.length;
   }
 
   getAliveUsers() {
     return this.users.filter((user) => user.player.state !== 2);
   }
 
+  isOneAlive() {
+    return this.getAliveUsers().length === 1 ? true : false;
+  }
+
   clearAllPlayers() {
     this.users.forEach((user) => user.player.resetPlayer());
   }
 
-  setState(state) {
+  setGameState(state) {
     this.state = state;
   }
 
   changeMap(socket) {
     for (let key in this.map.updateTime) {
       const mapKey = `map${key}`;
+
       this.timers[mapKey] = setTimeout(() => {
+        console.log(`맵 변경 시작 : ${mapKey}`);
         this.map.sizes.min += 5;
         this.map.sizes.max -= 5;
 
-        const mapInfos = { min: this.map.sizes.min, max: this.map.sizes.max };
+        const sessionIds = this.getAllSessionIds();
 
-        const sessionIds = iceUserManager.getAllSessionIds();
-
-        const message = iceMapSyncNotification(mapInfos);
+        const message = iceMapSyncNotification();
 
         const payloadType = getPayloadNameByMessageType(message.type);
 
@@ -110,8 +95,10 @@ class iceGame extends Game {
 
   iceGameTimer(socket) {
     this.timers.iceGameTimer = setTimeout(() => {
-      let aliveUsers = iceUserManager.getAliveUser();
+      console.log(`시간 경과로 게임 종료`);
+      let aliveUsers = this.getAliveUsers();
 
+      // * 살아있는 체력 순으로 내림차순 정렬 후, rank
       aliveUsers = aliveUsers.sort((a, b) => b.player.hp - a.player.hp);
       aliveUsers.forEach((user, index) => (user.player.rank = index + 1));
 
@@ -122,9 +109,9 @@ class iceGame extends Game {
   handleGameEnd(socket) {
     console.log(`게임 종료`);
     // 전체 유저 조회
-    const users = iceUserManager.getAllUser();
+    const users = this.getAllUser();
 
-    const sessionIds = iceUserManager.getAllSessionIds();
+    const sessionIds = this.getAllSessionIds();
 
     const message = iceGameOverNotification(users);
 
@@ -140,7 +127,7 @@ class iceGame extends Game {
 
   reset() {
     this.map = iceMap;
-    this.state = gameState.WAIT;
+    this.setGameState(gameState.WAIT);
 
     for (const key in this.timers) {
       clearTimeout(this.timers[key]); // 타이머 제거
