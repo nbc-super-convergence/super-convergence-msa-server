@@ -126,6 +126,8 @@ class redisTransaction {
       const locationKey = `${this.prefix.LOCATION}:${board.ownerId}`;
 
       multi.exists(boardKey);
+
+      // * 보드 정보 저장
       multi.hset(boardKey, {
         boardId: board.boardId,
         roomId: board.roomId,
@@ -133,8 +135,12 @@ class redisTransaction {
         state: board.state,
       });
       multi.expire(boardKey, this.expire);
+
+      // * 보드 플레이어 저장
       multi.sadd(playersKey, board.ownerId);
       multi.expire(playersKey, this.expire);
+
+      // * 유저 위치정보 - 보드 저장
       multi.hset(locationKey, 'board', board.boardId);
       multi.expire(locationKey, this.expire);
     });
@@ -142,7 +148,7 @@ class redisTransaction {
     // * 트랜잭션 성공했을 때만 publish
     if (result) {
       const channel = this.redisUtil.channel.BOARD;
-      const message = '';
+      const message = board.boardId + ':' + board.users;
       await this.client.publish(channel, message);
       console.log(`[${channel}] Channel Notification Sent: [${message}]`);
     }

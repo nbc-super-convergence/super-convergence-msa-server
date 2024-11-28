@@ -16,10 +16,9 @@ import { handleError } from '../utils/errors/handle.error.js';
  */
 export const gameStartRequestHandler = async ({ socket, payload }) => {
   /**
-   * *  [ redis ice에 pub/sub으로 진행? ]
    * 1. sessionId로 redis에서 유저 정보 및 룸 정보 조회
    * 2. 해당 유저가 방장(room owner)인지 확인 [ 방장만 요청 가능 ]
-   * 3. 게임 세션 생성 및 방 유저 추가 작업
+   * 3. 게임 세션 생성 및 방 유저 추가 작업[ redis pub ]
    * 4. 생성된 게임 세션 유저 모두에게 게임 시작 알림
    */
   const { sessionId } = payload;
@@ -34,7 +33,7 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
 
     try {
       sessionIds = JSON.parse(result.data.users);
-      console.log(' [ BOARD: gameStartRequestHandler ] users  ===>>> ', users);
+      console.log(' [ BOARD: gameStartRequestHandler ] sessionIds  ===>>> ', sessionIds);
     } catch (e) {
       sessionIds = [sessionId];
     }
@@ -64,8 +63,55 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
  * * => 응답 [ MESSAGE_TYPE.ROLL_DICE_RESPONSE, board.S2C_RollDiceResponse]
  * * => 알림 [ MESSAGE_TYPE.ROLL_DICE_NOTIFICATION, board.S2C_RollDiceNotification]
  */
-export const rollDiceRequestHandler = ({ socket, payload }) => {
-  //
+export const rollDiceRequestHandler = async ({ socket, payload }) => {
+  /**
+   * 1. 주사위를 던짐 randome값 처리 (dice.util)
+   * 2. 해당 값을 본인에게 전달
+   * 3. 해당 값을 나머지 인원에게 전달
+   */
+  const { sessionId } = payload;
+
+  let sessionIds = [sessionId];
+  try {
+    // * 주사위 던짐
+    const result = await boardManager.rollDice(sessionId);
+
+    // * RESPONSE
+    const responseMessageType = MESSAGE_TYPE.ROLL_DICE_RESPONSE;
+    const response = {
+      success: result.success,
+      diceResult: result.data.diceResult,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.ROLL_DICE_NOTIFICATION;
+    const notification = {
+      sessionId: sessionId,
+      diceResult: result.data.diceResult,
+    };
+
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(notificationMessageType),
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+  } catch (err) {
+    console.error('[ BOARD: rollDiceRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.ROLL_DICE_NOTIFICATION, sessionIds, err);
+  }
 };
 
 /**

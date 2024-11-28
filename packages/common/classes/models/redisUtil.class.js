@@ -553,6 +553,18 @@ class RedisUtil {
 
     return result;
   }
+
+  /**
+   * 보드 전체 플레이어 조회
+   * @param {*} boardId
+   * @returns
+   */
+  async getBoardPlayers(boardId) {
+    const key = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+    const result = this.client.lrange(key, 0, -1);
+
+    return result;
+  }
 }
 
 export default RedisUtil;

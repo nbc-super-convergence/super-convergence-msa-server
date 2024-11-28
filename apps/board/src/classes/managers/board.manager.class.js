@@ -2,6 +2,7 @@ import { FAIL_CODE } from '@repo/common/failcodes';
 import { redis } from '../../utils/redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { BOARD_STATE } from '../../constants/state.js';
+import { getRollDiceResult, rollDice } from '../../utils/dice.utils.js';
 
 class BoardManager {
   constructor() {
@@ -43,14 +44,46 @@ class BoardManager {
           boardId: uuidv4(),
           roomId: userLocation.roomId,
           ownerId: sessionId,
+          users: roomData.users,
           state: BOARD_STATE.WAITING,
         };
-        await redis.createBoardGame(board);
+
+        // * redisUtil에서 redisTransaction으로 변경
+        await redis.transaction.createBoardGame(board);
+
         return { success: true, data: roomData, failCode: 0 };
       } else {
         console.error('방장만 게임시작 요청을 할 수 있습니다.', roomData, userData);
         return { success: false, data: null, failCode: FAIL_CODE.INVALID_REQUEST };
       }
+    } catch (e) {
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 주사위를 던진다
+   * @param {*} sessionId
+   */
+  async rollDice(sessionId) {
+    //
+    try {
+      const DICE_MAX_VALUE = 10;
+      const DICE_COUNT = 1;
+
+      const diceResult = getRollDiceResult(DICE_MAX_VALUE, DICE_COUNT);
+
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
+      const sessionIds = await redis.getBoardPlayers(boardId);
+
+      return {
+        success: true,
+        data: {
+          diceResult,
+          sessionIds,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
     } catch (e) {
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
