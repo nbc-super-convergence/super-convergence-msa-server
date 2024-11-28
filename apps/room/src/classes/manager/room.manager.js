@@ -43,10 +43,9 @@ class RoomManager {
       }
 
       //* 대기방 생성
-      const roomData = Room.createRoomData('some-room-id', sessionId, roomName, lobbyId);
+      const roomData = Room.createRoomData(uuidv4(), sessionId, roomName, lobbyId);
       const redisData = RoomDTO.toRedis(roomData);
-      await redis.createRoom(redisData);
-      await redis.createUserLocation(sessionId, 'room', roomData.roomId);
+      await redis.transaction.createRoom(redisData, sessionId);
 
       logger.info('[ createRoom ] ====> success');
 
@@ -101,8 +100,7 @@ class RoomManager {
       const result = Room.join(roomData, sessionId, userData);
 
       if (result.success) {
-        await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
-        await redis.createUserLocation(sessionId, 'room', roomId);
+        await redis.transaction.joinRoom(roomId, RoomDTO.toRedis(roomData), sessionId);
 
         logger.info('[ joinRoom ] ====> success');
       }
