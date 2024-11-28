@@ -44,8 +44,7 @@ class LobbyManager {
       }
 
       // 로비 입장
-      await redis.addLobbyUsers(sessionId, this.lobbyId);
-      await redis.createUserLocation(sessionId, 'lobby', this.lobbyId);
+      await redis.transaction.joinLobby(sessionId, this.lobbyId);
 
       logger.info('[ joinUser ] ====> success', userData);
 
@@ -71,8 +70,7 @@ class LobbyManager {
       }
 
       // 퇴장
-      await redis.deleteLobbyUser(sessionId, lobbyId);
-      await redis.deleteUserLocationField(sessionId, 'lobby');
+      await redis.transaction.leaveLobby(sessionId, lobbyId);
 
       logger.info('[ leaveUser ] ====> success');
 
