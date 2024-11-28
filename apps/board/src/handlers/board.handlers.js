@@ -296,3 +296,15 @@ export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
     handleError(socket, MESSAGE_TYPE.BACK_TO_THE_ROOM_RESPONSE, sessionIds, err);
   }
 };
+
+/**
+ * * 미니게임 시작 요청, 미니게임 지정해서 알림
+ * * MESSAGE_TYPE.?
+ * * board.C2S_StartMiniGameRequest
+ *
+ * * => 알림 [ MESSAGE_TYPE.BACK_TO_THE_ROOM_NOTIFICATION, board.S2C_StartMiniGameNotification]
+ */
+export const startMiniGameRequestHandler = async ({ socket, payload }) => {
+  // TODO: 이 요청은 누가?? 어떤 타이밍에?
+  // TODO: => 턴 마지막 유저가? 이름 바꾸면 좋을듯? [ 미니게임선정 요청 ]
+};
