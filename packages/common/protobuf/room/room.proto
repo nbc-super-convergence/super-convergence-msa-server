@@ -37,7 +37,7 @@ message S2C_JoinRoomResponse {
 }
 
 message S2C_JoinRoomNotification {
-    UserData userData = 1;
+    UserData user = 1;
 }
 
 message C2S_LeaveRoomRequest{
@@ -50,7 +50,8 @@ message S2C_LeaveRoomResponse{
 }
 
 message S2C_LeaveRoomNotification {
-    UserData userData = 1;
+    UserData user = 1;
+    string ownerId = 2;
 }
 
 message C2S_GamePrepareRequest {
@@ -65,7 +66,7 @@ message S2C_GamePrepareResponse {
 } 
 
 message S2C_GamePrepareNotification{
-    UserData userData = 1;
+    UserData user = 1;
     bool isReady = 2;
     RoomStateType state = 3;
 }

@@ -8,7 +8,7 @@ class RoomDTO {
       return {
         roomId: redisData.roomId,
         ownerId: redisData.ownerId,
-        name: redisData.name,
+        roomName: redisData.roomName,
         lobbyId: redisData.lobbyId,
         state: redisData.state,
         users: new Set(JSON.parse(redisData.users)),
@@ -27,7 +27,7 @@ class RoomDTO {
       return {
         roomId: roomData.roomId,
         ownerId: roomData.ownerId,
-        name: roomData.name,
+        roomName: roomData.roomName,
         lobbyId: roomData.lobbyId,
         state: roomData.state,
         users: JSON.stringify(Array.from(roomData.users)),
@@ -46,7 +46,7 @@ class RoomDTO {
       return {
         roomId: roomData.roomId,
         ownerId: roomData.ownerId,
-        name: roomData.name,
+        roomName: roomData.roomName,
         lobbyId: roomData.lobbyId,
         state: roomData.state,
         users: Array.from(roomData.users),

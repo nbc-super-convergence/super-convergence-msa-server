@@ -14,7 +14,7 @@ import { logger } from '@repo/common/config';
  * @typedef RoomData
  * @property {string} roomId
  * @property {string} ownerId
- * @property {string} name
+ * @property {string} roomName
  * @property {string} lobbyId
  * @property {RoomState} state
  * @property {Set<string>} users
@@ -113,7 +113,14 @@ class Room {
 
       logger.info('[ leave ] ====> success');
 
-      return { success: true, data: roomData, userData: userData, stateChanged, failCode: 0 };
+      return {
+        success: true,
+        data: roomData,
+        userData: userData,
+        stateChanged,
+        ownerId: roomData.ownerId,
+        failCode: 0,
+      };
     } catch (error) {
       logger.error('[ leave ] ====> unknown error', error);
       return { success: false, data: null, userData: null, failCode: 1 };
@@ -197,15 +204,15 @@ class Room {
    * 새로운 대기방 데이터 생성
    * @param {string} roomId - 대기방 ID
    * @param {string} ownerId - 방장 세션 ID
-   * @param {string} name - 대기방 이름
+   * @param {string} roomName - 대기방 이름
    * @param {string} lobbyId - 로비 ID
    * @returns {RoomData} 생성된 대기방 데이터
    */
-  static createRoomData(roomId, ownerId, name, lobbyId) {
+  static createRoomData(roomId, ownerId, roomName, lobbyId) {
     return {
       roomId,
       ownerId,
-      name,
+      roomName,
       lobbyId,
       state: 'wait',
       maxUser: 4,

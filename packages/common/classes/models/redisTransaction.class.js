@@ -68,7 +68,7 @@ class redisTransaction {
       multi.hset(roomKey, {
         roomId: room.roomId,
         ownerId: room.ownerId,
-        name: room.name,
+        roomName: room.roomName,
         state: room.state,
         lobbyId: room.lobbyId,
         users: room.users,

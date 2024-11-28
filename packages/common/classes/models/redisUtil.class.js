@@ -18,7 +18,7 @@ import redisTransaction from './redisTransaction.class.js';
  * @typedef room
  * @property {string} roomId
  * @property {string} ownerSessionId
- * @property {string} name
+ * @property {string} roomName
  * @property {string} lobbyId
  * @property {string} state
  * @property {string} users
@@ -423,7 +423,7 @@ class RedisUtil {
     await this.client.hset(key, {
       roomId: room.roomId,
       ownerId: room.ownerId,
-      name: room.name,
+      roomName: room.roomName,
       state: room.state,
       lobbyId: room.lobbyId,
       users: room.users,
@@ -449,7 +449,7 @@ class RedisUtil {
     return {
       roomId: roomData.roomId,
       ownerId: roomData.ownerId,
-      name: roomData.name,
+      roomName: roomData.roomName,
       state: roomData.state,
       lobbyId: roomData.lobbyId,
       users: roomData.users,

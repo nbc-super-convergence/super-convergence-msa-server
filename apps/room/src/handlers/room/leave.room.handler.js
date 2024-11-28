@@ -21,7 +21,7 @@ export const leaveRoomRequestHandler = async ({ socket, payload }) => {
       if (otherSessionIds.length > 0) {
         // 퇴장 알림
         const leaveNotificationPacket = createNotification(
-          { userData: result.userData },
+          { userData: result.userData, ownerId: result.ownerId },
           MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION,
           otherSessionIds,
         );
