@@ -1,7 +1,8 @@
 import Lobby from '../models/lobby.class.js';
 import { v4 as uuidv4 } from 'uuid';
 import { redis } from '../../init/redis.js';
-import { logger } from '@repo/common/config';
+import { config, logger } from '@repo/common/config';
+import { ResponseHelper } from '@repo/common/classes';
 
 class LobbyManager {
   constructor() {
@@ -32,7 +33,7 @@ class LobbyManager {
       logger.info('[ joinUser ] ====> userData', { sessionId, userData });
       if (!userData) {
         logger.error('[ joinUser ] ====> user is undefined', { sessionId });
-        return { success: false, data: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
       }
 
       // 이미 로비에 있는 유저인지 검증
@@ -40,7 +41,7 @@ class LobbyManager {
       logger.info('[ joinUser ] ====> existingLobbyId', { sessionId, existingLobbyId });
       if (existingLobbyId) {
         logger.error('[ joinUser ] ====> user is already in another lobby', { sessionId });
-        return { success: false, data: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.ALREADY_IN_LOBBY);
       }
 
       // 로비 입장
@@ -48,10 +49,10 @@ class LobbyManager {
 
       logger.info('[ joinUser ] ====> success', userData);
 
-      return { success: true, data: Lobby.formatUserData(userData), failCode: 0 };
+      return ResponseHelper.success(Lobby.formatUserData(userData));
     } catch (error) {
       logger.error('[ joinUser ] ====> unknown error', error);
-      return { success: false, data: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 
@@ -66,7 +67,7 @@ class LobbyManager {
       const lobbyId = await redis.getUserLocationField(sessionId, 'lobby');
       if (!lobbyId) {
         logger.error('[ leaveUser ] ====> user does not exist in lobby', { sessionId });
-        return { success: false, data: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_LOBBY);
       }
 
       // 퇴장
@@ -74,10 +75,10 @@ class LobbyManager {
 
       logger.info('[ leaveUser ] ====> success');
 
-      return { success: true, data: null, failCode: 0 };
+      return ResponseHelper.success();
     } catch (error) {
       logger.error('[ leaveUser ] ====> unknown error', error);
-      return { success: false, data: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 
@@ -92,7 +93,7 @@ class LobbyManager {
       const userData = await redis.getUserToSession(targetSessionId);
       if (!userData) {
         logger.error('[ getUserDetail ] ====> user is undefined', { targetSessionId });
-        return { success: false, data: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
       }
 
       // 로비에 있는 유저가 맞는지 검증
@@ -103,15 +104,15 @@ class LobbyManager {
           lobbyId: this.lobbyId,
         });
 
-        return { success: false, data: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_LOBBY);
       }
 
       logger.info('[ getUserDetail ] ====> success', userData);
 
-      return { success: true, data: Lobby.formatUserData(userData), failCode: 0 };
+      return ResponseHelper.success(Lobby.formatUserData(userData));
     } catch (error) {
       logger.error('[ getUserDetail ] ====> unknown error', error);
-      return { success: false, data: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 
@@ -125,7 +126,7 @@ class LobbyManager {
       const users = await redis.getLobbyUsers(this.lobbyId);
       if (!users) {
         logger.error('[ getUserList ] ====> no users', { lobbyId: this.lobbyId });
-        return { success: true, data: [], failCode: 0 };
+        return ResponseHelper.fail(config.FAIL_CODE.NONE_FAILCODE);
       }
 
       const userList = await Promise.all(
@@ -137,10 +138,10 @@ class LobbyManager {
 
       logger.info('[ getUserList ] ====> success', userList.filter(Boolean));
 
-      return { success: true, data: userList.filter(Boolean), failCode: 0 };
+      return ResponseHelper.success(userList.filter(Boolean));
     } catch (error) {
       logger.error('[ getUserList ] ====> unknown error', error);
-      return { success: false, data: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 }

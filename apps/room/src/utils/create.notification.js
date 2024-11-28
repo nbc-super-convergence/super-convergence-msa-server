@@ -12,19 +12,19 @@ export const createNotification = (data, messageType, sessionIds) => {
   switch (messageType) {
     case MESSAGE_TYPE.JOIN_ROOM_NOTIFICATION:
       notification.payload = {
-        userData: data.userData,
+        user: data.userData,
       };
       break;
 
     case MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION:
       notification.payload = {
-        userData: data.userData,
+        user: data.userData,
       };
       break;
 
     case MESSAGE_TYPE.GAME_PREPARE_NOTIFICATION:
       notification.payload = {
-        userData: data.userData,
+        user: data.userData,
         isReady: data.isReady,
         state: data.state,
       };
