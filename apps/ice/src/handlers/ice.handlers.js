@@ -1,85 +1,168 @@
-import { v4 as uuidv4 } from 'uuid';
+import iceGameManager from '../classes/managers/ice.game.manager.js';
+import iceUserManager from '../classes/managers/ice.user.manager.js';
+import {
+  iceGameReadyNotification,
+  iceGameStartNotification,
+  iceMiniGameStartNotification,
+  icePlayerDamageNotification,
+  icePlayerDeathNotification,
+  icePlayerSyncNotification,
+} from '../utils/ice.notifications.js';
+import { serializeForGate } from '@repo/common/utils';
+import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { logger } from '@repo/common/config';
-import { addUser, getUserBySocket } from '../sessions/user.session.js';
-import { getGameSessionById } from '../sessions/game.session.js';
-import { icePlayerMoveNotification } from '../notifications/ice.notifications.js';
+import { gameState } from '../constants/gameState.js';
 
-/**
- * 빙판 게임 참가
- * @param {*} param
- */
-export const iceJoinRequestHandler = ({ socket, payload }) => {
-  const { playerId } = payload;
-
-  /**
-   * TODO: 유저에게 게임 세션 아이디를 언제 줄 것인가?
-   * TODO: 유저의 상태 동기화, 맵 동기화 필요!
-   */
-  let user = getUserBySocket(socket);
-
-  // TODO: 테스트용
-  if (!user) {
-    const id = uuidv4();
-    user = addUser(socket, id);
-  }
-
-  const gameId = user.getGameId();
-
-  const game = getGameSessionById(gameId);
-
-  game.addUser(user);
-};
-
-/**
- * 빙판 게임 플레이어 위치 업데이트
- * @param {*} param
- */
-export const icePlayerMoveRequestHandler = ({ socket, payload }) => {
+export const iceMiniGameStartRequestHandler = async ({ socket, payload }) => {
   try {
-    const { playerId, position, force, rotation, state } = payload;
+    // ! 방장의 세션아이디
+    const { sessionId } = payload;
 
-    const user = getUserBySocket(socket); // 유저 찾기
-    if (!user) {
-      throw new Error(`유저를 찾을 수 없습니다.`);
+    const game = iceGameManager.getGameBySessionId(sessionId);
+
+    if (!iceGameManager.isValidGame(game)) {
+      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
     }
 
-    const player = user.player; // 유저의 플레이어
+    // * 게임 상태 변경
+    game.setState(gameState.START);
 
-    player.updatePosition(position, force, rotation); // 위치 업데이트
+    // * 게임 시작 Notification
+    const sessionIds = game.getAllSessionIds();
 
-    const gameSession = getGameSessionById(user.gameId); // 유저가 참가한 게임 세션 찾기
-    if (!gameSession) {
-      throw new Error(`게임 세션를 찾을 수 없습니다.`);
-    }
+    const users = game.getAllUserBySessionId(sessionId);
 
-    const userPositions = gameSession.getUserPosition(user.id); // 세션 내 유저의 위치 정보 조회
+    const message = iceMiniGameStartNotification(users, Date.now());
 
-    const packet = icePlayerMoveNotification(userPositions); // 이동 동기화 패킷 생성
+    const payloadType = getPayloadNameByMessageType(message.type);
 
-    gameSession.notifyOtherUsers(packet, user.id); // 세션 내 본인 이외의 유저에서 패킷 전송
+    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+    socket.write(buffer);
   } catch (error) {
-    logger.error(`[ icePlayerMoveRequestHandler ] error =>>> `, error.message, error);
+    logger.error(`[iceMiniGameStartRequestHandler]====> `, error);
   }
 };
 
-/**
- * 테스트 게임용 준비 완료 요청
- * @param {*} param
- */
-export const iceStartRequestHandler = ({ socket, payload }) => {
-  // 테스트 게임 용
+export const iceGameReadyRequestHandler = ({ socket, payload }) => {
   try {
-    const user = getUserBySocket(socket);
+    const { playerId } = payload;
 
-    if (!user) {
-      throw new Error(`유저를 찾을 수 없습니다.`);
+    // ! 세션 아이디로 유저 조회
+    const user = iceUserManager.getUserByPlayerId(playerId);
+
+    if (!iceUserManager.isValidUser(user)) {
+      throw new Error(`유저가 존재하지 않습니다.`);
     }
 
-    const gameSession = getGameSessionById(user.gameId);
+    user.player.isReady = true;
 
-    // 테스트 환경 : 준비 완료된 유저 각자 시작
-    gameSession.startTestGame(user.id);
+    const game = iceGameManager.getGameBySessionId(user.sessionId);
+
+    const sessionIds = game.getOtherSessionIds(user.id);
+
+    const message = iceGameReadyNotification(user.player.id);
+
+    const payloadType = getPayloadNameByMessageType(message.type);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+    socket.write(buffer);
+
+    // ! 모든 유저가 준비가 끝났을 경우
+    if (game.getReadyCounts() === game.users.length) {
+      console.log(`모든 유저 준비 완료`);
+
+      const sessionIds = game.getAllSessionIds();
+
+      const message = iceGameStartNotification(Date.now());
+
+      const payloadType = getPayloadNameByMessageType(message.type);
+
+      const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+      socket.write(buffer);
+
+      // * 맵 변경, 게임 종료 타이머
+      game.changeMap(socket);
+      game.iceGameTimer(socket);
+    }
   } catch (error) {
-    logger.error(`[ icePlayerMoveRequestHandler ] error =>>> `, error.message, error);
+    logger.error(`[iceGameReadyRequestHandler] ===> `, error);
+  }
+};
+
+export const icePlayerSyncRequestHandler = ({ socket, payload }) => {
+  try {
+    const { playerId, position, rotation, state } = payload;
+
+    const user = iceUserManager.getUserByPlayerId(playerId);
+
+    user.player.updateState(position, rotation, state);
+
+    // * 유저 상태 정보 noti
+    const game = iceGameManager.getGameBySessionId(user.sessionId);
+
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
+
+    const message = icePlayerSyncNotification(user);
+
+    const payloadType = getPayloadNameByMessageType(message.type);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+    socket.write(buffer);
+  } catch (error) {
+    logger.error(`[icePlayerSyncRequestHandler] ===> `, error);
+  }
+};
+
+export const icePlayerDamageRequestHandler = ({ socket, payload }) => {
+  try {
+    const { playerId } = payload;
+
+    const user = iceUserManager.getUserByPlayerId(playerId);
+
+    const game = iceGameManager.getGameBySessionId(user.sessionId);
+
+    // 플레이어 데미지
+    user.player.damage();
+
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
+
+    // * noti
+    const message = icePlayerDamageNotification(user.player.id);
+
+    const payloadType = getPayloadNameByMessageType(message.type);
+
+    const buffer = serializeForGate(message.type, message.payload, payloadType, sessionIds);
+
+    socket.write(buffer);
+
+    if (user.player.hp <= 0) {
+      user.player.playerDead();
+
+      // * 사망시 랭킹 매겨주기
+      user.player.rank = game.getAliveUser().length + 1;
+
+      const message = icePlayerDeathNotification(user);
+
+      const payloadType = getPayloadNameByMessageType(message.type);
+
+      const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+      socket.write(buffer);
+
+      // * 유저 1명 => 게임 종료
+      if (iceUserManager.getAliveUserLength() <= 1) {
+        const user = game.getAliveUser()[0];
+
+        user.player.rank = 1;
+
+        game.handleGameEnd(socket);
+      }
+    }
+  } catch (error) {
+    logger.error('[icePlayerDamageRequestHandler] ===> ', error);
   }
 };
