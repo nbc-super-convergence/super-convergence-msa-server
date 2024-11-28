@@ -10,7 +10,7 @@ class LobbyServer extends TcpServer {
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.info(
+      console.log(
         `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
