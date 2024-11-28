@@ -541,9 +541,17 @@ class RedisUtil {
 
     // pub
     const channel = this.channel.BOARD;
-    const message = '';
+    const message = board.boardId;
     await this.client.publish(channel, message);
     console.log(`[${channel}] Channel Notification Sent: [${message}]`);
+  }
+
+  async getBoardGameField(boardId, field) {
+    const boardKey = `${this.prefix.BOARD}:${boardId}`;
+
+    const result = this.client.hget(boardKey, `${field}`);
+
+    return result;
   }
 }
 

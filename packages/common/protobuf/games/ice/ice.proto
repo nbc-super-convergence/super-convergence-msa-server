@@ -3,86 +3,81 @@ syntax = 'proto3';
 package ice;
 import '../../common.proto';
 
-// * [ Request ] 
-// TODO: test 1
-message C2S_IceJoinRequest {
+message S2S_BoardGameToIceStartRequest {
+    string sessionId = 1;
 }
 
-// TODO: test 3
-message C2S_IcePlayerMoveRequest {
-    int32 playerId = 1; 
-    Vector position = 2; 
-    Vector force = 3;
-    float rotation = 4;
-    State state = 5; 
+message C2S_IceMiniGameStartRequest {
+    string sessionId = 1;
 }
 
-message C2S_IceStartRequest {
-    int32 playerId = 1; 
-}
+message S2C_IceMiniGameStartNotification {
+    repeated startPlayers players = 1;
 
-// * [ Notification ] 
-message S2C_IceMoveNotification {
-    int32 playerId = 1; 
-    int32 gameType = 2; 
-}
-
-
-// TODO: test 2
-message S2C_IcePlayerSpawnNotification {
-    int32 playerId = 1; 
-    int32 playerType = 2;
-    Vector position = 3; 
-    Vector force = 4; 
-    float rotation = 5;
-}
-
-message S2C_IceStartNotification {
-        int32 playerId = 1; 
-}
-
-message S2C_IcePlayersStateSyncNotification {
-    repeated PlayerInfo players = 1;
-
-    message PlayerInfo {
-        int32 playerId = 1; 
-        Vector position = 2; 
-        int32 hp = 3; 
-        State state = 4; 
+    message startPlayers {
+        int32 sessionId = 1; 
+        Vector position =2; 
+        float rotation = 3;
     }
 
+    int64 startTime = 2;    
 }
 
+message C2S_IceGameReadyRequest {
+    string sessionId = 1;
+}
+
+message S2C_IceGameReadyNotification {
+    int32 sessionId = 1;
+}
+
+message S2C_IceGameStartNotification {
+    int64 startTime = 1;
+}
+
+message C2S_IcePlayerSyncRequest {
+    int32 sessionId = 1;
+     Vector position = 2;
+     float rotation = 3;
+     State state = 4;
+}
+
+message S2C_IcePlayerSyncNotification {
+     int32 sessionId = 1;
+     Vector position = 2;
+     float rotation = 3;
+     State state = 4;
+}
+
+message C2S_IcePlayerDamageRequest {
+   int32 sessionId = 1;
+}
+
+message S2C_IcePlayerDamageNotification {
+    int32 sessionId = 1;
+}
 
 message S2C_IcePlayerDeathNotification {
-    int32 playerId = 1; 
+    int32 sessionId = 1;
+    Vector position = 2;
 }
 
-
-message S2C_IceMapStateSyncNotification {
-    int32 scale = 1;
+message MapInfos {
+    float min = 1;
+    float max = 2;
 }
 
-message S2C_IceOverNotification {
-    repeated Rank ranks = 1;
+message S2C_IceMapSyncNotification {
+   MapInfos map = 1;
+}
+
+message S2C_IceGameOverNotification {
+   repeated Rank ranks = 1;
     int32 endTime = 2; 
 
     message Rank {
-        int32 playerId = 1;
+        int32 sessionId = 1;
         int32 rank = 2; 
-    }
-}
-
-// TODO: test 4
-message S2C_IcePlayerMoveNotification {
-    repeated PlayerData players = 1;
-
-    message PlayerData {
-        int32 playerId = 1; 
-        Vector position = 2; 
-        Vector force = 3; 
-        float rotation = 4;
-        State state = 5;
     }
 }
 
