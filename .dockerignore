@@ -1,0 +1,26 @@
+# node_modules 
+node_modules
+npm-debug.log
+
+
+# 로그 파일 제외
+logs
+*.log
+
+# env 
+.env
+
+# Git 
+.git
+.gitignore
+
+# Docker 
+Dockerfile
+docker-compose.yml
+
+# docs 
+Docs
+*.md
+
+#test
+*/test/**

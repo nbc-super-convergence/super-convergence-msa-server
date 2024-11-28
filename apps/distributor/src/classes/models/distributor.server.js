@@ -1,6 +1,7 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { createServerInfoNotification, deserialize, packetParser } from '@repo/common/utils';
+import { SERVER_HOST } from '../../constants/env.js';
 
 class DistributorServer extends TcpServer {
   //
@@ -87,7 +88,7 @@ class DistributorServer extends TcpServer {
       {
         name: this.context.name,
         number: 1,
-        host: 'localhost',
+        host: SERVER_HOST,
         port: this.context.port + '',
         types: this.context.types,
       },

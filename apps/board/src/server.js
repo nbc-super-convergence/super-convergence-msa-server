@@ -1,6 +1,5 @@
-import { RedisClient } from '@repo/common/classes';
 import BoardServer from './classes/models/board.server.class.js';
-import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from './constants/env.js';
+import { SERVER_HOST } from './constants/env.js';
 
 const SERVER_NAME = 'board';
 const SERVER_PORT = 7015;
@@ -23,7 +22,7 @@ const server = new BoardServer(
 
 await server.start();
 
-server.connectToDistributor('127.0.0.1', 7010, (data) => {
+server.connectToDistributor(SERVER_HOST, 7010, (data) => {
   // Distributor 연결
   console.log(' [ Board Server ] Distributor Notification', data);
 });
