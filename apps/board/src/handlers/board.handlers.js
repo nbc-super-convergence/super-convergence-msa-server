@@ -68,7 +68,7 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
    * 1. 주사위를 던짐 randome값 처리 (dice.util)
    * 2. 해당 값을 나머지 인원에게 전달
    * 3. 해당 값을 본인에게 전달
-   * 4. 업적용 이력 저장
+   * TODO: 4. 업적용 이력 저장
    */
   const { sessionId } = payload;
 
@@ -131,7 +131,7 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
    * 1. 여기로 이동하곘다 요청
    * 2. 나머지 플레이어에게 알림 전달
    * 3. 요청 플레이어에게 확인 응답
-   * 4. 플레이어 이동 위치 저장 ?
+   * TODO: 4. [업적용] 플레이어 이동 위치 저장
    */
   const { sessionId, targetPoint } = payload;
 
@@ -247,6 +247,52 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
  * * => 응답 [ MESSAGE_TYPE.BACK_TO_THE_ROOM_RESPONSE, board.S2C_BackToTheRoomResponse]
  * * => 알림 [ MESSAGE_TYPE.BACK_TO_THE_ROOM_NOTIFICATION, board.S2C_BackToTheRoomNotification]
  */
-export const backToTheRoomRequestHandler = ({ socket, payload }) => {
-  //
+export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
+  /**
+   * 1. 대기방 이동 요청
+   * 2. 대기방 이동 응답
+   * 3. 대기방 이동 알림
+   */
+
+  const { sessionId } = payload;
+  let sessionIds = [sessionId];
+  try {
+    const result = await boardManager.backTotheRoom(sessionId);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.BACK_TO_THE_ROOM_NOTIFICATION;
+    const notification = {
+      sessionId: sessionId,
+    };
+
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(notificationMessageType),
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.BACK_TO_THE_ROOM_RESPONSE;
+    const response = {
+      success: result.success,
+      room: result.data.room,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+  } catch (err) {
+    console.error('[ BOARD: backToTheRoomRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.BACK_TO_THE_ROOM_RESPONSE, sessionIds, err);
+  }
 };

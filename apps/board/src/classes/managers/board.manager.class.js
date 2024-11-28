@@ -142,6 +142,30 @@ class BoardManager {
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
+
+  /**
+   * 대기실로 되돌아 가기
+   * @param {String} sessionId
+   */
+  async backTotheRoom(sessionId) {
+    //
+    try {
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+      const roomId = await redis.getUserLocationField(sessionId, 'room');
+      const room = await redis.getRoom(roomId);
+      return {
+        success: true,
+        data: {
+          room,
+          sessionIds,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      console.error('[ BOARD : backTotheRoom ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
 } //* class end
 
 const boardManagerInstance = BoardManager.getInstance();
