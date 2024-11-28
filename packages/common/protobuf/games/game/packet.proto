@@ -73,10 +73,10 @@ message GamePacket {
 
         // ice  (201)
         C2S_IceMiniGameStartRequest iceMiniGameStartRequest = 201;
-        S2C_IceMiniGameStartNotification iceMiniGameStartNotification = 202;
+        S2C_IceMiniGameReadyNotification iceMiniGameReadyNotification = 202;
         C2S_IceGameReadyRequest iceGameReadyRequest = 203; 
         S2C_IceGameReadyNotification iceGameReadyNotification = 204;
-        S2C_IceGameStartNotification iceGameStartNotification = 205;
+        S2C_IceMiniGameStartNotification iceMiniGameStartNotification = 205;
         C2S_IcePlayerSyncRequest icePlayerSyncRequest = 206;
         S2C_IcePlayerSyncNotification icePlayerSyncNotification = 207;
         C2S_IcePlayerDamageRequest icePlayerDamageRequest = 208;
@@ -84,5 +84,6 @@ message GamePacket {
         S2C_IcePlayerDeathNotification icePlayerDeathNotification = 210;
         S2C_IceGameOverNotification iceGameOverNotification = 211;
         S2C_IceMapSyncNotification iceMapSyncNotification = 212;
+
     }
 }

@@ -1,11 +1,9 @@
 class Game {
-  constructor(id, type) {
+  constructor(id) {
     this.id = id;
-    this.type = type;
     this.state = '';
 
     this.users = [];
-    this.mapInfos; // 맵 정보 저장할 것
   }
 
   // TODO: 기능 추가
