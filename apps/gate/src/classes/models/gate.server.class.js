@@ -144,13 +144,21 @@ class GateServer extends TcpServer {
         console.log('[ GATE: ] payload.sessionIds.length ===>>> ', payload.sessionIds.length);
         if (payload.sessionIds && payload.sessionIds.length > 0) {
           payload.sessionIds.forEach((sessionId) => {
-            console.log(
-              ` FOR ====>>> ${sessionId} ====>>> `,
-              this._mapClients[sessionId].socket.remoteAddress,
-              ':',
-              this._mapClients[sessionId].socket.remotePort,
-            );
-            this._mapClients[sessionId].socket.write(packetForClient);
+            if (this._mapClients[sessionId]) {
+              console.log(
+                ` FOR ====>>> ${sessionId} ====>>> `,
+                this._mapClients[sessionId].socket.remoteAddress,
+                ':',
+                this._mapClients[sessionId].socket.remotePort,
+              );
+              this._mapClients[sessionId].socket.write(packetForClient);
+            } else {
+              if (sessionId === 'self') {
+                this._socket.write(packetForClient);
+              } else {
+                console.log(` [ GATE: ] NOT FOUND SOCKET, sessionId ===>>> ${sessionId}`);
+              }
+            }
           });
         } else {
           this._socket.write(packetForClient);
@@ -203,8 +211,6 @@ class GateServer extends TcpServer {
           this._clientDistributor.write(packet);
         },
         (socket, data) => {
-          console.log(' [ _clientDistributor onData ] data tostring ==>> ', data.toString());
-
           this._onDistribute(socket, data);
         },
         (options) => {

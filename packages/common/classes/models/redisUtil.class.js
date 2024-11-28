@@ -190,7 +190,6 @@ class RedisUtil {
     await this.client.del(key);
   }
 
-
   /**
    * 유저의 특정 위치 데이터만 삭제
    * @param {string} sessionId
@@ -222,7 +221,7 @@ class RedisUtil {
   async getUserLocationField(sessionId, locationField) {
     const key = `${this.prefix.LOCATION}:${sessionId}`;
     const data = await this.client.hget(key, locationField);
-    
+
     if (!data) {
       return null;
     }
@@ -257,7 +256,6 @@ class RedisUtil {
     }
     return data;
   }
-
 
   /**
    * 유저의 위치 데이터 조회
@@ -498,6 +496,39 @@ class RedisUtil {
         this.client.srem(`${this.prefix.LOBBY_ROOM_LIST}:${roomData.lobbyId}`, key),
       ]);
     }
+  }
+
+  // [ BOARD ]
+
+  /**
+   * * 보드게임 생성 및 보드게임 플레이어 추가, 보드 채널 published
+   * @param {board} board
+   * @returns
+   */
+  async createBoardGame(board) {
+    const key = `${this.prefix.BOARD}:${board.boardId}`;
+
+    const exists = await this.client.exists(key);
+    if (exists) {
+      return false;
+    }
+
+    await this.client.hset(key, {
+      boardId: board.boardId,
+      roomId: board.roomId,
+      ownerId: board.ownerId,
+      state: board.state,
+    });
+    await this.client.expire(key, this.expire);
+
+    const playersKey = `${this.prefix.BOARD_PLAYERS}:${board.boardId}`;
+    await this.client.sadd(playersKey, board.ownerId);
+
+    // pub
+    const channel = this.channel.BOARD;
+    const message = '';
+    await this.client.publish(channel, message);
+    console.log(`[${channel}] Channel Notification Sent: [${message}]`);
   }
 }
 

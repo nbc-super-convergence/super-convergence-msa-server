@@ -49,7 +49,7 @@ client.connect();
 console.log('[ TEST ] CLIENT CONNECTED +++++++++++++++++++ ');
 const type = MESSAGE_TYPE.GAME_START_REQUEST;
 const payload = {
-  sessionId: 'SSSS111',
+  sessionId: '93b2bf52-09f7-41bf-aeb5-2d6beff07a8b',
 };
 console.log('[ TEST ] payload ===>> ', payload);
 const packet = serialize(type, payload, 2, getPayloadNameByMessageType(type));
