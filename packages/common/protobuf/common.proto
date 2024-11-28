@@ -14,9 +14,9 @@ message UserData {
 }
 
 message RoomData {
-    string id = 1;
+    string roomId = 1;
     string ownerId = 2;
-    string name = 3;
+    string roomName = 3;
     string lobbyId = 4;
     RoomStateType state = 5;
     repeated UserData users = 6;

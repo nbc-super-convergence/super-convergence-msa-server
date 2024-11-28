@@ -8,7 +8,7 @@ message C2S_LobbyJoinRequest {
 
 message S2C_LobbyJoinResponse {
     bool success = 1;
-    UserData userData = 2;
+    UserData user = 2;
     GlobalFailCode failCode = 3;
 }
 
@@ -38,7 +38,7 @@ message C2S_LobbyUserDetailRequest {
 
 message S2C_LobbyUserDetailResponse {
     bool success = 1;
-    UserData UserData = 2;
+    UserData user = 2;
     GlobalFailCode failCode = 3;
 }
 
