@@ -1,12 +1,10 @@
 import { RedisClient, RedisUtil } from '@repo/common/classes';
-import { config } from '../../config/config.js';
-
-console.log(config);
+import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from '../../config/env.js';
 
 const redisClient = new RedisClient({
-  host: config.REDIS.HOST,
-  port: config.REDIS.PORT,
-  password: config.REDIS.PASSWORD,
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  password: REDIS_PASSWORD,
 }).getClient();
 
 export const redis = new RedisUtil(redisClient);
