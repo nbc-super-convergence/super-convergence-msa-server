@@ -34,9 +34,15 @@ class RedisUtil {
       LOBBY_ROOM_LIST: 'lobbyRoomList',
       ROOM: 'room',
       LOGIN: 'login',
+      BOARD: 'board',
+      BOARD_PLAYERS: 'boardPlayers',
     };
     console.log('Redis prefix:', this.prefix);
     this.expire = 60 * 60;
+
+    this.channel = {
+      BOARD: 'boardChannel',
+    };
   }
   //* 유저 위치
   /**
