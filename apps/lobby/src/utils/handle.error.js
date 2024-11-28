@@ -1,6 +1,6 @@
 import { getPayloadNameByMessageType } from '../handlers/index.js';
 import { serializeForGate } from '@repo/common/utils';
-import { logger } from '@repo/common/config';
+import { config, logger } from '@repo/common/config';
 
 export const handleError = (socket, messageType, sessionId, error) => {
   logger.error(`[ ${messageType} ] ====>  error `, {
@@ -12,7 +12,7 @@ export const handleError = (socket, messageType, sessionId, error) => {
   socket.write(
     serializeForGate(
       messageType,
-      { success: false, failCode: 1 },
+      { success: false, failCode: config.FAIL_CODE.UNKNOWN_ERROR },
       0,
       getPayloadNameByMessageType(messageType),
       [sessionId],
