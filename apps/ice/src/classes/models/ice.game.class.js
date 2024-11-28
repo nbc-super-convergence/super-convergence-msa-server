@@ -1,202 +1,153 @@
-import { Game } from '@repo/common/classes';
-
-import {
-  createIcePlayerSpawnNotification,
-  iceMapSyncNotification,
-  icePlayersStateSyncNotification,
-  iceStartTestGame,
-} from '../../notifications/ice.notifications.js';
-import { serialize } from '@repo/common/utils';
+import { Game, User } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
-import { getPayloadNameByMessageType } from '../../handlers/index.js';
+import iceUserManager from '../managers/ice.user.manager.js';
+import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
+import { getPayloadNameByMessageType } from '@repo/common/handlers';
+import { serializeForGate } from '@repo/common/utils';
+import { gameState } from '../../constants/gameState.js';
 
 class iceGame extends Game {
   constructor(id, type) {
     super(id, type);
 
-    this.startPosition = [
-      { pos: { x: -6, y: 1.9, z: 6 }, rot: 135 },
-      { pos: { x: 6, y: 1.9, z: 6 }, rot: -135 },
-      { pos: { x: -6, y: 1.9, z: -6 }, rot: 45 },
-      { pos: { x: 6, y: 1.9, z: -6 }, rot: -45 },
-    ];
+    this.map = iceMap;
+    this.gameTimer = iceMap.timer;
+    this.timers = {};
+    this.startPosition = iceMap.startPosition;
   }
 
-  /**
-   * 게임세션에 유저 추가
-   * @param {User} user
-   */
-  addUser(user) {
-    // TODO: 테스트용 코드, 플레이어 추가
-    const playerType = this.users.length + 1;
-    user.setPlayer(
-      Math.max(...this.users.map((user) => user.player.id), 0) + 1,
-      playerType,
-      this.startPosition[playerType - 1].pos,
-      this.startPosition[playerType - 1].rot,
-    );
+  addUser(users, sessionId) {
+    users.forEach((user, index) => {
+      //TODO: user.loginId? user.nickName??
+      const newUser = iceUserManager.addUser(user.loginId, sessionId, user.sessionId);
 
-    /**
-     * TODO: 게임 세션당 인원 체크 추가
-     */
-    this.users.push(user);
+      const playerId = index + 1;
+      const position = this.startPosition[index].pos;
+      const rotation = this.startPosition[index].rot;
 
-    /**
-     * TODO: 테스트용 코드, 접속하자마자 위치 정보 전달
-     */
-    const { type, payload } = createIcePlayerSpawnNotification(
-      user.player.id,
-      user.player.type,
-      user.player.position.get(),
-      user.player.force.get(),
-      user.player.rotation,
-    );
+      newUser.setPlayer(playerId, position, rotation);
+      this.users.push(newUser);
+    });
 
-    const payloadType = getPayloadNameByMessageType(type);
-
-    const playerSpawnPacket = serialize(type, payload, user.getNextSequence(), payloadType); // 직렬화
-
-    user.socket.write(playerSpawnPacket);
+    console.log(`게임내 유저들`, this.users);
   }
 
-  getUser(userId) {}
+  // ! id === loginId
+  getUserById(id) {
+    return this.users.find((user) => user.id === id);
+  }
 
-  removeUser(userId) {
-    const index = this.users.findIndex((user) => user.id === userId);
-    if (index !== -1) {
-      return this.users.splice(index, 1)[0];
+  getAllUser() {
+    return this.users;
+  }
+
+  getOtherUsers(id) {
+    return this.users.filter((user) => user.id !== id);
+  }
+
+  // ! 방장의 세션아이디로 전체 유저들을 조회할 때 사용
+  getAllUserBySessionId(sessionId) {
+    return this.users.filter((user) => user.player.gameId === sessionId);
+  }
+
+  getAllSessionIds() {
+    return this.users.map((user) => user.sessionId);
+  }
+
+  getOtherSessionIds(id) {
+    const users = this.users.filter((user) => user.id !== id);
+
+    return users.map((user) => user.sessionId);
+  }
+
+  getUserBySessionId(sessionId) {
+    return this.users.find((user) => user.sessionId === sessionId);
+  }
+
+  getReadyCounts() {
+    return this.users.filter((user) => user.player.isReady === true).length;
+  }
+
+  getUserByPlayerId(playerId) {
+    return this.users.find((user) => user.player.id === playerId);
+  }
+
+  getAliveUsers() {
+    return this.users.filter((user) => user.player.state !== 2);
+  }
+
+  clearAllPlayers() {
+    this.users.forEach((user) => user.player.resetPlayer());
+  }
+
+  setState(state) {
+    this.state = state;
+  }
+
+  changeMap(socket) {
+    for (let key in this.map.updateTime) {
+      const mapKey = `map${key}`;
+      this.timers[mapKey] = setTimeout(() => {
+        this.map.sizes.min += 5;
+        this.map.sizes.max -= 5;
+
+        const mapInfos = { min: this.map.sizes.min, max: this.map.sizes.max };
+
+        const sessionIds = iceUserManager.getAllSessionIds();
+
+        const message = iceMapSyncNotification(mapInfos);
+
+        const payloadType = getPayloadNameByMessageType(message.type);
+
+        const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+        socket.write(buffer);
+
+        delete this.timers.map1;
+      }, this.map.updateTime[key] * 1000);
     }
   }
 
-  /**
-   * 자신 제외 게임 세션 내 유저의 위치 정보 조회
-   * @returns { Object }
-   * - players (Array)
-   * - playerId (number)
-   * - position (object) { x, y, z }
-   * - vector (object) { x, y, z }
-   * - rotation (number)
-   * - state (number)
-   */
-  getUserPosition(userId) {
-    const users = this.users.filter((user) => user.id !== userId);
-    return {
-      players: users.map((user) => ({
-        playerId: user.player.id,
-        position: user.player.position,
-        force: user.player.force,
-        rotation: user.player.rotation,
-        state: user.player.state,
-      })),
-    };
+  iceGameTimer(socket) {
+    this.timers.iceGameTimer = setTimeout(() => {
+      let aliveUsers = iceUserManager.getAliveUser();
+
+      aliveUsers = aliveUsers.sort((a, b) => b.player.hp - a.player.hp);
+      aliveUsers.forEach((user, index) => (user.player.rank = index + 1));
+
+      this.handleGameEnd(socket);
+    }, this.gameTimer);
   }
 
-  /**
-   * 게임 세션 내 모든 유저의 상태 정보를 조회
-   * @returns { Object }
-   * - players (Array)
-   * - playerId (number)
-   * - hp (number)
-   * - position (object) { x, y, z }
-   * - state (number)
-   */
-  getUserState() {
-    return {
-      players: this.users.map((user) => ({
-        playerId: user.player.id,
-        position: user.player.position,
-        hp: user.player.vertor,
-        State: user.player.rotation,
-      })),
-    };
+  handleGameEnd(socket) {
+    console.log(`게임 종료`);
+    // 전체 유저 조회
+    const users = iceUserManager.getAllUser();
+
+    const sessionIds = iceUserManager.getAllSessionIds();
+
+    const message = iceGameOverNotification(users);
+
+    const payloadType = getPayloadNameByMessageType(message.type);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+
+    socket.write(buffer);
+
+    this.reset();
+    this.clearAllPlayers();
   }
 
-  /**
-   * 게임 세션 내 모든 유저에게 알림 패킷 송신
-   * @param {Object} packet
-   */
-  notifyUsers(packet) {
-    this.users.forEach((user) => user.sendPacket(packet));
-  }
+  reset() {
+    this.map = iceMap;
+    this.state = gameState.WAIT;
 
-  /**
-   * 게임 세션 내 본인 이외의 유저에게 알림 패킷 송신
-   * @param {Object} packet
-   * @param {String} userId
-   */
-  notifyOtherUsers(packet, userId) {
-    const users = this.users.filter((user) => user.id !== userId);
-    users.forEach((user) => user.sendPacket(packet));
-  }
+    for (const key in this.timers) {
+      clearTimeout(this.timers[key]); // 타이머 제거
+    }
 
-  /**
-   * 상태 동기화 인터벌
-   * TODO: 게임 시작 때 추가하고 게임 끝나면 인터벌 삭제하면 될 것 같습니다.
-   */
-  syncState() {
-    this.intervalManager.addInterval(
-      this.id,
-      () => {
-        const userState = this.getUserState();
-        const packet = icePlayersStateSyncNotification(userState);
-        this.notifyUsers(packet);
-      },
-      100,
-      'syncState',
-    );
-  }
-
-  /**
-   * 게임 내에 생존한 모든 유저 조회
-   * @returns {Array}
-   */
-  getAliveUsersCount() {
-    const users = this.users.map((user) => {
-      return user.player.state !== 2;
-    });
-
-    return users.length;
-  }
-
-  /**
-   * 맵 동기화 함수
-   * TODO: 게임 시작시에 넣어주시면 됩니다!!
-   */
-  updateMapSync() {
-    const mapInfo = iceMap;
-
-    setTimeout(() => {
-      mapInfo.min += 5;
-      mapInfo.max -= 5;
-
-      // 현재 맵 크기 구함
-      const scale = Math.abs(mapInfo.min * mapInfo.max);
-      const packet = iceMapSyncNotification(scale);
-
-      this.notifyUsers(packet);
-      // 패킷 전송 필요
-    }, mapInfo.changeTime[0] * 1000);
-
-    setTimeout(() => {
-      mapInfo.min += 5;
-      mapInfo.max -= 5;
-
-      const scale = Math.abs(mapInfo.min * mapInfo.max);
-      const packet = iceMapSyncNotification(scale);
-
-      this.notifyUsers(packet);
-      // 패킷 전송 필요
-    }, mapInfo.changeTime[1] * 1000);
-  }
-
-  /**
-   * 테스트 게임 시작
-   * 요청한 유저 개별로 게임 시작
-   */
-  startTestGame(userId) {
-    const user = this.users.find((user) => user.id === userId);
-    const packet = iceStartTestGame(user.player.id);
-    user.sendPacket(packet);
+    // 모든 키 삭제
+    this.timers = {};
   }
 }
 

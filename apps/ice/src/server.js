@@ -1,21 +1,41 @@
+import { RedisClient } from '@repo/common/classes';
 import IceServer from './classes/models/ice.server.class.js';
 import { SERVER_HOST } from './constants/env.js';
-import { addGameSession } from './sessions/game.session.js';
+import { REDIS } from './constants/env.js';
+import { config } from './config/config.js';
+import iceGameManager from './classes/managers/ice.game.manager.js';
 
 const SERVER_NAME = 'ice';
 const SERVER_PORT = 7016;
+
 const server = new IceServer(
   SERVER_NAME,
   SERVER_PORT,
-  [201, 2022, 203, 204, 205, 206, 207, 208, 209, 210, 211],
+  [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212],
 );
+
+const subScriber = new RedisClient(REDIS).getClient();
+
+subScriber.subscribe(config.REDIS.CHANNEL, (err, count) => {
+  if (err) {
+    console.error('Subscribe error:', err);
+    return;
+  }
+  console.log(`Subscribed to ${count} channel(s).`);
+});
+
+subScriber.on('message', (channel, message) => {
+  console.log(`Received ${config.REDIS.CHANNEL} ===> ${channel}: ${message}`);
+
+  // ! message = boardId
+  const sessionId = subScriber.getBoardGameBySessionId(message);
+
+  iceGameManager.addGame(sessionId);
+});
 
 await server.start();
 
-// TODO: 서버에서 게임 시작 요청이 들어올 때 게임 세션을 생성하는 걸로 변경해야함!
-await addGameSession();
-
-server.connectToDistributor(SERVER_HOST, 7010, (data) => {
+server.connectToDistributor('127.0.0.1', 7010, (data) => {
   // Distributor 연결
   console.log('Distributor Notification', data);
 });
