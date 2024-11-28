@@ -1,20 +1,15 @@
+import { getPayloadNameByMessageType } from '../../handlers/index.js';
 import { serialize } from '../../utils/index.js';
 import Player from './player.class.js';
 
 class User {
-  constructor(socket, id) {
+  constructor(id, gameId, sessionId) {
     this.id = id;
-    this.socket = socket;
-    this.sequence = 0;
-    this.lastUpdateTime = Date.now();
 
     // TODO: 테스트용 게임 세션 ID로 진행
-    this.gameId = 'testGameId'; // Game Session ID
+    this.gameId = gameId; // Game Session ID
+    this.sessionId = sessionId;
     this.player; // Player
-  }
-
-  getNextSequence() {
-    return ++this.sequence;
   }
 
   getGameId() {
@@ -31,7 +26,8 @@ class User {
    */
   sendPacket(packet) {
     const { type, payload } = packet;
-    const buffer = serialize(type, payload, this.getNextSequence()); // 직렬화
+    const payloadType = getPayloadNameByMessageType(type);
+    const buffer = serialize(type, payload, this.getNextSequence(), payloadType); // 직렬화
     this.socket.write(buffer);
   }
 }

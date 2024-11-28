@@ -45,7 +45,6 @@ export const registerRequestHandler = async ({ socket, payload }) => {
     );
     socket.write(registerResponse);
   } catch (error) {
-    // logger.error(`[ icePlayerMoveRequestHandler ] error =>>> `, error.message, error);
     console.error(`[ registerRequestHandler ] error =>>> `, error);
   }
 };

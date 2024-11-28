@@ -1,65 +1,72 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 import {
-  icePlayerMoveRequestHandler,
-  iceStartRequestHandler,
-  iceJoinRequestHandler,
+  iceGameReadyRequestHandler,
+  iceMiniGameStartRequestHandler,
+  icePlayerDamageRequestHandler,
+  icePlayerSyncRequestHandler,
 } from './ice.handlers.js';
 
 const handlers = {
   // * REQUEST
-  [MESSAGE_TYPE.ICE_JOIN_REQUEST]: {
-    handler: iceJoinRequestHandler,
-    message: 'ice.C2S_IceJoinRequest',
-    payload: 'iceJoinRequest',
+  [MESSAGE_TYPE.ICE_MINI_GAME_START_REQUEST]: {
+    handler: iceMiniGameStartRequestHandler,
+    message: 'ice.C2S_IceMiniGameStartRequest',
+    payload: 'iceMiniGameStartRequest',
   },
-  [MESSAGE_TYPE.ICE_PLAYER_MOVE_REQUEST]: {
-    handler: icePlayerMoveRequestHandler,
-    message: 'ice.C2S_IcePlayerMoveRequest',
-    payload: 'icePlayerMoveRequest',
-  },
-
-  [MESSAGE_TYPE.ICE_START_REQUEST]: {
-    handler: iceStartRequestHandler,
-    message: 'game.C2S_IceStartRequest',
-    payload: 'iceStartRequest',
-  },
-  // * RESPONSE [handler X]
-
-  // * NOTIFICATION [handler X]
-  [MESSAGE_TYPE.ICE_PLAYER_SPAWN_NOTIFICATION]: {
+  [MESSAGE_TYPE.ICE_MINI_GAME_START_NOTIFICATION]: {
     handler: undefined,
-    message: 'ice.S2C_IcePlayerSpawnNotification',
-    payload: 'icePlayerSpawnNotification',
+    message: 'ice.S2C_IceMiniGameStartResponse',
+    payload: 'iceMiniGameStartResponse',
   },
-  [MESSAGE_TYPE.ICE_PLAYERS_STATE_SYNC_NOTIFICATION]: {
+  [MESSAGE_TYPE.ICE_GAME_READY_REQUEST]: {
+    handler: iceGameReadyRequestHandler,
+    message: 'ice.C2S_IceGameReadyRequest',
+    payload: 'iceGameReadyRequest',
+  },
+  [MESSAGE_TYPE.ICE_GAME_READY_NOTIFICATION]: {
     handler: undefined,
-    message: 'ice.S2C_IcePlayersStateSyncNotification',
-    payload: 'icePlayersStateSyncNotification',
+    message: 'ice.S2C_IceGameReadyNotification',
+    payload: 'iceGameReadyNotification',
+  },
+  [MESSAGE_TYPE.ICE_GAME_START_NOTIFICATION]: {
+    handler: undefined,
+    message: 'ice.S2C_IceGameStartNotification',
+    payload: 'iceGameStartNotification',
+  },
+  [MESSAGE_TYPE.ICE_PLAYER_SYNC_REQUEST]: {
+    handler: icePlayerSyncRequestHandler,
+    message: 'ice.C2S_IcePlayerSyncRequest',
+    payload: 'icePlayerSyncRequest',
+  },
+  [MESSAGE_TYPE.ICE_PLAYERS_SYNC_NOTIFICATION]: {
+    handler: undefined,
+    message: 'ice.S2C_IcePlayerSyncNotification',
+    payload: 'icePlayerSyncNotification',
+  },
+  [MESSAGE_TYPE.ICE_PLAYER_DAMAGE_REQUEST]: {
+    handler: icePlayerDamageRequestHandler,
+    message: 'ice.C2S_IcePlayerDamageRequest',
+    payload: 'icePlayerDamageRequest',
+  },
+  [MESSAGE_TYPE.ICE_PLAYER_DAMAGE_NOTIFICATION]: {
+    handler: undefined,
+    message: 'ice.S2C_IcePlayerDamageNotification',
+    payload: 'icePlayerDamageNotification',
   },
   [MESSAGE_TYPE.ICE_PLAYER_DEATH_NOTIFICATION]: {
     handler: undefined,
     message: 'ice.S2C_IcePlayerDeathNotification',
     payload: 'icePlayerDeathNotification',
   },
-  [MESSAGE_TYPE.ICE_MAP_STATE_SYNC_NOTIFICATION]: {
+  [MESSAGE_TYPE.ICE_MAP_SYNC_NOTIFICATION]: {
     handler: undefined,
-    message: 'ice.S2C_IceMapStateSyncNotification',
-    payload: 'iceMapStateSyncNotification',
+    message: 'ice.S2C_IceMapSyncNotification',
+    payload: 'iceMapSyncNotification',
   },
-  [MESSAGE_TYPE.ICE_OVER_NOTIFICATION]: {
+  [MESSAGE_TYPE.ICE_GAME_OVER_NOTIFICATION]: {
     handler: undefined,
-    message: 'ice.S2C_IceOverNotification',
-    payload: 'iceOverNotification',
-  },
-  [MESSAGE_TYPE.ICE_START_NOTIFICATION]: {
-    handler: undefined,
-    message: 'ice.S2C_IceStartNotification',
-    payload: 'iceStartNotification',
-  },
-  [MESSAGE_TYPE.ICE_PLAYER_MOVE_NOTIFICATION]: {
-    handler: undefined,
-    message: 'ice.S2C_IcePlayerMoveNotification',
-    payload: 'icePlayerMoveNotification',
+    message: 'ice.S2C_IceGameOverNotification',
+    payload: 'iceGameOverNotification',
   },
 };
 
