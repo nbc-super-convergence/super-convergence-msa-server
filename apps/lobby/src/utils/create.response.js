@@ -16,11 +16,11 @@ export const createResponse = (result, messageType, sessionId) => {
       break;
 
     case MESSAGE_TYPE.LOBBY_USER_DETAIL_RESPONSE:
-      response.userData = result.data;
+      response.user = result.data;
       break;
 
     case MESSAGE_TYPE.LOBBY_JOIN_RESPONSE:
-      response.userData = result.data;
+      response.user = result.data;
       break;
 
     default:
