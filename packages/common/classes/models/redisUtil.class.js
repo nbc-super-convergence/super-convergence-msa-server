@@ -555,6 +555,28 @@ class RedisUtil {
     return result;
   }
 
+
+  /**
+   * 보드 전체 플레이어 조회
+   * @param {String} boardId
+   * @returns
+   */
+  async getBoardPlayers(boardId) {
+    const key = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+    const result = this.client.lrange(key, 0, -1);
+    return result;
+  }
+
+  /**
+   * 참여한 보드게임의 플레이어 목록 조회
+   * @param {String} sessionId
+   * @returns
+   */
+  async getBoardPlayersBySessionId(sessionId) {
+    const boardId = await this.getUserLocationField(sessionId, 'board');
+    return await this.getBoardPlayers(boardId);
+  }
+
   async createLockKey(key, id) {
     const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
     const lockAcquired = await this.client.set(lockKey, 'LOCK', 'NX', 'EX', 2);
