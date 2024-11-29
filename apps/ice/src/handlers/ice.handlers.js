@@ -1,29 +1,9 @@
 import iceGameManager from '../classes/managers/ice.game.manager.js';
 import iceUserManager from '../classes/managers/ice.user.manager.js';
-import { logger } from '@repo/common/config';
-
-export const iceMiniGameStartRequestHandler = async ({ socket, payload }) => {
-  try {
-    // ! 방장의 세션아이디
-    const { sessionId } = payload;
-
-    const game = iceGameManager.getGameBySessionId(sessionId);
-
-    if (!iceGameManager.isValidGame(game)) {
-      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
-    }
-
-    //* iceMiniGameReadyNotification
-    const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
-
-    socket.write(buffer);
-  } catch (error) {
-    logger.error(`[iceMiniGameStartRequestHandler]====> `, error);
-  }
-};
 
 export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
+    console.log(`Start [iceGameReadyRequestHandler]`);
     const { sessionId } = payload;
 
     const user = iceUserManager.getUserBySessionId(sessionId);
@@ -39,25 +19,29 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
     }
 
     // * iceGameReadyNotification
-    const readyBuffer = await iceGameManager.iceGameReadyNoti(user, game);
+    let buffer = await iceGameManager.iceGameReadyNoti(user, game);
 
     // * iceMiniGameStartNotification
-    const startBuffer = await iceGameManager.iceMiniGameStartNoti(socket, game);
+    if (game.isAllReady()) {
+      buffer = await iceGameManager.iceMiniGameStartNoti(socket, game);
+    }
 
-    // TODO: 헷갈리지 않게? 좀 이해하기 쉽게 만들기
-    socket.write(startBuffer ? startBuffer : readyBuffer);
+    // TODO: 마지막 남은 유저가 준비했을 때 굳이 2개를 보내야 할까?
+    socket.write(buffer);
   } catch (error) {
-    logger.error(`[iceGameReadyRequestHandler] ===> `, error);
+    console.error(`[iceGameReadyRequestHandler] ===> `, error);
   }
 };
 
 export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
   try {
+    console.log(`Start [icePlayerSyncRequestHandler]`);
+
     const user = iceUserManager.getUserBySessionId(payload.sessionId);
 
     if (!iceUserManager.isValidUser(user)) {
       throw new Error(`유저가 존재하지 않습니다.`);
-      // TODO: globalFailCode
+      // TODO: error부분 나중에 globalFailCode로 처리
     }
 
     const game = iceGameManager.getGameBySessionId(user.gameId);
@@ -71,12 +55,14 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     socket.write(buffer);
   } catch (error) {
-    logger.error(`[icePlayerSyncRequestHandler] ===> `, error);
+    console.error(`[icePlayerSyncRequestHandler] ===> `, error);
   }
 };
 
 export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
   try {
+    console.log(`Start [icePlayerDamageRequestHandler]`);
+
     const { sessionId } = payload;
 
     const user = iceUserManager.getUserBySessionId(sessionId);
@@ -102,6 +88,6 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
     // * iceGameOverNotification
     await iceGameManager.iceGameOver(socket, game);
   } catch (error) {
-    logger.error('[icePlayerDamageRequestHandler] ===> ', error);
+    console.error('[icePlayerDamageRequestHandler] ===> ', error);
   }
 };

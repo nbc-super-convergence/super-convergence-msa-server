@@ -9,6 +9,7 @@ import {
 } from '../../utils/ice.notifications.js';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { serializeForGate } from '@repo/common/utils';
+import { GAME_STATE } from '../../constants/states.js';
 
 const redisClient = new RedisClient(REDIS).getClient();
 const redisUtil = new RedisUtil(redisClient);
@@ -33,10 +34,10 @@ class iceGameManager {
     // ! 방장 아이디로 새로운 게임 생성
     const game = new iceGame(sessionId);
 
-    // TODO: 이 부분 보드게임에서 수정할 시 수정 필요
+    // ? nickName, sessionId가 있겠지?
     const users = await redisUtil.getBoardPlayersBySessionId(sessionId);
 
-    game.addUser(users, sessionId);
+    await game.addUser(users, sessionId);
     this.games.push(game); // 게임 세션에 추가;
 
     console.log(`현재 게임들`, this.games);
@@ -74,7 +75,7 @@ class iceGameManager {
 
   async iceMiniGameReadyNoti(game) {
     // * 게임 상태 변경
-    game.setGameState(gameState.START);
+    game.setGameState(GAME_STATE.START);
 
     // * 게임 시작 Notification
     const sessionIds = game.getAllSessionIds();
@@ -92,7 +93,7 @@ class iceGameManager {
 
   async iceGameReadyNoti(user, game) {
     // * 플레이어 준비
-    user.player.gameReady();
+    user.gameReady();
 
     const sessionIds = game.getOtherSessionIds(user.id);
 
@@ -106,31 +107,29 @@ class iceGameManager {
   }
 
   async iceMiniGameStartNoti(socket, game) {
-    if (game.isAllReady()) {
-      console.log(`모든 유저 준비 완료`);
+    console.log(`모든 유저 준비 완료`);
 
-      const sessionIds = game.getAllSessionIds();
+    const sessionIds = game.getAllSessionIds();
 
-      const message = iceMiniGameStartNotification();
+    const message = iceMiniGameStartNotification();
 
-      const payloadType = getPayloadNameByMessageType(message.type);
+    const payloadType = getPayloadNameByMessageType(message.type);
 
-      const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
 
-      // * 맵 변경, 게임 종료 타이머
-      game.changeMap(socket);
-      game.iceGameTimer(socket);
+    // * 맵 변경, 게임 종료 타이머
+    game.changeMap(socket);
+    game.iceGameTimer(socket);
 
-      return buffer;
-    }
-    return;
+    return buffer;
   }
 
   async iceGameOver(socket, game) {
     if (game.isOneAlive()) {
+      console.log(`유저 1명, 게임 종료`);
       const user = game.getAliveUsers()[0];
 
-      user.player.rank = 1;
+      user.rank = 1;
 
       game.handleGameEnd(socket);
     }

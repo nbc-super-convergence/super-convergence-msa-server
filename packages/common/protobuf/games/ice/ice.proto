@@ -3,10 +3,6 @@ syntax = 'proto3';
 package ice;
 import '../../common.proto';
 
-message C2S_IceMiniGameStartRequest {
-    string sessionId = 1;
-}
-
 message S2C_IceMiniGameReadyNotification {
     repeated startPlayers players = 1;
 
