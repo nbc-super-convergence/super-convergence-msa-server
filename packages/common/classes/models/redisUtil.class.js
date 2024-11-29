@@ -2,7 +2,6 @@ import redisTransaction from './redisTransaction.class.js';
 
 /**
  * @typedef userdata
- * @property {string} loginId
  * @property {string} nickname
  */
 
@@ -183,11 +182,10 @@ class RedisUtil {
    * @param {string} sessionId
    * @param {userdata} userData
    */
-  async createUserToSession(sessionId, userData) {
+  async createUserToSession(sessionId, nickname) {
     const key = `${this.prefix.USER}:${sessionId}`;
     await this.client.hset(key, {
-      loginId: userData.loginId,
-      nickname: userData.nickname,
+      nickname: nickname,
     });
     await this.client.expire(key, this.expire);
   }
@@ -287,14 +285,12 @@ class RedisUtil {
   /**
    * 세션에 유저 데이터 등록
    * @param {string} sessionId
-   * @param {userdata} userData
+   * @param {string} nickname
    */
-  async createUserToSession(sessionId, userData) {
+  async createUserToSession(sessionId, nickname) {
     const key = `${this.prefix.USER}:${sessionId}`;
     await this.client.hset(key, {
-      loginId: userData.loginId,
-      nickname: userData.nickname,
-      location: userData.location,
+      nickname: nickname,
     });
     await this.client.expire(key, 60 * 60 * 24);
   }
@@ -343,15 +339,12 @@ class RedisUtil {
    */
   async getUserToSession(sessionId) {
     const key = `${this.prefix.USER}:${sessionId}`;
-    const userData = await this.client.hgetall(key);
-    if (!userData) {
+    const nickname = await this.client.hgetall(key);
+    if (!nickname) {
       return null;
     }
 
-    return {
-      loginId: userData.loginId,
-      nickname: userData.nickname,
-    };
+    return nickname;
   }
 
   //* 로비 데이터
@@ -394,19 +387,53 @@ class RedisUtil {
   //* 룸 데이터
 
   async getRoomsByLobby(lobbyId) {
-    const pipeline = this.client.pipeline();
+    try {
+      //* 로비의 방 목록 키 조회
+      const lobbyRoomListKey = `${this.prefix.LOBBY_ROOM_LIST}:${lobbyId}`;
+      const roomIds = await this.client.smembers(lobbyRoomListKey);
 
-    pipeline.smembers(`${this.prefix.LOBBY_ROOM_LIST}:${lobbyId}`);
-    const [[err, roomKeys]] = await pipeline.exec();
+      if (!roomIds || roomIds.length === 0) {
+        console.error('[ getRoomsByLobby ] ====> no rooms found');
+        return [];
+      }
 
-    if (err || !roomKeys || roomKeys.length === 0) return [];
+      //* 실제 방 ID들을 가져옴 (prefix:roomId 형태에서 roomId만 추출)
+      const actualRoomIds = roomIds.map((key) => key.split(':').pop());
 
-    roomKeys.forEach((key) => {
-      pipeline.hgetall(key);
-    });
+      //* 각 방의 데이터를 조회
+      const rooms = await Promise.all(
+        actualRoomIds.map(async (roomId) => {
+          const roomKey = `${this.prefix.ROOM}:${roomId}`;
+          const roomData = await this.client.hgetall(roomKey);
 
-    const results = await pipeline.exec();
-    return results.map(([err, room]) => (err || !room ? null : room)).filter(Boolean);
+          if (!roomData || !roomData.roomId) {
+            //* 유효하지 않은 방은 로비 목록에서 제거
+            await this.client.srem(lobbyRoomListKey, roomKey);
+            return null;
+          }
+
+          return {
+            roomId: roomData.roomId,
+            ownerId: roomData.ownerId,
+            roomName: roomData.roomName,
+            lobbyId: roomData.lobbyId,
+            state: roomData.state,
+            users: roomData.users,
+            maxUser: roomData.maxUser,
+            readyUsers: roomData.readyUsers,
+          };
+        }),
+      );
+
+      //* null 값 필터링
+      const validRooms = rooms.filter((room) => room !== null);
+      console.log('[ getRoomsByLobby ] ====> found rooms:', validRooms.length);
+
+      return validRooms;
+    } catch (error) {
+      console.error('[ getRoomsByLobby ] ====> error', error);
+      return [];
+    }
   }
 
   /**
@@ -554,7 +581,6 @@ class RedisUtil {
 
     return result;
   }
-
 
   /**
    * 보드 전체 플레이어 조회
