@@ -4,7 +4,7 @@ import iceUserManager from '../managers/ice.user.manager.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { serializeForGate } from '@repo/common/utils';
-import { gameState } from '../../constants/gameState.js';
+import { GAME_STATE } from '../../constants/states.js';
 
 class iceGame extends Game {
   constructor(id) {
@@ -16,19 +16,23 @@ class iceGame extends Game {
     this.startPosition = iceMap.startPosition;
   }
 
-  addUser(users, sessionId) {
+  async addUser(users, sessionId) {
     users.forEach((user, index) => {
-      //TODO: user.loginId? user.nickName??
-      const newUser = iceUserManager.addUser(user.loginId, sessionId, user.sessionId);
+      //! nickName = id
 
       const position = this.startPosition[index].pos;
       const rotation = this.startPosition[index].rot;
 
-      newUser.setPlayer(position, rotation);
+      const newUser = iceUserManager.addUser(
+        user.nickName,
+        sessionId,
+        user.sessionId,
+        position,
+        rotation,
+      );
+
       this.users.push(newUser);
     });
-
-    console.log(`게임내 유저들`, this.users);
   }
 
   getAllUser() {
@@ -50,11 +54,11 @@ class iceGame extends Game {
   }
 
   isAllReady() {
-    return this.users.filter((user) => user.player.isReady === true).length === this.users.length;
+    return this.users.filter((user) => user.isReady === true).length === this.users.length;
   }
 
   getAliveUsers() {
-    return this.users.filter((user) => user.player.state !== 2);
+    return this.users.filter((user) => user.state !== 2);
   }
 
   isOneAlive() {
@@ -62,7 +66,7 @@ class iceGame extends Game {
   }
 
   clearAllPlayers() {
-    this.users.forEach((user) => user.player.resetPlayer());
+    this.users.forEach((user) => user.resetInfo());
   }
 
   setGameState(state) {
@@ -99,8 +103,8 @@ class iceGame extends Game {
       let aliveUsers = this.getAliveUsers();
 
       // * 살아있는 체력 순으로 내림차순 정렬 후, rank
-      aliveUsers = aliveUsers.sort((a, b) => b.player.hp - a.player.hp);
-      aliveUsers.forEach((user, index) => (user.player.rank = index + 1));
+      aliveUsers = aliveUsers.sort((a, b) => b.hp - a.hp);
+      aliveUsers.forEach((user, index) => (user.rank = index + 1));
 
       this.handleGameEnd(socket);
     }, this.gameTimer);
@@ -127,7 +131,7 @@ class iceGame extends Game {
 
   reset() {
     this.map = iceMap;
-    this.setGameState(gameState.WAIT);
+    this.setGameState(GAME_STATE.WAIT);
 
     for (const key in this.timers) {
       clearTimeout(this.timers[key]); // 타이머 제거

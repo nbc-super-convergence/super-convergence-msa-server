@@ -5,8 +5,8 @@ export const iceMiniGameReadyNotification = (users) => {
   const payload = {
     startPlayers: users.map((user) => ({
       sessionId: user.sessionId,
-      position: user.player.position,
-      rotation: user.player.rotation,
+      position: user.position,
+      rotation: user.rotation,
     })),
   };
 
@@ -32,9 +32,9 @@ export const icePlayerSyncNotification = (user) => {
 
   const payload = {
     sessionId: user.sessionId,
-    position: user.player.position,
-    rotation: user.player.rotation,
-    state: user.player.state,
+    position: user.position,
+    rotation: user.rotation,
+    state: user.state,
   };
 
   return { type, payload };
@@ -55,7 +55,7 @@ export const icePlayerDamageNotification = (sessionId) => {
  */
 export const icePlayerDeathNotification = (user) => {
   const type = MESSAGE_TYPE.ICE_PLAYER_DEATH_NOTIFICATION;
-  const payload = { sessionId: user.sessionId, position: user.player.position };
+  const payload = { sessionId: user.sessionId, position: user.position };
 
   return { type, payload };
 };
@@ -70,7 +70,7 @@ export const iceGameOverNotification = (users) => {
 
   // ranks 배열 생성
   const ranks = users.map((user) => {
-    return { sessionId: user.sessionId, rank: user.player.rank };
+    return { sessionId: user.sessionId, rank: user.rank };
   });
 
   // ranks와 endTime으로 payload 생성

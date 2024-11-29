@@ -23,8 +23,8 @@ class iceUserManager {
     return iceUserManager.instance;
   }
 
-  addUser(id, gameId, sessionId) {
-    const user = new iceUser(id, gameId, sessionId);
+  addUser(id, gameId, sessionId, position, rotation) {
+    const user = new iceUser(id, gameId, sessionId, position, rotation);
 
     this.users.push(user);
     return user;
@@ -36,7 +36,7 @@ class iceUserManager {
   }
 
   getUserByPlayerId(playerId) {
-    return this.users.find((user) => user.player.id === playerId);
+    return this.users.find((user) => user.id === playerId);
   }
 
   getUserBySessionId(sessionId) {
@@ -44,7 +44,7 @@ class iceUserManager {
   }
 
   getAllUserBySessionId(sessionId) {
-    return this.users.filter((user) => user.player.gameId === sessionId);
+    return this.users.filter((user) => user.gameId === sessionId);
   }
 
   isValidUser(user) {
@@ -62,7 +62,7 @@ class iceUserManager {
 
   icePlayerSyncNoti(user, game, payload) {
     //* 유저 위치 정보 업데이트
-    user.player.updateState(payload.position, payload.rotation, payload.state);
+    user.updateUserInfos(payload.position, payload.rotation, payload.state);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -77,7 +77,7 @@ class iceUserManager {
 
   icePlayerDamageNoti(user, game) {
     // * 플레이어에 데미지
-    user.player.damage();
+    user.damage();
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -91,12 +91,12 @@ class iceUserManager {
   }
 
   icePlayerDeathNoti(user, game) {
-    if (user.player.hp <= 0) {
+    if (user.isDead()) {
       // * 플레이어 사망
-      user.player.playerDead();
+      user.Dead();
 
       // * 사망시 랭킹
-      user.player.rank = game.getAliveUser().length + 1;
+      user.rank = game.getAliveUser().length + 1;
 
       const sessionIds = game.getOtherSessionIds(user.sessionId);
 
