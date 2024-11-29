@@ -34,12 +34,17 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
 
     const game = iceGameManager.getGameBySessionId(user.gameId);
 
+    if (!iceGameManager.isValidGame(game)) {
+      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
+    }
+
     // * iceGameReadyNotification
     const readyBuffer = await iceGameManager.iceGameReadyNoti(user, game);
 
     // * iceMiniGameStartNotification
     const startBuffer = await iceGameManager.iceMiniGameStartNoti(socket, game);
 
+    // TODO: 헷갈리지 않게? 좀 이해하기 쉽게 만들기
     socket.write(startBuffer ? startBuffer : readyBuffer);
   } catch (error) {
     logger.error(`[iceGameReadyRequestHandler] ===> `, error);
@@ -50,7 +55,16 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
   try {
     const user = iceUserManager.getUserBySessionId(payload.sessionId);
 
+    if (!iceUserManager.isValidUser(user)) {
+      throw new Error(`유저가 존재하지 않습니다.`);
+      // TODO: globalFailCode
+    }
+
     const game = iceGameManager.getGameBySessionId(user.gameId);
+
+    if (!iceGameManager.isValidGame(game)) {
+      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
+    }
 
     // * icePlayerSyncNotification
     const buffer = await iceUserManager.icePlayerSyncNoti(user, game, payload);
@@ -67,7 +81,15 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     const user = iceUserManager.getUserBySessionId(sessionId);
 
+    if (!iceUserManager.isValidUser(user)) {
+      throw new Error(`유저가 존재하지 않습니다.`);
+    }
+
     const game = iceGameManager.getGameBySessionId(user.gameId);
+
+    if (!iceGameManager.isValidGame(game)) {
+      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
+    }
 
     // * icePlayerDamageNotification
     const damageBuffer = await iceUserManager.icePlayerDamageNoti(user, game);

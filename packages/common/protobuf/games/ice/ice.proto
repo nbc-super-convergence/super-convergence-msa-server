@@ -11,7 +11,7 @@ message S2C_IceMiniGameReadyNotification {
     repeated startPlayers players = 1;
 
     message startPlayers {
-        int32 sessionId = 1; 
+        string sessionId = 1; 
         Vector position =2; 
         float rotation = 3;
     } 
@@ -22,36 +22,36 @@ message C2S_IceGameReadyRequest {
 }
 
 message S2C_IceGameReadyNotification {
-    int32 sessionId = 1;
+    string sessionId = 1;
 }
 
 message S2C_IceMiniGameStartNotification {
 }
 
 message C2S_IcePlayerSyncRequest {
-    int32 sessionId = 1;
+    string sessionId = 1;
      Vector position = 2;
      float rotation = 3;
      State state = 4;
 }
 
 message S2C_IcePlayerSyncNotification {
-     int32 sessionId = 1;
+     string sessionId = 1;
      Vector position = 2;
      float rotation = 3;
      State state = 4;
 }
 
 message C2S_IcePlayerDamageRequest {
-   int32 sessionId = 1;
+   string sessionId = 1;
 }
 
 message S2C_IcePlayerDamageNotification {
-    int32 sessionId = 1;
+    string sessionId = 1;
 }
 
 message S2C_IcePlayerDeathNotification {
-    int32 sessionId = 1;
+    string sessionId = 1;
     Vector position = 2;
 }
 
@@ -60,10 +60,10 @@ message S2C_IceMapSyncNotification {
 
 message S2C_IceGameOverNotification {
    repeated Rank ranks = 1;
-    int32 endTime = 2; 
+    int64 endTime = 2; 
 
     message Rank {
-        int32 sessionId = 1;
+        string sessionId = 1;
         int32 rank = 2; 
     }
 }
