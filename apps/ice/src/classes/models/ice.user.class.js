@@ -14,6 +14,8 @@ class iceUser extends User {
     this.rank;
     this.isReady = false;
 
+    this.startInfos;
+
     this.saveStartInfo();
   }
 
