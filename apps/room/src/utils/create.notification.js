@@ -19,6 +19,7 @@ export const createNotification = (data, messageType, sessionIds) => {
     case MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION:
       notification.payload = {
         user: data.userData,
+        ownerId: data.ownerId,
       };
       break;
 

@@ -20,7 +20,7 @@ export const joinRoomRequestHandler = async ({ socket, payload }) => {
 
       if (otherSessionIds.length > 0) {
         const notificationPacket = createNotification(
-          { userData: result.userData },
+          { userData: result.data },
           MESSAGE_TYPE.JOIN_ROOM_NOTIFICATION,
           otherSessionIds,
         );
