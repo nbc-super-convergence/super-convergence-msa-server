@@ -9,7 +9,8 @@ message Vector {
 }
 
 message UserData {
-    string nickname = 1;
+    string sessionId = 1;
+    string nickname = 2;
 }
 
 message RoomData {
@@ -18,15 +19,15 @@ message RoomData {
     string roomName = 3;
     string lobbyId = 4;
     RoomStateType state = 5;
-    repeated string users = 6;
+    repeated UserData users = 6;
     int32 maxUser = 7;
     repeated string readyUsers = 8;
 }
 
 enum RoomStateType  {
-	WAIT = 0;
-	PREPARE = 1;
-	BOARD = 2;
+	  WAIT = 0;
+	  PREPARE = 1;
+	  BOARD = 2;
     MINI = 3;
 }
 
