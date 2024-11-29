@@ -106,7 +106,7 @@ class Room {
       }
 
       // 방장이 나가는 경우
-      if (isOwner) {
+      if (roomData.ownerId === sessionId) {
         // 남은 유저가 있으면 첫 번째 유저를 방장으로 설정
         const remainingUsers = Array.from(roomData.users);
         if (remainingUsers.length > 0) {

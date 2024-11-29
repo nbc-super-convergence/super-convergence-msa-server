@@ -19,7 +19,7 @@ message RoomData {
     string roomName = 3;
     string lobbyId = 4;
     RoomStateType state = 5;
-    repeated UserData users = 6;
+    repeated string users = 6;
     int32 maxUser = 7;
     repeated string readyUsers = 8;
 }

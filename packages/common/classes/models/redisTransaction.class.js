@@ -62,7 +62,7 @@ class redisTransaction {
     return this.execute(async (multi) => {
       const roomKey = `${this.prefix.ROOM}:${room.roomId}`;
       const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
-      const lobbyRoomListKey = `${this.prefix.LOBBY_ROOM_LIST}:${room.roomId}`;
+      const lobbyRoomListKey = `${this.prefix.LOBBY_ROOM_LIST}:${room.lobbyId}`;
 
       multi.exists(roomKey);
       multi.hset(roomKey, {
