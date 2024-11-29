@@ -49,7 +49,7 @@ class RoomManager {
 
       logger.info('[ createRoom ] ====> success');
 
-      return ResponseHelper.success(RoomDTO.toResponse(roomData));
+      return ResponseHelper.success(await RoomDTO.toResponse(roomData));
     } catch (error) {
       logger.error('[ createRoom ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -97,15 +97,15 @@ class RoomManager {
 
       //* 입장
       const roomData = RoomDTO.fromRedis(redisData);
-      const result = Room.join(roomData, sessionId, userData);
+      const result = Room.join(roomData, sessionId);
 
-      if (result.success) {
-        await redis.transaction.joinRoom(roomId, RoomDTO.toRedis(roomData), sessionId);
+      if (!result.success) return result;
+      await redis.transaction.joinRoom(roomId, RoomDTO.toRedis(result.data), sessionId);
 
-        logger.info('[ joinRoom ] ====> success');
-      }
+      logger.info('[ joinRoom ] ====> success');
 
-      return result;
+      const responseData = await RoomDTO.toResponse(result.data);
+      return ResponseHelper.success(responseData);
     } catch (error) {
       logger.error('[ joinRoom ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -142,21 +142,25 @@ class RoomManager {
 
       //* 퇴장
       const roomData = RoomDTO.fromRedis(redisData);
-      const result = Room.leave(roomData, sessionId, userData);
+      const result = Room.leave(roomData, sessionId);
 
-      if (result.success) {
-        if (roomData.users.size === 0) {
-          //* 남은 인원이 없으면 대기방 삭제
-          await redis.deleteRoom(roomId);
-        } else {
-          await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
-        }
-        await redis.deleteUserLocationField(sessionId, 'room');
+      if (!result.success) return result;
 
-        logger.info('[ leaveRoom ] ====> success');
+      if (roomData.users.size === 0) {
+        //* 남은 인원이 없으면 대기방 삭제
+        await redis.transaction.deleteRoom(roomId, roomData.lobbyId);
+      } else {
+        await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
       }
+      await redis.deleteUserLocationField(sessionId, 'room');
 
-      return result;
+      logger.info('[ leaveRoom ] ====> success');
+
+      const responseData = await RoomDTO.toResponse(result.data);
+      return ResponseHelper.success(responseData, {
+        stateChanged: result.stateChanged,
+        ownerId: result.ownerId,
+      });
     } catch (error) {
       logger.error('[ leaveRoom ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -198,17 +202,28 @@ class RoomManager {
         return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
-      //* 준비 상태 설정
       const roomData = RoomDTO.fromRedis(redisData);
-      const result = Room.updateReady(roomData, sessionId, isReady, userData);
 
-      if (result.success) {
-        await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
-
-        logger.info('[ updateReady ] ====> success');
+      // * 방장은 준비 불가
+      if (roomData.ownerId === sessionId) {
+        logger.error('[ updateReady ] ====> owner can not prepare', { sessionId });
+        return ResponseHelper.fail(config.FAIL_CODE.OWNER_CANNOT_READY);
       }
 
-      return result;
+      //* 준비 상태 설정
+      const result = Room.updateReady(roomData, sessionId, isReady);
+
+      if (!result.success) return result;
+
+      await redis.updateRoomFields(roomId, RoomDTO.toRedis(roomData));
+
+      logger.info('[ updateReady ] ====> success');
+
+      const responseData = await RoomDTO.toResponse(roomData);
+      return ResponseHelper.success(result.data, {
+        state: result.state,
+        userData: responseData.users.find((user) => user.sessionId === sessionId),
+      });
     } catch (error) {
       logger.error('[ updateReady ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -230,15 +245,21 @@ class RoomManager {
       }
 
       //* 로비에 있는 대기방 목록 조회
-      const redisDataList = await redis.getRoomsByLobby(lobbyId);
-      const roomList = redisDataList
-        .map((redisData) => RoomDTO.fromRedis(redisData))
-        .map((roomData) => RoomDTO.toResponse(roomData))
-        .filter((room) => room !== null);
+      const rooms = await redis.getRoomsByLobby(lobbyId);
 
-      logger.info('[ getRoomList ] ====> success');
+      // 각 방의 상세 정보를 포함한 응답 생성
+      const roomResponses = await Promise.all(
+        rooms.map(async (room) => {
+          const roomData = RoomDTO.fromRedis(room);
+          if (!roomData) return null;
+          return await RoomDTO.toResponse(roomData);
+        }),
+      );
 
-      return ResponseHelper.success(roomList);
+      const validRoomResponses = roomResponses.filter((room) => room !== null);
+      logger.info('[ getRoomList ] ====> success', { roomCount: validRoomResponses.length });
+
+      return ResponseHelper.success(validRoomResponses);
     } catch (error) {
       logger.error('[ getRoomList ] ====> unknown error', error);
       return ResponseHelper.fail();
