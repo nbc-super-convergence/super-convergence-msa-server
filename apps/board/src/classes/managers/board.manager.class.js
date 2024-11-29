@@ -2,7 +2,7 @@ import { FAIL_CODE } from '@repo/common/failcodes';
 import { redis } from '../../utils/redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { BOARD_STATE } from '../../constants/state.js';
-import { getRollDiceResult, rollDice } from '../../utils/dice.utils.js';
+import { getRollDiceResult } from '../../utils/dice.utils.js';
 
 class BoardManager {
   constructor() {
