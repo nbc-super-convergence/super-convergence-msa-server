@@ -219,11 +219,6 @@ const handlers = {
   },
 
   // Ice Game (201-212)
-  [MESSAGE_TYPE.ICE_MINI_GAME_START_REQUEST]: {
-    handler: undefined,
-    message: 'ice.C2S_IceMiniGameStartRequest',
-    payload: 'iceMiniGameStartRequest',
-  },
   [MESSAGE_TYPE.ICE_MINI_GAME_READY_NOTIFICATION]: {
     handler: undefined,
     message: 'ice.S2C_IceMiniGameStartResponse',

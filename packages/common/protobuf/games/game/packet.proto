@@ -72,18 +72,17 @@ message GamePacket {
         S2C_StartMiniGameNotification startMiniGameNotification = 102;
 
         // ice  (201)
-        C2S_IceMiniGameStartRequest iceMiniGameStartRequest = 201;
-        S2C_IceMiniGameReadyNotification iceMiniGameReadyNotification = 202;
-        C2S_IceGameReadyRequest iceGameReadyRequest = 203; 
-        S2C_IceGameReadyNotification iceGameReadyNotification = 204;
-        S2C_IceMiniGameStartNotification iceMiniGameStartNotification = 205;
-        C2S_IcePlayerSyncRequest icePlayerSyncRequest = 206;
-        S2C_IcePlayerSyncNotification icePlayerSyncNotification = 207;
-        C2S_IcePlayerDamageRequest icePlayerDamageRequest = 208;
-        S2C_IcePlayerDamageNotification icePlayerDamageNotification = 209;
-        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 210;
-        S2C_IceGameOverNotification iceGameOverNotification = 211;
-        S2C_IceMapSyncNotification iceMapSyncNotification = 212;
+        S2C_IceMiniGameReadyNotification iceMiniGameReadyNotification = 201;
+        C2S_IceGameReadyRequest iceGameReadyRequest = 202; 
+        S2C_IceGameReadyNotification iceGameReadyNotification = 203;
+        S2C_IceMiniGameStartNotification iceMiniGameStartNotification = 204;
+        C2S_IcePlayerSyncRequest icePlayerSyncRequest = 205;
+        S2C_IcePlayerSyncNotification icePlayerSyncNotification = 206;
+        C2S_IcePlayerDamageRequest icePlayerDamageRequest = 207;
+        S2C_IcePlayerDamageNotification icePlayerDamageNotification = 208;
+        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 209;
+        S2C_IceGameOverNotification iceGameOverNotification = 210;
+        S2C_IceMapSyncNotification iceMapSyncNotification = 211;
 
     }
 }
