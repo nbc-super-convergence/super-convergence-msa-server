@@ -166,11 +166,10 @@ class redisTransaction {
       const loginKey = `${this.prefix.LOGIN}`;
 
       multi.hset(userKey, {
-        loginId: user.loginId,
         nickname: user.nickname,
       });
       multi.expire(userKey, this.expire);
-      multi.sadd(loginKey, loginId);
+      multi.sadd(loginKey, user.nickname);
     });
   }
 

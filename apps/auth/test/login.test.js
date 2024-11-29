@@ -75,7 +75,7 @@ const runClient = async () => {
         const buffer4 = serialize(3, payload4, 0, 'loginRequest');
         client.write(buffer4);
         // console.log(`C2S buffer ===>>> `, buffer);
-      }, 1000);
+      }, 1500);
     });
 
     // 서버로부터 데이터 수신

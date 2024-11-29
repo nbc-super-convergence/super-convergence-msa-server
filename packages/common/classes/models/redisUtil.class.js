@@ -141,9 +141,9 @@ class RedisUtil {
    * 중복 로그인 검사
    */
 
-  async getUserToLogin(loginId) {
+  async getUserToLogin(nickname) {
     const key = `${this.prefix.LOGIN}`;
-    const findUser = await this.client.sismember(key, loginId);
+    const findUser = await this.client.sismember(key, nickname);
     return findUser;
   }
 
@@ -554,7 +554,6 @@ class RedisUtil {
 
     return result;
   }
-
 
   /**
    * 보드 전체 플레이어 조회

@@ -21,7 +21,7 @@ export const registerValidation = async (payload, loginId) => {
     // 동시성 제어
     const lockAcquired = await redis.createLockKey('register', value.loginId);
     if (!lockAcquired) {
-      return config.FAIL_CODE.UNKNOWN_ERROR;
+      return config.FAIL_CODE.ALREADY_EXIST_ID;
     }
 
     // 이미 존재하는 아이디
@@ -63,11 +63,11 @@ export const loginValidation = async (payload, loginId) => {
     // 동시성 제어
     const lockAcquired = await redis.createLockKey('login', value.loginId);
     if (!lockAcquired) {
-      return config.FAIL_CODE.UNKNOWN_ERROR;
+      return config.FAIL_CODE.ALREADY_LOGGED_IN_ID;
     }
 
     // 중복로그인 체크
-    const isAlreadyLoggedIn = await redis.getUserToLogin(value.loginId);
+    const isAlreadyLoggedIn = await redis.getUserToLogin(loginId.nickname);
     if (isAlreadyLoggedIn === 1) {
       return config.FAIL_CODE.ALREADY_LOGGED_IN_ID;
     }

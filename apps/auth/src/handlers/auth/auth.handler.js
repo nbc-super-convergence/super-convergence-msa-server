@@ -62,7 +62,6 @@ export const loginRequestHandler = async ({ socket, payload }) => {
       const sessionId = uuidv4();
 
       const redisData = {
-        loginId: checkExistId.login_id,
         nickname: checkExistId.nickname,
       };
 
