@@ -136,11 +136,20 @@ class redisTransaction {
       });
       multi.expire(boardKey, this.expire);
 
-      // * 보드 플레이어 저장
       console.log('[ createBoardGame ] board.users ===>> ', board.users);
       board.users.forEach((sessionId) => {
+        // * 보드 플레이어 목록 저장
         multi.sadd(playersKey, sessionId);
         multi.expire(playersKey, this.expire);
+
+        // * 보드 플레이어 정보 저장
+        // 골드, 트로피, 플레이어 타일 위치,
+        const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${board.boardId}:${sessionId}`;
+        multi.hset(boardPlayerInfoKey, {
+          gold: 10, // TODO: 게임 데이터에서 파싱?
+          trophy: 0,
+          tileLocation: 0, // TODO: 시작 위치?
+        });
       });
 
       // * 유저 위치정보 - 보드 저장

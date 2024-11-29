@@ -25,6 +25,13 @@ import redisTransaction from './redisTransaction.class.js';
  * @property {string} readyUsers
  */
 
+/**
+ * @typedef BoardPlayerInfo
+ * @property {number} gold
+ * @property {number} trophy
+ * @property {number} tileLocation
+ */
+
 class RedisUtil {
   constructor(redisClient) {
     this.client = redisClient;
@@ -36,6 +43,7 @@ class RedisUtil {
       ROOM: 'room',
       LOGIN: 'login',
       BOARD: 'board',
+      BOARD_PLAYER_INFO: 'boardPlayerInfo',
       BOARD_PLAYERS: 'boardPlayers',
       LOCK: 'lock',
     };
@@ -601,6 +609,28 @@ class RedisUtil {
   async getBoardPlayersBySessionId(sessionId) {
     const boardId = await this.getUserLocationField(sessionId, 'board');
     return await this.getBoardPlayers(boardId);
+  }
+
+  /**
+   * 보드게임 플레이어 정보 조회
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @returns {BoardPlayerInfo}
+   */
+  async getBoardPlayerinfo(boardId, sessionId) {
+    const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+    return await this.client.hgetall(key);
+  }
+
+  /**
+   * 보드게임 플레이어 정보 수정
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {BoardPlayerInfo} boardPlayerInfo
+   */
+  async updateBoardPlayerInfo(boardId, sessionId, boardPlayerInfo) {
+    const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+    await this.client.hset(key, boardPlayerInfo);
   }
 
   async createLockKey(key, id) {

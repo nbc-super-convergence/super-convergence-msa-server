@@ -306,3 +306,89 @@ export const startMiniGameRequestHandler = async ({ socket, payload }) => {
   // TODO: 이 요청은 누가?? 어떤 타이밍에?
   // TODO: => 턴 마지막 유저가? 이름 바꾸면 좋을듯? [ 미니게임선정 요청 ]
 };
+
+/**
+ * * 트로피 구매 요청
+ * * MESSAGE_TYPE.PURCHASE_TROPHY_REQUEST
+ *
+ * * => 응답 [ PURCHASE_TROPHY_RESPONSE ]
+ * * => 알림 [ PURCHASE_TROPHY_NOTIFICATION ]
+ */
+export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
+  /**
+   * 1. 트로피 구매 요청 [ sessionId, tile ]
+   * 2. 플레이어 골드 감소,
+   * 3. 플레이어 트로피 개수 증가,
+   * 4. 트로피 타일 해제 및 새로운 트로피 타일 생성
+   * 5. 트로피 구매 응답
+   * 6. 트로피 구매 알림
+   */
+  const { sessionId, tile } = payload;
+  let sessionIds = [sessionId];
+
+  try {
+    //
+    const result = await boardManager.purchaseTrophy(sessionId, tile);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.PURCHASE_TROPHY_NOTIFICATION;
+    const notification = {
+      sessionId: sessionId,
+      beforeTile: tile,
+      nextTile: result.data.nextTile,
+    };
+
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(notificationMessageType),
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.PURCHASE_TROPHY_RESPONSE;
+    const response = {
+      success: result.success,
+      playerInfo: result.data.boardPlayerInfo,
+      nextTile: result.data.nextTile,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+  } catch (err) {
+    console.error('[ BOARD: purchaseTrophyRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.PURCHASE_TROPHY_RESPONSE, sessionIds, err);
+  }
+};
+
+/**
+ * * 벌금 요청
+ * * TILE_PENALTY_REQUEST
+ *
+ * * => 응답 [ TILE_PENALTY_RESPONSE ]
+ * * => 알림 [ TILE_PENALTY_NOTIFICATION ]
+ */
+export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
+  //
+};
+
+/**
+ * * 첫 주사위 순서 게임 요청
+ * * ORDER_OF_THE_DICE_REQUEST
+ *
+ * * => 응답 [ ORDER_OF_THE_DICE_RESPONSE ]
+ * * => 알림 [ ORDER_OF_THE_DICE_NOTIFICATION ]
+ */
+export const orderOfTheDiceRequestHandler = async ({ socket, payload }) => {
+  //
+};
