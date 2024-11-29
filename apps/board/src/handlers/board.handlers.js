@@ -1,7 +1,5 @@
 import { serializeForGate } from '@repo/common/utils';
-import { redis } from '../utils/redis.js';
 import boardManager from '../classes/managers/board.manager.class.js';
-import { FAIL_CODE } from '@repo/common/failcodes';
 import { MESSAGE_TYPE } from '@repo/common/header';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { handleError } from '../utils/errors/handle.error.js';
