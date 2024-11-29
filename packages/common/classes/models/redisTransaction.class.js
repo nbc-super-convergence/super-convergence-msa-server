@@ -137,8 +137,11 @@ class redisTransaction {
       multi.expire(boardKey, this.expire);
 
       // * 보드 플레이어 저장
-      multi.sadd(playersKey, board.ownerId);
-      multi.expire(playersKey, this.expire);
+      console.log('[ createBoardGame ] board.users ===>> ', board.users);
+      board.users.forEach((sessionId) => {
+        multi.sadd(playersKey, sessionId);
+        multi.expire(playersKey, this.expire);
+      });
 
       // * 유저 위치정보 - 보드 저장
       multi.hset(locationKey, 'board', board.boardId);
