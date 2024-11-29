@@ -56,8 +56,6 @@ const runClient = async () => {
             client.buffer = client.buffer.subarray(length);
 
             const payload = packetParser(messageType, packet, payloadType);
-
-            console.log('payload', payload);
           } catch (e) {
             console.error('[ onData ] 오류가 발생하였습니다.', e);
           }

@@ -1,30 +1,28 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 
-export const iceMiniGameStartNotification = (users, startTime) => {
+export const iceMiniGameReadyNotification = (users) => {
   const type = MESSAGE_TYPE.ICE_MINI_GAME_START_NOTIFICATION;
   const payload = {
     startPlayers: users.map((user) => ({
-      playerId: user.player.id,
-      playerType: user.player.type,
+      sessionId: user.sessionId,
       position: user.player.position,
       rotation: user.player.rotation,
     })),
-    startTime,
   };
 
   return { type, payload };
 };
 
-export const iceGameReadyNotification = (playerId) => {
+export const iceGameReadyNotification = (sessionId) => {
   const type = MESSAGE_TYPE.ICE_GAME_READY_NOTIFICATION;
-  const payload = { playerId };
+  const payload = { sessionId };
 
   return { type, payload };
 };
 
-export const iceGameStartNotification = (startTime) => {
-  const type = MESSAGE_TYPE.ICE_GAME_START_NOTIFICATION;
-  const payload = { startTime };
+export const iceMiniGameStartNotification = () => {
+  const type = MESSAGE_TYPE.ICE_MINI_GAME_START_NOTIFICATION;
+  const payload = {};
 
   return { type, payload };
 };
@@ -33,7 +31,7 @@ export const icePlayerSyncNotification = (user) => {
   const type = MESSAGE_TYPE.ICE_PLAYERS_SYNC_NOTIFICATION;
 
   const payload = {
-    playerId: user.player.id,
+    sessionId: user.sessionId,
     position: user.player.position,
     rotation: user.player.rotation,
     state: user.player.state,
@@ -42,10 +40,10 @@ export const icePlayerSyncNotification = (user) => {
   return { type, payload };
 };
 
-export const icePlayerDamageNotification = (playerId) => {
+export const icePlayerDamageNotification = (sessionId) => {
   const type = MESSAGE_TYPE.ICE_PLAYER_DAMAGE_NOTIFICATION;
 
-  const payload = { playerId };
+  const payload = { sessionId };
 
   return { type, payload };
 };
@@ -57,7 +55,7 @@ export const icePlayerDamageNotification = (playerId) => {
  */
 export const icePlayerDeathNotification = (user) => {
   const type = MESSAGE_TYPE.ICE_PLAYER_DEATH_NOTIFICATION;
-  const payload = { playerId: user.player.id, position: user.player.position };
+  const payload = { sessionId: user.sessionId, position: user.player.position };
 
   return { type, payload };
 };
@@ -72,7 +70,7 @@ export const iceGameOverNotification = (users) => {
 
   // ranks 배열 생성
   const ranks = users.map((user) => {
-    return { playerId: user.player.id, rank: user.player.rank };
+    return { sessionId: user.sessionId, rank: user.player.rank };
   });
 
   // ranks와 endTime으로 payload 생성
@@ -81,10 +79,10 @@ export const iceGameOverNotification = (users) => {
   return { type, payload };
 };
 
-export const iceMapSyncNotification = (MapInfos) => {
+export const iceMapSyncNotification = () => {
   const type = MESSAGE_TYPE.ICE_MAP_SYNC_NOTIFICATION;
 
-  const payload = { MapInfos };
+  const payload = {};
 
   return { type, payload };
 };

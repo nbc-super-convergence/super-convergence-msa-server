@@ -13,7 +13,7 @@ const handlers = {
     message: 'ice.C2S_IceMiniGameStartRequest',
     payload: 'iceMiniGameStartRequest',
   },
-  [MESSAGE_TYPE.ICE_MINI_GAME_START_NOTIFICATION]: {
+  [MESSAGE_TYPE.ICE_MINI_GAME_READY_NOTIFICATION]: {
     handler: undefined,
     message: 'ice.S2C_IceMiniGameStartResponse',
     payload: 'iceMiniGameStartResponse',
@@ -28,7 +28,7 @@ const handlers = {
     message: 'ice.S2C_IceGameReadyNotification',
     payload: 'iceGameReadyNotification',
   },
-  [MESSAGE_TYPE.ICE_GAME_START_NOTIFICATION]: {
+  [MESSAGE_TYPE.ICE_MINI_GAME_START_NOTIFICATION]: {
     handler: undefined,
     message: 'ice.S2C_IceGameStartNotification',
     payload: 'iceGameStartNotification',

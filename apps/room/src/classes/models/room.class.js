@@ -1,4 +1,5 @@
-import { logger } from '@repo/common/config';
+import { ResponseHelper } from '@repo/common/classes';
+import { config, logger } from '@repo/common/config';
 
 /**
  * @typedef UserData
@@ -46,6 +47,7 @@ class Room {
       return true;
     } catch (error) {
       logger.error('[ validateJoin ] ====> unknown error', error);
+      return false;
     }
   }
 
@@ -61,16 +63,23 @@ class Room {
       // 입장 여부 검증
       if (!this.validateJoin(roomData, sessionId, userData)) {
         logger.error('[ join ] ====> validateJoin fail', { roomData, sessionId, userData });
-        return { success: false, data: null, userData: null, failCode: 1 };
+        if (roomData.users.size >= roomData.maxUser) {
+          return ResponseHelper.fail(config.FAIL_CODE.ROOM_IS_FULL);
+        }
+        if (roomData.users.has(sessionId)) {
+          return ResponseHelper.fail(config.FAIL_CODE.USER_ALREADY_IN_ROOM);
+        }
+        return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
       }
 
       roomData.users.add(sessionId);
 
       logger.info('[ join ] ====> success');
-      return { success: true, data: roomData, userData: userData, failCode: 0 };
+
+      return ResponseHelper.success(roomData, { userData });
     } catch (error) {
       logger.error('[ join ] ====> unknown error', error);
-      return { success: false, data: null, userData: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 
@@ -84,7 +93,7 @@ class Room {
     try {
       if (!roomData.users.has(sessionId)) {
         logger.error('[ leave ] ====> roomData.users.has == false', { sessionId });
-        return { success: false, data: null, userData: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       roomData.users.delete(sessionId);
@@ -113,17 +122,14 @@ class Room {
 
       logger.info('[ leave ] ====> success');
 
-      return {
-        success: true,
-        data: roomData,
-        userData: userData,
+      return ResponseHelper.success(roomData, {
+        userData,
         stateChanged,
         ownerId: roomData.ownerId,
-        failCode: 0,
-      };
+      });
     } catch (error) {
       logger.error('[ leave ] ====> unknown error', error);
-      return { success: false, data: null, userData: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 
@@ -138,17 +144,17 @@ class Room {
     try {
       if (sessionId === roomData.ownerId) {
         logger.error('[ updateReady ] ====> owner can not prepare', { sessionId });
-        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.OWNER_CANNOT_READY);
       }
 
       if (!roomData.users.has(sessionId)) {
         logger.error('[ updateReady ] ====> roomData.users.has == false', { sessionId });
-        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       if (roomData.state !== 'wait' && roomData.state !== 'prepare') {
         logger.error('[ updateReady ] ====> state must be wait or prepare', { sessionId });
-        return { success: false, data: { isReady: false }, userData: null, failCode: 1 };
+        return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
       }
 
       if (roomData.state === 'prepare' && !isReady) {
@@ -178,16 +184,13 @@ class Room {
         });
       }
 
-      return {
-        success: true,
-        data: { isReady: roomData.readyUsers.has(sessionId) },
-        userData,
-        state: roomData.state,
-        failCode: 0,
-      };
+      return ResponseHelper.success(
+        { isReady: roomData.readyUsers.has(sessionId) },
+        { userData, state: roomData.state },
+      );
     } catch (error) {
       logger.error('[ updateReady ] ====> unknown error', error);
-      return { success: false, data: null, userData: null, failCode: 1 };
+      return ResponseHelper.fail();
     }
   }
 

@@ -3,24 +3,18 @@ syntax = 'proto3';
 package ice;
 import '../../common.proto';
 
-message S2S_BoardGameToIceStartRequest {
-    string sessionId = 1;
-}
-
 message C2S_IceMiniGameStartRequest {
     string sessionId = 1;
 }
 
-message S2C_IceMiniGameStartNotification {
+message S2C_IceMiniGameReadyNotification {
     repeated startPlayers players = 1;
 
     message startPlayers {
         int32 sessionId = 1; 
         Vector position =2; 
         float rotation = 3;
-    }
-
-    int64 startTime = 2;    
+    } 
 }
 
 message C2S_IceGameReadyRequest {
@@ -31,8 +25,7 @@ message S2C_IceGameReadyNotification {
     int32 sessionId = 1;
 }
 
-message S2C_IceGameStartNotification {
-    int64 startTime = 1;
+message S2C_IceMiniGameStartNotification {
 }
 
 message C2S_IcePlayerSyncRequest {
@@ -62,13 +55,7 @@ message S2C_IcePlayerDeathNotification {
     Vector position = 2;
 }
 
-message MapInfos {
-    float min = 1;
-    float max = 2;
-}
-
 message S2C_IceMapSyncNotification {
-   MapInfos map = 1;
 }
 
 message S2C_IceGameOverNotification {

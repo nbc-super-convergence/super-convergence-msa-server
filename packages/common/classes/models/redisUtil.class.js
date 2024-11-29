@@ -38,6 +38,7 @@ class RedisUtil {
       LOGIN: 'login',
       BOARD: 'board',
       BOARD_PLAYERS: 'boardPlayers',
+      LOCK: 'lock',
     };
 
     this.expire = 60 * 60;
@@ -554,6 +555,7 @@ class RedisUtil {
     return result;
   }
 
+
   /**
    * 보드 전체 플레이어 조회
    * @param {String} boardId
@@ -562,7 +564,6 @@ class RedisUtil {
   async getBoardPlayers(boardId) {
     const key = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
     const result = this.client.lrange(key, 0, -1);
-
     return result;
   }
 
@@ -574,6 +575,17 @@ class RedisUtil {
   async getBoardPlayersBySessionId(sessionId) {
     const boardId = await this.getUserLocationField(sessionId, 'board');
     return await this.getBoardPlayers(boardId);
+  }
+
+  async createLockKey(key, id) {
+    const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
+    const lockAcquired = await this.client.set(lockKey, 'LOCK', 'NX', 'EX', 2);
+    return lockAcquired;
+  }
+
+  async deleteLockKey(key, id) {
+    const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
+    await this.client.del(lockKey);
   }
 }
 
