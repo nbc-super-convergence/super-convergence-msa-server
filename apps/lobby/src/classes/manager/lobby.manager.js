@@ -49,7 +49,7 @@ class LobbyManager {
 
       logger.info('[ joinUser ] ====> success', userData);
 
-      return ResponseHelper.success(Lobby.formatUserData(userData));
+      return ResponseHelper.success(Lobby.formatUserData(userData, sessionId));
     } catch (error) {
       logger.error('[ joinUser ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -109,7 +109,7 @@ class LobbyManager {
 
       logger.info('[ getUserDetail ] ====> success', userData);
 
-      return ResponseHelper.success(Lobby.formatUserData(userData));
+      return ResponseHelper.success(Lobby.formatUserData(userData, targetSessionId));
     } catch (error) {
       logger.error('[ getUserDetail ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -132,7 +132,7 @@ class LobbyManager {
       const userList = await Promise.all(
         users.map(async (sessionId) => {
           const userData = await redis.getUserToSession(sessionId);
-          return userData ? userData.nickname : null;
+          return userData ? Lobby.formatUserData(userData, sessionId) : null;
         }),
       );
 

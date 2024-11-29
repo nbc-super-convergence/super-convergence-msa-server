@@ -1,6 +1,6 @@
 /**
  * @typedef UserData
- * @property {string} loginId
+ * @property {string} sessionId
  * @property {string} nickname
  */
 
@@ -19,11 +19,12 @@ class Lobby {
   /**
    * 로비 응답에 필요한 유저 데이터 형식으로 변환
    * @param {Object} userData
+   * @param {string} sessionId
    * @returns {UserData}
    */
-  static formatUserData(userData) {
+  static formatUserData(userData, sessionId) {
     return {
-      loginId: userData.loginId,
+      sessionId,
       nickname: userData.nickname,
     };
   }

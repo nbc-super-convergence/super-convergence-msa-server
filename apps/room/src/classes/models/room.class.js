@@ -3,7 +3,7 @@ import { config, logger } from '@repo/common/config';
 
 /**
  * @typedef UserData
- * @property {string} loginId
+ * @property {string} sessionId
  * @property {string} nickname
  */
 
@@ -38,9 +38,9 @@ class Room {
    * @param {UserData} userData - 입장하려는 유저의 데이터
    * @returns {boolean} 입장 가능 여부
    */
-  static validateJoin(roomData, sessionId, userData) {
+  static validateJoin(roomData, sessionId) {
     try {
-      if (!roomData || !sessionId || !userData) return false;
+      if (!roomData || !sessionId) return false;
       if (roomData.users.size >= roomData.maxUser) return false;
       if (roomData.users.has(sessionId)) return false;
       if (roomData.state !== 'wait' && roomData.state !== 'prepare') return false;
@@ -58,11 +58,11 @@ class Room {
    * @param {UserData} userData - 입장하려는 유저의 데이터
    * @returns {RoomReponse} 입장 결과
    */
-  static join(roomData, sessionId, userData) {
+  static join(roomData, sessionId) {
     try {
       // 입장 여부 검증
-      if (!this.validateJoin(roomData, sessionId, userData)) {
-        logger.error('[ join ] ====> validateJoin fail', { roomData, sessionId, userData });
+      if (!this.validateJoin(roomData, sessionId)) {
+        logger.error('[ join ] ====> validateJoin fail', { roomData, sessionId });
         if (roomData.users.size >= roomData.maxUser) {
           return ResponseHelper.fail(config.FAIL_CODE.ROOM_IS_FULL);
         }
@@ -76,7 +76,7 @@ class Room {
 
       logger.info('[ join ] ====> success');
 
-      return ResponseHelper.success(roomData, { userData });
+      return ResponseHelper.success(roomData);
     } catch (error) {
       logger.error('[ join ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -89,12 +89,14 @@ class Room {
    * @param {string} sessionId - 퇴장하려는 유저의 세션 ID
    * @returns {RoomReponse} 퇴장 결과
    */
-  static leave(roomData, sessionId, userData) {
+  static leave(roomData, sessionId) {
     try {
       if (!roomData.users.has(sessionId)) {
         logger.error('[ leave ] ====> roomData.users.has == false', { sessionId });
         return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
+
+      const prevState = roomData.state;
 
       roomData.users.delete(sessionId);
       roomData.readyUsers.delete(sessionId);
@@ -123,7 +125,6 @@ class Room {
       logger.info('[ leave ] ====> success');
 
       return ResponseHelper.success(roomData, {
-        userData,
         stateChanged,
         ownerId: roomData.ownerId,
       });
@@ -140,7 +141,7 @@ class Room {
    * @param {boolean} isReady - 준비 상태 여부
    * @returns {RoomReponse} 준비 상태 변경 결과
    */
-  static updateReady(roomData, sessionId, isReady, userData) {
+  static updateReady(roomData, sessionId, isReady) {
     try {
       if (sessionId === roomData.ownerId) {
         logger.error('[ updateReady ] ====> owner can not prepare', { sessionId });
@@ -186,7 +187,7 @@ class Room {
 
       return ResponseHelper.success(
         { isReady: roomData.readyUsers.has(sessionId) },
-        { userData, state: roomData.state },
+        { state: roomData.state },
       );
     } catch (error) {
       logger.error('[ updateReady ] ====> unknown error', error);
@@ -231,8 +232,13 @@ class Room {
    * @returns {string[]} 다른 유저들의 세션 ID 배열
    */
   static getOtherSessionIds(roomData, excludeSessionId) {
-    if (!roomData || !roomData.users) return [];
-    return Array.from(roomData.users.keys()).filter((id) => id !== excludeSessionId);
+    if (!roomData || !roomData.users || !Array.isArray(roomData.users)) {
+      return [];
+    }
+
+    return roomData.users
+      .filter((user) => user && user.sessionId !== excludeSessionId)
+      .map((user) => user.sessionId);
   }
 }
 
