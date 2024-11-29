@@ -1,5 +1,11 @@
 import { MESSAGE_TYPE } from '../constants/header.js';
-import { gameStartRequestHandler } from './board.handlers.js';
+import {
+  backToTheRoomRequestHandler,
+  gameStartRequestHandler,
+  movePlayerBoardRequestHandler,
+  purchaseTileRequestHandler,
+  rollDiceRequestHandler,
+} from './board.handlers.js';
 
 //
 const handlers = {
@@ -10,22 +16,22 @@ const handlers = {
     payload: 'gameStartRequest',
   },
   [MESSAGE_TYPE.ROLL_DICE_REQUEST]: {
-    handler: undefined,
+    handler: rollDiceRequestHandler,
     message: 'board.C2S_RollDiceRequest',
     payload: 'rollDiceRequest',
   },
   [MESSAGE_TYPE.MOVE_PLAYER_BOARD_REQUEST]: {
-    handler: undefined,
+    handler: movePlayerBoardRequestHandler,
     message: 'board.C2S_MovePlayerBoardRequest',
     payload: 'movePlayerBoardRequest',
   },
   [MESSAGE_TYPE.PURCHASE_TILE_REQUEST]: {
-    handler: undefined,
+    handler: purchaseTileRequestHandler,
     message: 'board.C2S_PurchaseTileRequest',
     payload: 'purchaseTileRequest',
   },
   [MESSAGE_TYPE.BACK_TO_THE_ROOM_REQUEST]: {
-    handler: undefined,
+    handler: backToTheRoomRequestHandler,
     message: 'board.C2S_BackToTheRoomRequest',
     payload: 'backToTheRoomRequest',
   },
