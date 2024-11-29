@@ -1,18 +1,12 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 import {
   iceGameReadyRequestHandler,
-  iceMiniGameStartRequestHandler,
   icePlayerDamageRequestHandler,
   icePlayerSyncRequestHandler,
 } from './ice.handlers.js';
 
 const handlers = {
   // * REQUEST
-  [MESSAGE_TYPE.ICE_MINI_GAME_START_REQUEST]: {
-    handler: iceMiniGameStartRequestHandler,
-    message: 'ice.C2S_IceMiniGameStartRequest',
-    payload: 'iceMiniGameStartRequest',
-  },
   [MESSAGE_TYPE.ICE_MINI_GAME_READY_NOTIFICATION]: {
     handler: undefined,
     message: 'ice.S2C_IceMiniGameStartResponse',
