@@ -25,9 +25,9 @@ message RoomData {
 }
 
 enum RoomStateType  {
-	WAIT = 0;
-	PREPARE = 1;
-	BOARD = 2;
+	  WAIT = 0;
+	  PREPARE = 1;
+	  BOARD = 2;
     MINI = 3;
 }
 
