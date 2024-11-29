@@ -64,7 +64,7 @@ enum GlobalFailCode {
 
     // 500 ~ 599 ICE SERVER ERROR
     GAME_NOT_FOUND = 500;
-
+    USER_IN_GAME_NOT_FOUND = 501;
 }
 
 enum State {

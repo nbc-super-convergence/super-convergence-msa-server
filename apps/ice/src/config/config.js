@@ -1,3 +1,5 @@
+import { FAIL_CODE } from '@repo/common/failcodes';
+
 export const config = {
   REDIS: {
     CHANNEL: 'boardChannel',
@@ -6,4 +8,5 @@ export const config = {
   BOARD: {
     PLAYERS: 'players',
   },
+  FAIL_CODE,
 };
