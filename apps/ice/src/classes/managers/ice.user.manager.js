@@ -5,6 +5,7 @@ import {
   icePlayerSyncNotification,
 } from '../../utils/ice.notifications.js';
 import iceUser from '../models/ice.user.class.js';
+import { config } from '../../config/config.js';
 
 class iceUserManager {
   constructor() {
@@ -48,6 +49,15 @@ class iceUserManager {
 
   isValidUser(user) {
     return this.users.includes(user) ? true : false;
+  }
+
+  // TODO: GlobalFailCode용 로직
+  userValidation(user) {
+    if (this.users.includes(user)) {
+      const failCode = config.FAIL_CODE.USER_IN_GAME_NOT_FOUND;
+    }
+
+    return failCode;
   }
 
   icePlayerSyncNoti(user, game, payload) {

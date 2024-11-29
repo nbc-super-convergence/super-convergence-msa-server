@@ -34,10 +34,12 @@ class iceGameManager {
     const game = new iceGame(sessionId);
 
     // TODO: 이 부분 보드게임에서 수정할 시 수정 필요
-    const users = await redisUtil.getBoardGameField(sessionId, config.BOARD.PLAYERS);
+    const users = await redisUtil.getBoardPlayersBySessionId(sessionId);
 
     game.addUser(users, sessionId);
     this.games.push(game); // 게임 세션에 추가;
+
+    console.log(`현재 게임들`, this.games);
   }
 
   removeGame(id) {
@@ -59,6 +61,15 @@ class iceGameManager {
 
   isValidGame(game) {
     return this.games.includes(game) ? true : false;
+  }
+
+  // TODO: GlobalFailCode용 로직
+  gameValidation(game) {
+    if (this.games.includes(game)) {
+      const failCode = config.FAIL_CODE.GAME_NOT_FOUND;
+    }
+
+    return failCode;
   }
 
   async iceMiniGameReadyNoti(game) {
