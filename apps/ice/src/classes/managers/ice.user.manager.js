@@ -6,6 +6,7 @@ import {
 } from '../../utils/ice.notifications.js';
 import iceUser from '../models/ice.user.class.js';
 import { config } from '../../config/config.js';
+import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 class iceUserManager {
   constructor() {
@@ -23,8 +24,8 @@ class iceUserManager {
     return iceUserManager.instance;
   }
 
-  addUser(id, gameId, sessionId, position, rotation) {
-    const user = new iceUser(id, gameId, sessionId, position, rotation);
+  addUser(gameId, sessionId, position, rotation) {
+    const user = new iceUser(gameId, sessionId, position, rotation);
 
     this.users.push(user);
     return user;
@@ -51,17 +52,35 @@ class iceUserManager {
     return this.users.includes(user) ? true : false;
   }
 
-  // TODO: GlobalFailCode용 로직
-  userValidation(user) {
-    if (this.users.includes(user)) {
-      const failCode = config.FAIL_CODE.USER_IN_GAME_NOT_FOUND;
-    }
+  isValidUserPosition(user, game) {
+    const position = user.getPosition();
 
-    return failCode;
+    const mapSize = game.getMapSize();
+    if (
+      position.x > mapSize.max ||
+      position.z > mapSize.max ||
+      position.x < mapSize.min ||
+      position.z < mapSize.min
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
+
+  // TODO: GlobalFailCode용 로직
+  // userValidation(user) {
+  //   if (this.users.includes(user)) {
+  //     const failCode = config.FAIL_CODE.USER_IN_GAME_NOT_FOUND;
+  //   }
+
+  //   return failCode;
+  // }
 
   icePlayerSyncNoti(user, game, payload) {
     //* 유저 위치 정보 업데이트
+    console.log(`[iceUserManager - icePlayerSyncNoti]`);
+
     user.updateUserInfos(payload.position, payload.rotation, payload.state);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
@@ -77,6 +96,8 @@ class iceUserManager {
 
   icePlayerDamageNoti(user, game) {
     // * 플레이어에 데미지
+    console.log(`[iceUserManager - icePlayerDamageNoti]`);
+
     user.damage();
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
@@ -91,25 +112,23 @@ class iceUserManager {
   }
 
   icePlayerDeathNoti(user, game) {
-    if (user.isDead()) {
-      // * 플레이어 사망
-      user.Dead();
+    // * 플레이어 사망
+    console.log(`[iceUserManager - icePlayerDeathNoti]`);
 
-      // * 사망시 랭킹
-      user.rank = game.getAliveUser().length + 1;
+    user.Dead();
 
-      const sessionIds = game.getOtherSessionIds(user.sessionId);
+    // * 사망시 랭킹
+    user.rank = game.getAliveUser().length + 1;
 
-      const message = icePlayerDeathNotification(user);
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
 
-      const payloadType = getPayloadNameByMessageType(message.type);
+    const message = icePlayerDeathNotification(user);
 
-      const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const payloadType = getPayloadNameByMessageType(message.type);
 
-      return buffer;
-    }
+    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
 
-    return;
+    return buffer;
   }
 }
 
