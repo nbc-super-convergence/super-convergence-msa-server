@@ -7,7 +7,8 @@ import { config } from '@repo/common/config';
 class TcpServer {
   _protoMessages;
   _sequence;
-  _socket;
+  _socketSeq = 1;
+  _socketMap = {};
 
   constructor(name, port, types = []) {
     // 서버 상태 정보
@@ -31,7 +32,10 @@ class TcpServer {
       ` [ _onConnection ] ${this.context.name} server : =>  ${socket.remoteAddress} : ${socket.remotePort}`,
     );
 
-    this._socket = socket;
+    socket.id = ++this._socketSeq;
+    this._socketMap[socket.id] = { socket };
+
+    // this._socket = socket;
     this._onCreate(socket);
 
     socket.buffer = Buffer.alloc(0);
