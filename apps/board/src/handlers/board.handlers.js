@@ -372,14 +372,65 @@ export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
 };
 
 /**
- * * 벌금 요청
+ * * 벌금 처리 요청
  * * TILE_PENALTY_REQUEST
+ * TODO: 추가 작업 필요
  *
  * * => 응답 [ TILE_PENALTY_RESPONSE ]
  * * => 알림 [ TILE_PENALTY_NOTIFICATION ]
  */
 export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
-  //
+  /**
+   * 1. 벌금 처리 요청
+   * 2. 대상 금액 감소, 타일 주인 금액 상승
+   * 3. 벌금 처리 응답
+   * 4. 벌금 처리 알림
+   */
+
+  const { sessionId, tile } = payload;
+  let sessionIds = [sessionId];
+
+  try {
+    const result = await boardManager.tilePenalty(sessionId, tile);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.TILE_PENALTY_NOTIFICATION;
+    const notification = {
+      sessionId: sessionId,
+      tile: result.data.tile,
+      penaltyGold: result.data.penaltyGold, // TODO: 벌금비
+    };
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      getPayloadNameByMessageType(notificationMessageType),
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.TILE_PENALTY_RESPONSE;
+    const response = {
+      success: result.success,
+      tile: result.data.tile,
+      penaltyGold: result.data.penaltyGold, // TODO: 벌금비
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(
+      responseMessageType,
+      response,
+      0,
+      getPayloadNameByMessageType(responseMessageType),
+      sessionIds,
+    );
+    socket.write(responsePacket);
+  } catch (err) {
+    console.error('[ BOARD: tilePenaltyRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.TILE_PENALTY_RESPONSE, sessionIds, err);
+  }
 };
 
 /**

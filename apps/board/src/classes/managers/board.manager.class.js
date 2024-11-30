@@ -127,7 +127,8 @@ class BoardManager {
     try {
       const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
 
-      // TODO: [업적용] 타일 구매이력
+      // TODO: 1 - 타일 주인 정보 저장, [ 타일 주인 정보를 미리 넣어두어야하는가? undefined로 체크? ]
+      // TODO: 2 - [업적용] 타일 구매이력 저장
 
       return {
         success: true,
@@ -207,6 +208,33 @@ class BoardManager {
       };
     } catch (e) {
       console.error('[ BOARD : purchaseTrophy ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 타일 벌금 부여
+   * @param {String} sessionId
+   * @param {Number} tile
+   * @returns
+   */
+  async tilePenalty(sessionId, tile) {
+    try {
+      //
+
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+
+      return {
+        success: true,
+        data: {
+          sessionIds,
+          penaltyGold,
+          tile,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      console.error('[ BOARD : tilePenalty ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
