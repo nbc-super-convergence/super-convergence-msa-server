@@ -30,6 +30,8 @@ import { config, logger } from '@repo/common/config';
  * @property {number} failCode
  */
 
+const { ROOM_STATE } = config;
+
 class Room {
   /**
    * 유저의 대기방 입장 가능 여부를 검증
@@ -40,10 +42,24 @@ class Room {
    */
   static validateJoin(roomData, sessionId) {
     try {
-      if (!roomData || !sessionId) return false;
-      if (roomData.users.size >= roomData.maxUser) return false;
-      if (roomData.users.has(sessionId)) return false;
-      if (roomData.state !== 'wait' && roomData.state !== 'prepare') return false;
+      if (!roomData || !sessionId) {
+        logger.error('[ validateJoin ] ====> roomData or sessionId is undefined');
+        return false;
+      }
+
+      if (roomData.users.size >= roomData.maxUser) {
+        logger.error('[ validateJoin ] ====> room is full');
+        return false;
+      }
+
+      if (roomData.users.has(sessionId)) {
+        logger.error('[ validateJoin ] ====> not a user in the room');
+        return false;
+      }
+      if (roomData.state !== ROOM_STATE.WAIT && roomData.state !== ROOM_STATE.PREPARE) {
+        logger.error('[ validateJoin ] ====> room is aleady start');
+        return false;
+      }
       return true;
     } catch (error) {
       logger.error('[ validateJoin ] ====> unknown error', error);
@@ -97,6 +113,11 @@ class Room {
 
       const prevState = roomData.state;
 
+      // 준비중이였던 유저가 나가면
+      if (roomData.readyUsers.has(sessionId)) {
+        roomData.state = ROOM_STATE.WAIT;
+      }
+
       roomData.users.delete(sessionId);
       roomData.readyUsers.delete(sessionId);
 
@@ -113,8 +134,8 @@ class Room {
         if (remainingUsers.length > 0) {
           roomData.ownerId = remainingUsers[0];
           // 방 상태를 'wait'로 변경
-          if (roomData.state === 'prepare') {
-            roomData.state = 'wait';
+          if (roomData.state === ROOM_STATE.PREPARE) {
+            roomData.state = ROOM_STATE.WAIT;
           }
         }
       }
@@ -152,13 +173,13 @@ class Room {
         return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
-      if (roomData.state !== 'wait' && roomData.state !== 'prepare') {
+      if (roomData.state !== ROOM_STATE.WAIT && roomData.state !== ROOM_STATE.PREPARE) {
         logger.error('[ updateReady ] ====> state must be wait or prepare', { sessionId });
         return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
       }
 
-      if (roomData.state === 'prepare' && !isReady) {
-        roomData.state = 'wait';
+      if (roomData.state === ROOM_STATE.PREPARE && !isReady) {
+        roomData.state = ROOM_STATE.WAIT;
       }
 
       if (isReady) {
@@ -171,7 +192,7 @@ class Room {
         .filter((id) => id !== roomData.ownerId)
         .every((id) => roomData.readyUsers.has(id));
 
-      roomData.state = allUsersReady ? 'prepare' : 'wait';
+      roomData.state = allUsersReady ? ROOM_STATE.PREPARE : ROOM_STATE.WAIT;
 
       const prevState = roomData.state;
       logger.info('[ updateReady ] ====> success');
@@ -184,10 +205,7 @@ class Room {
         });
       }
 
-      return ResponseHelper.success(
-        { isReady: roomData.readyUsers.has(sessionId) },
-        { state: roomData.state },
-      );
+      return ResponseHelper.success(roomData.readyUsers.has(sessionId), { state: roomData.state });
     } catch (error) {
       logger.error('[ updateReady ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -200,7 +218,7 @@ class Room {
    * @returns {boolean} 유효성 여부
    */
   static validateState(state) {
-    return ['wait', 'prepare', 'board', 'mini'].includes(state);
+    return [ROOM_STATE.WAIT, ROOM_STATE.PREPARE, ROOM_STATE.BOARD, ROOM_STATE.MINI].includes(state);
   }
 
   /**
@@ -217,7 +235,7 @@ class Room {
       ownerId,
       roomName,
       lobbyId,
-      state: 'wait',
+      state: ROOM_STATE.WAIT,
       maxUser: 4,
       users: new Set([ownerId]),
       readyUsers: new Set(),
@@ -231,13 +249,15 @@ class Room {
    * @returns {string[]} 다른 유저들의 세션 ID 배열
    */
   static getOtherSessionIds(roomData, excludeSessionId) {
-    if (!roomData || !roomData.users || !Array.isArray(roomData.users)) {
+    if (!roomData || !roomData.users) {
       return [];
     }
 
-    return roomData.users
-      .filter((user) => user && user.sessionId !== excludeSessionId)
+    const otherIds = Array.from(roomData.users)
+      .filter((user) => user.sessionId !== excludeSessionId)
       .map((user) => user.sessionId);
+
+    return otherIds;
   }
 }
 
