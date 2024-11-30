@@ -48,6 +48,7 @@ class RedisUtil {
 
     this.transaction = new redisTransaction(this);
   }
+
   //* 유저 위치
   /**
    * 유저의 위치 데이터 등록
@@ -155,28 +156,7 @@ class RedisUtil {
     await this.client.srem(key, loginId);
   }
 
-  // 유저 위치
-  /**
-   * 유저의 위치 데이터 등록
-   * @param {string} sessionId
-   * @param {string} location
-   * @param {string} locationId
-   */
-  async createUserLocation(sessionId, location, locationId) {
-    const key = `${this.prefix.LOCATION}:${sessionId}`;
-    await this.client.hset(key, location, locationId);
-    await this.client.expire(key, 60 * 60);
-  }
-
-  /**
-   * 유저의 위치 데이터 삭제
-   * @param {string} sessionId
-   */
-  async deleteUserLocation(sessionId) {
-    const key = `${this.prefix.LOCATION}:${sessionId}`;
-    await this.client.del(key);
-  }
-
+  //* 유저 데이터
   /**
    * 세션에 유저 데이터 등록
    * @param {string} sessionId
@@ -200,45 +180,6 @@ class RedisUtil {
   }
 
   /**
-   * 유저의 특정 위치 데이터만 삭제
-   * @param {string} sessionId
-   * @param {string} locationField
-   */
-  async deleteUserLocationField(sessionId, locationField) {
-    const key = `${this.prefix.LOCATION}:${sessionId}`;
-    await this.client.hdel(key, locationField);
-  }
-
-  /**
-   * 유저의 특정 위치 데이터만 수정
-   * @param {string} sessionId
-   * @param {string} locationField
-   * @param {string} locationId
-   */
-  async updateUserLocationField(sessionId, locationField, locationId) {
-    const key = `${this.prefix.LOCATION}:${sessionId}`;
-    await this.client.hset(key, locationField, locationId);
-    await this.client.expire(key, 60 * 60);
-  }
-
-  /**
-   * 유저의 특정 위치 데이터만 조회
-   * @param {string} sessionId
-   * @param {string} locationField
-   * @returns {string} data
-   */
-  async getUserLocationField(sessionId, locationField) {
-    const key = `${this.prefix.LOCATION}:${sessionId}`;
-    const data = await this.client.hget(key, locationField);
-
-    if (!data) {
-      return null;
-    }
-
-    return data;
-  }
-
-  /**
    * 유저 데이터 중 하나의 필드만 수정
    * @param {string} sessionId
    * @param {userdata} userField
@@ -263,72 +204,6 @@ class RedisUtil {
     if (!data) {
       return null;
     }
-    return data;
-  }
-
-  /**
-   * 유저의 위치 데이터 조회
-   * @param {string} sessionId
-   * @returns {locationField} data
-   */
-  async getUserLocation(sessionId) {
-    const key = `${this.prefix.LOCATION}:${sessionId}`;
-    const data = await this.client.hget(key);
-    if (!data) {
-      return null;
-    }
-
-    return data;
-  }
-
-  // 유저 데이터
-  /**
-   * 세션에 유저 데이터 등록
-   * @param {string} sessionId
-   * @param {string} nickname
-   */
-  async createUserToSession(sessionId, nickname) {
-    const key = `${this.prefix.USER}:${sessionId}`;
-    await this.client.hset(key, {
-      nickname: nickname,
-    });
-    await this.client.expire(key, 60 * 60 * 24);
-  }
-
-  /**
-   * 유저 데이터 삭제
-   * @param {string} sessionId
-   */
-  async deleteUserToSession(sessionId) {
-    const key = `${this.prefix.USER}:${sessionId}`;
-    await this.client.del(key);
-  }
-
-  /**
-   * 유저 데이터 중 하나의 필드만 수정
-   * @param {string} sessionId
-   * @param {userField} userField
-   * @param {string} value
-   */
-  async updateUserToSessionfield(sessionId, userField, value) {
-    const key = `${this.prefix.USER}:${sessionId}`;
-    await this.client.hset(key, userField, value);
-    await this.client.expire(key, 60 * 60 * 24);
-  }
-
-  /**
-   * 유저 데이터 중 하나의 필드만 조회
-   * @param {string} sessionId
-   * @param {userField} userField
-   * @returns {string} data
-   */
-  async getUserToSessionfield(sessionId, userField) {
-    const key = `${this.prefix.USER}:${sessionId}`;
-    const data = await this.client.hget(key, userField);
-    if (!data) {
-      return null;
-    }
-
     return data;
   }
 
