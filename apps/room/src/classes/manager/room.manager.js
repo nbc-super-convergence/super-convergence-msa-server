@@ -105,7 +105,13 @@ class RoomManager {
       logger.info('[ joinRoom ] ====> success');
 
       const responseData = await RoomDTO.toResponse(result.data);
-      return ResponseHelper.success(responseData);
+
+      const user = {
+        sessionId,
+        nickname: userData.nickname,
+      };
+
+      return ResponseHelper.success(responseData, { user });
     } catch (error) {
       logger.error('[ joinRoom ] ====> unknown error', error);
       return ResponseHelper.fail();
@@ -156,10 +162,16 @@ class RoomManager {
 
       logger.info('[ leaveRoom ] ====> success');
 
+      const user = {
+        sessionId,
+        nickname: userData.nickname,
+      };
+
       const responseData = await RoomDTO.toResponse(result.data);
       return ResponseHelper.success(responseData, {
         stateChanged: result.stateChanged,
         ownerId: result.ownerId,
+        userData: user,
       });
     } catch (error) {
       logger.error('[ leaveRoom ] ====> unknown error', error);
