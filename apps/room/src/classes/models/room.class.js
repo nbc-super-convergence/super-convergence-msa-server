@@ -55,7 +55,6 @@ class Room {
    * 유저를 대기방에 입장시킴
    * @param {RoomData} roomData - 대기방 데이터
    * @param {string} sessionId - 입장하려는 유저의 세션 ID
-   * @param {UserData} userData - 입장하려는 유저의 데이터
    * @returns {RoomReponse} 입장 결과
    */
   static join(roomData, sessionId) {
