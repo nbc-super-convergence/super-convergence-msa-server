@@ -12,9 +12,11 @@ import { config } from '@repo/common/config';
  * 회원가입 핸들러
  */
 export const registerRequestHandler = async ({ socket, payload }) => {
-  const { loginId, password, nickname } = payload;
-  const checkExistId = await findUserId(payload.loginId);
-  const resultFailcode = await registerValidation(payload, checkExistId);
+  const { loginId, password, passwordConfirm, nickname } = payload;
+  const registerPayload = { loginId, password, passwordConfirm, nickname };
+
+  const checkExistId = await findUserId(loginId);
+  const resultFailcode = await registerValidation(registerPayload, checkExistId);
 
   try {
     let packet = {
@@ -22,6 +24,7 @@ export const registerRequestHandler = async ({ socket, payload }) => {
       failCode: resultFailcode,
     };
 
+    // 회원가입 처리
     if (packet.failCode === config.FAIL_CODE.NONE_FAILCODE) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await createUser(loginId, hashedPassword, nickname);
@@ -34,7 +37,7 @@ export const registerRequestHandler = async ({ socket, payload }) => {
       packet,
       0,
       payloadType,
-      ['self'],
+      [payload.sequence],
     );
     socket.write(registerResponse);
   } catch (error) {
@@ -47,9 +50,12 @@ export const registerRequestHandler = async ({ socket, payload }) => {
  */
 export const loginRequestHandler = async ({ socket, payload }) => {
   try {
-    const { loginId } = payload;
+    const { loginId, password } = payload;
+    const loginPayload = { loginId, password };
+
+    console.log('loginPayload', loginPayload);
     const checkExistId = await findUserId(loginId);
-    const resultFailcode = await loginValidation(payload, checkExistId);
+    const resultFailcode = await loginValidation(loginPayload, checkExistId);
 
     let packet = {
       success: false,
@@ -72,7 +78,7 @@ export const loginRequestHandler = async ({ socket, payload }) => {
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
     const loginResponse = serializeForGate(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, payloadType, [
-      'self',
+      payload.sequence,
     ]);
     socket.write(loginResponse);
   } catch (error) {

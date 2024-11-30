@@ -23,6 +23,8 @@ class AuthServer extends TcpServer {
           const payloadType = getPayloadNameByMessageType(messageType);
 
           const payload = packetParser(messageType, packet, payloadType);
+          payload.sequence = String(sequence);
+
           console.log(' [ AuthServer _onData ] payload ====>> ', payload);
 
           const handler = getHandlerByMessageType(messageType);
