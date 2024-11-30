@@ -4,27 +4,24 @@ import { serializeForGate } from '@repo/common/utils';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 export const createNotification = (data, messageType, sessionIds) => {
-  let notification = {
-    type: messageType,
-    payload: {},
-  };
+  let notification = {};
 
   switch (messageType) {
     case MESSAGE_TYPE.JOIN_ROOM_NOTIFICATION:
-      notification.payload = {
+      notification = {
         user: data.userData,
       };
       break;
 
     case MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION:
-      notification.payload = {
+      notification = {
         user: data.userData,
         ownerId: data.ownerId,
       };
       break;
 
     case MESSAGE_TYPE.GAME_PREPARE_NOTIFICATION:
-      notification.payload = {
+      notification = {
         user: data.userData,
         isReady: data.isReady,
         state: data.state,
