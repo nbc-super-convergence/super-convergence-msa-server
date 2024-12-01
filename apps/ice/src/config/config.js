@@ -1,9 +1,15 @@
 import { FAIL_CODE } from '@repo/common/failcodes';
+import { REDIS } from '../constants/env.js';
 
-export const config = {
+export const iceConfig = {
   REDIS: {
     CHANNEL: 'boardChannel',
     PREFIX_PLAYER: 'boardPlayers',
+    REDIS_INFO: {
+      host: REDIS.host,
+      port: REDIS.port,
+      password: REDIS.password,
+    },
   },
   BOARD: {
     PLAYERS: 'players',
