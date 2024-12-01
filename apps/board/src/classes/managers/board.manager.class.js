@@ -224,6 +224,8 @@ class BoardManager {
 
       const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
 
+      const penaltyGold = 10;
+
       return {
         success: true,
         data: {
