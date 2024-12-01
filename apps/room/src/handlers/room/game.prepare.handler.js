@@ -16,9 +16,9 @@ export const gamePrepareRequestHandler = async ({ socket, payload }) => {
     const responsePacket = createResponse(result, MESSAGE_TYPE.GAME_PREPARE_RESPONSE, sessionId);
     socket.write(responsePacket);
 
-    // 요청이 성공했으면 noti
+    //* 요청이 성공했으면 noti
     if (result.success) {
-      // 대기방 데이터 조회
+      //* 대기방 데이터 조회
       const roomId = await redis.getUserLocationField(sessionId, 'room');
       const roomData = RoomDTO.fromRedis(await redis.getRoom(roomId));
 
