@@ -66,9 +66,10 @@ message GamePacket {
         S2C_PurchaseTrophyNotification purchaseTrophyNotification = 73;
         C2S_TilePenaltyRequest tilePenaltyRequest = 74;
         S2C_TilePenaltyResponse tilePenaltyResponse = 75;
-        C2S_DiceGameRequest diceGameRequest = 76;
-        S2C_DiceGameResponse diceGameResponse = 77;
-        S2C_DiceGameNotification diceGameNotification = 78;
+        S2C_TilePenaltyNotification tilePenaltyNotification = 76;
+        C2S_DiceGameRequest diceGameRequest = 77;
+        S2C_DiceGameResponse diceGameResponse = 78;
+        S2C_DiceGameNotification diceGameNotification = 79;
 
         // Post Game (91-100)
         C2S_BackToTheRoomRequest backToTheRoomRequest = 91;
