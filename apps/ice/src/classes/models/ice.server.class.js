@@ -1,17 +1,18 @@
-import { RedisClient, TcpServer } from '@repo/common/classes';
+import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType } from '../../handlers/index.js';
-import { CHANNEL, REDIS } from '../../constants/env.js';
 import iceGameManager from '../managers/ice.game.manager.js';
+import { iceConfig } from '../../config/config.js';
+import { redisClient } from '../../utils/init/redis.js';
 
 class IceServer extends TcpServer {
   constructor(name, port, types = []) {
     super(name, port, types);
 
-    this.subScriber = new RedisClient(REDIS).getClient();
+    this.subScriber = redisClient;
 
-    this.subScriber.subscribe(CHANNEL, (err, count) => {
+    this.subScriber.subscribe(iceConfig.REDIS.CHANNEL, (err, count) => {
       if (err) {
         console.error('Subscribe error:', err);
         return;
@@ -20,18 +21,21 @@ class IceServer extends TcpServer {
     });
 
     this.subScriber.on('message', async (channel, message) => {
-      console.info(`[Received ${CHANNEL}] ===> ${channel}: ${message}`);
+      console.info(`[Received ${iceConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
 
-      //* `${boardId}:${request}`
-      const [boardId, request] = message.split(':');
+      //* `${boardId}:${users}`
+      const [boardId, users] = message.split(':');
 
-      await iceGameManager.addGame(boardId);
+      await iceGameManager.addGame(boardId, users.split(','));
 
       const game = iceGameManager.getGameBySessionId(boardId);
 
       const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
 
-      this._socket.write(buffer);
+      // TODO: 나중에 수정하기
+      const seq = '2';
+
+      this._socketMap[seq].socket.write(buffer);
     });
   }
 

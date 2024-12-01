@@ -4,15 +4,29 @@ import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import net from 'net';
 import { getPayloadNameByMessageType } from '../src/handlers/index.js';
 import { config } from '@repo/common/config';
+import { redisUtil } from '../src/utils/init/redis.js';
+
+const clientRedisUtil = redisUtil;
+
+const board = {
+  boardId: 'sample',
+  roomId: 'sample',
+  ownerId: 'rider1',
+  state: 'start',
+  users: ['rider1', 'rider2', 'rider3', 'rider4'],
+};
+
+await clientRedisUtil.transaction.createBoardGame(board);
 
 const gateOptions = {
   host: 'localhost',
   port: '7011',
 };
+
 const client = net.connect(gateOptions, async () => {
   await loadProtos();
-  const packet = {};
-  const messageType = MESSAGE_TYPE.ICE_JOIN_REQUEST;
+  const packet = { sessionId: board.users[0] };
+  const messageType = MESSAGE_TYPE.ICE_GAME_READY_REQUEST;
 
   const sequence = 0;
 

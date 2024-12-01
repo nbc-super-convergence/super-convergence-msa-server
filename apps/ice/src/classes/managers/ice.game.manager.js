@@ -1,7 +1,7 @@
 import { RedisClient, RedisUtil } from '@repo/common/classes';
 import iceGame from '../models/ice.game.class.js';
 import { REDIS } from '../../constants/env.js';
-import { config } from '../../config/config.js';
+import { iceConfig } from '../../config/config.js';
 import {
   iceGameReadyNotification,
   iceMiniGameReadyNotification,
@@ -30,12 +30,9 @@ class iceGameManager {
     return iceGameManager.instance;
   }
 
-  async addGame(sessionId) {
+  async addGame(sessionId, users) {
     // ! 방장 아이디로 새로운 게임 생성
     const game = new iceGame(sessionId);
-
-    // ? nickName, sessionId가 있겠지?
-    const users = await redisUtil.getBoardPlayersBySessionId(sessionId);
 
     console.log(`유저입니다`, users);
 
@@ -69,7 +66,7 @@ class iceGameManager {
   // TODO: GlobalFailCode용 로직
   // gameValidation(game) {
   //   if (this.games.includes(game)) {
-  //     const failCode = config.FAIL_CODE.GAME_NOT_FOUND;
+  //     const failCode = iceConfig.FAIL_CODE.GAME_NOT_FOUND;
   //   }
 
   //   return failCode;

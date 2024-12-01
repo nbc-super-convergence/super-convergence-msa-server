@@ -12,5 +12,3 @@ export const REDIS = {
   // username: process.env.REDIS_USERNAME,
   // userpass: process.env.REDIS_USERPASS,
 };
-
-export const CHANNEL = 'boardChannel';

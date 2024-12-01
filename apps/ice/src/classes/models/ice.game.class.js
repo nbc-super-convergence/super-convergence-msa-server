@@ -17,13 +17,12 @@ class iceGame extends Game {
   }
 
   async addUser(users, sessionId) {
-    users.forEach((user, index) => {
+    users.forEach((userId, index) => {
       //! nickName = id
-
       const position = this.startPosition[index].pos;
       const rotation = this.startPosition[index].rot;
 
-      const newUser = iceUserManager.addUser(sessionId, user.sessionId, position, rotation);
+      const newUser = iceUserManager.addUser(sessionId, userId, position, rotation);
 
       this.users.push(newUser);
     });
