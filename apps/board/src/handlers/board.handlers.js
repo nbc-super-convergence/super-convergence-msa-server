@@ -436,12 +436,27 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
 };
 
 /**
- * * 첫 주사위 순서 게임 요청
+ * * 첫 주사위 순서 게임 결과 요청
  * * DICE_GAME_REQUEST
  *
  * * => 응답 [ DICE_GAME_RESPONSE ]
  * * => 알림 [ DICE_GAME_NOTIFICATION ]
  */
 export const diceGameRequestHandler = async ({ socket, payload }) => {
-  //
+  /**
+   * 1. 첫 주사위 순서 게임 결과
+   * 2. 주사위 순서 게임 로직 처리
+   * 3. 게임 결과 응답
+   * 4. 게임 결과 알림
+   */
+
+  const { sessionId } = payload;
+  let sessionIds = [sessionId];
+
+  try {
+    // TODO: 주사위 순서 게임은 어떤 게임인가...?
+  } catch (err) {
+    logger.error('[ BOARD: diceGameRequestHandler ] ERROR ==>> ', err);
+    handleError(socket, MESSAGE_TYPE.DICE_GAME_RESPONSE, sessionIds, err);
+  }
 };
