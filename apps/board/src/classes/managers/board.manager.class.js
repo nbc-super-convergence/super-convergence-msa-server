@@ -222,12 +222,8 @@ class BoardManager {
    */
   async tilePenalty(sessionId, tile) {
     try {
-      //
-
       const boardId = await this.getUserLocationField(sessionId, 'board');
       const sessionIds = await this.getBoardPlayers(boardId);
-
-      const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionId);
 
       // TODO: 벌급 정해야 함, Game Data에서??
       const penalty = 10;
@@ -236,15 +232,14 @@ class BoardManager {
        * 1. 벌금 적용
        * 2. 상대방 유저 금액 상승
        */
-      const playerGold = playerInfo.gold - penalty;
-
-      // const data = await redis.transaction.
+      const result = await redis.transaction.tilePenalty(boardId, sessionId, tile, penalty);
 
       return {
         success: true,
         data: {
           sessionIds,
-          playersInfo: '', // * 변화가 반영된 플레이어 정보
+          tile,
+          playersInfo: result.playersInfo, // * 변화가 반영된 플레이어 정보
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };

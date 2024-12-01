@@ -255,14 +255,13 @@ class redisTransaction {
       // TODO: 페널티 이력 저장?
 
       // * 페널티가 적용된 플레이어 정보 반환
-      result.data.tile = tile;
-      result.data.playersInfo = [];
+      result.playersInfo = [];
       const PlayersInfoKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
       const playerSessionIds = this.client.lrange(PlayersInfoKey, 0, -1);
       playerSessionIds.forEach(async (sId) => {
-        result.playersInfo.push(
-          await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`),
-        );
+        const playerInfo = await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`);
+        playerInfo.sessionId = sId;
+        result.playersInfo.push(playerInfo);
       });
     });
 
