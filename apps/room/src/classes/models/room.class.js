@@ -107,39 +107,31 @@ class Room {
   static leave(roomData, sessionId) {
     try {
       if (!roomData.users.has(sessionId)) {
-        logger.error('[ leave ] ====> roomData.users.has == false', { sessionId });
+        logger.error('[ leave ] ====> not a user in the room', { sessionId });
         return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
+      //* 퇴장 전 대기방 상태
       const prevState = roomData.state;
 
-      // 준비중이였던 유저가 나가면
+      //* 준비중이였던 유저가 나간 경우
       if (roomData.readyUsers.has(sessionId)) {
         roomData.state = ROOM_STATE.WAIT;
       }
 
+      //* 대기방에서 퇴장 유저 정보 삭제
       roomData.users.delete(sessionId);
       roomData.readyUsers.delete(sessionId);
 
+      //* 방장이 나가는 경우
       if (roomData.ownerId === sessionId && roomData.users.size > 0) {
-        roomData.ownerId = Array.from(roomData.users.keys())[0];
-
+        roomData.ownerId = Array.from(roomData.users)[0]; //* 다음 유저가 방장
+        //* 방장으로 변경된 유저의 준비 취소
         roomData.readyUsers.delete(roomData.ownerId);
+        roomData.state = ROOM_STATE.WAIT;
       }
 
-      // 방장이 나가는 경우
-      if (roomData.ownerId === sessionId) {
-        // 남은 유저가 있으면 첫 번째 유저를 방장으로 설정
-        const remainingUsers = Array.from(roomData.users);
-        if (remainingUsers.length > 0) {
-          roomData.ownerId = remainingUsers[0];
-          // 방 상태를 'wait'로 변경
-          if (roomData.state === ROOM_STATE.PREPARE) {
-            roomData.state = ROOM_STATE.WAIT;
-          }
-        }
-      }
-
+      //* 대기방 상태 변경 여부
       const stateChanged = prevState !== roomData.state;
 
       logger.info('[ leave ] ====> success');
@@ -178,32 +170,27 @@ class Room {
         return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
       }
 
+      //* 준비를 취소한 경우 대기방 상태 변경
       if (roomData.state === ROOM_STATE.PREPARE && !isReady) {
         roomData.state = ROOM_STATE.WAIT;
       }
 
+      //* 준비한 유저 업데이터
       if (isReady) {
         roomData.readyUsers.add(sessionId);
       } else {
         roomData.readyUsers.delete(sessionId);
       }
 
+      //* 모든 유저가의 준비 상태 체크
       const allUsersReady = Array.from(roomData.users.keys())
         .filter((id) => id !== roomData.ownerId)
         .every((id) => roomData.readyUsers.has(id));
 
+      //* 대기방 상태 업데이트
       roomData.state = allUsersReady ? ROOM_STATE.PREPARE : ROOM_STATE.WAIT;
 
-      const prevState = roomData.state;
       logger.info('[ updateReady ] ====> success');
-
-      if (prevState !== roomData.state) {
-        logger.info('[ updateReady ] ====> change state', {
-          roomId: roomData.roomId,
-          prevState,
-          newState: roomData.state,
-        });
-      }
 
       return ResponseHelper.success(roomData.readyUsers.has(sessionId), { state: roomData.state });
     } catch (error) {
