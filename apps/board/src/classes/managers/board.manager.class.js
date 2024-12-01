@@ -125,10 +125,12 @@ class BoardManager {
   async purchaseTileInBoard(sessionId, tile) {
     //
     try {
-      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+      const boardId = await this.getUserLocationField(sessionId, 'board');
+      const sessionIds = await this.getBoardPlayers(boardId);
 
-      // TODO: 1 - 타일 주인 정보 저장, [ 타일 주인 정보를 미리 넣어두어야하는가? undefined로 체크? ]
+      // TODO: 1 - 타일 주인 정보 저장,
       // TODO: 2 - [업적용] 타일 구매이력 저장
+      await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
 
       return {
         success: true,
@@ -222,16 +224,27 @@ class BoardManager {
     try {
       //
 
-      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+      const boardId = await this.getUserLocationField(sessionId, 'board');
+      const sessionIds = await this.getBoardPlayers(boardId);
 
-      const penaltyGold = 10;
+      const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionId);
+
+      // TODO: 벌급 정해야 함, Game Data에서??
+      const penalty = 10;
+
+      /**
+       * 1. 벌금 적용
+       * 2. 상대방 유저 금액 상승
+       */
+      const playerGold = playerInfo.gold - penalty;
+
+      // const data = await redis.transaction.
 
       return {
         success: true,
         data: {
           sessionIds,
-          penaltyGold,
-          tile,
+          playersInfo: '', // * 변화가 반영된 플레이어 정보
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };

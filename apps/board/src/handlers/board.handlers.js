@@ -3,6 +3,7 @@ import boardManager from '../classes/managers/board.manager.class.js';
 import { MESSAGE_TYPE } from '@repo/common/header';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { handleError } from '../utils/errors/handle.error.js';
+import { logger } from '../utils/logger.utils.js';
 
 /**
  * * 게임 시작 요청 (방장만 가능)
@@ -393,13 +394,15 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
   try {
     const result = await boardManager.tilePenalty(sessionId, tile);
 
+    logger.info('[ BOARD: tilePenaltyRequestHandler ] result ===>>> ', result);
+
     // * 나머지 NOTIFICATION
     sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
     const notificationMessageType = MESSAGE_TYPE.TILE_PENALTY_NOTIFICATION;
     const notification = {
       sessionId: sessionId,
       tile: result.data.tile,
-      penaltyGold: result.data.penaltyGold, // TODO: 벌금비
+      playersInfo: result.data.playersInfo,
     };
     const notificationPacket = serializeForGate(
       notificationMessageType,
@@ -415,8 +418,7 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
     const responseMessageType = MESSAGE_TYPE.TILE_PENALTY_RESPONSE;
     const response = {
       success: result.success,
-      tile: result.data.tile,
-      penaltyGold: result.data.penaltyGold, // TODO: 벌금비
+      playersInfo: result.data.playersInfo,
       failCode: result.failCode,
     };
     const responsePacket = serializeForGate(
@@ -428,7 +430,7 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
     );
     socket.write(responsePacket);
   } catch (err) {
-    console.error('[ BOARD: tilePenaltyRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: tilePenaltyRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.TILE_PENALTY_RESPONSE, sessionIds, err);
   }
 };
