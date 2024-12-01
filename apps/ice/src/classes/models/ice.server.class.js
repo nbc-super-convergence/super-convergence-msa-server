@@ -27,6 +27,8 @@ class IceServer extends TcpServer {
 
       await iceGameManager.addGame(boardId);
 
+      const game = iceGameManager.getGameBySessionId(boardId);
+
       const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
 
       this._socket.write(buffer);

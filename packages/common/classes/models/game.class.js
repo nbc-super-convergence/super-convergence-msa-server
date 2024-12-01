@@ -1,7 +1,7 @@
 class Game {
   constructor(id) {
     this.id = id;
-    this.state = '';
+    this.state = 'Wait';
 
     this.users = [];
   }

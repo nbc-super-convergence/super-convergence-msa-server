@@ -23,13 +23,7 @@ class iceGame extends Game {
       const position = this.startPosition[index].pos;
       const rotation = this.startPosition[index].rot;
 
-      const newUser = iceUserManager.addUser(
-        user.nickName,
-        sessionId,
-        user.sessionId,
-        position,
-        rotation,
-      );
+      const newUser = iceUserManager.addUser(sessionId, user.sessionId, position, rotation);
 
       this.users.push(newUser);
     });
@@ -73,6 +67,10 @@ class iceGame extends Game {
     this.state = state;
   }
 
+  getMapSize() {
+    return this.map.sizes;
+  }
+
   changeMap(socket) {
     for (let key in this.map.updateTime) {
       const mapKey = `map${key}`;
@@ -110,6 +108,20 @@ class iceGame extends Game {
     }, this.gameTimer);
   }
 
+  // * 살아있는 유저들 수 확인
+  checkGameOverInterval(socket) {
+    this.timers.gameOverInterval = setInterval(() => {
+      if (this.isOneAlive()) {
+        console.log(`유저 1명, 게임 종료`);
+        const user = this.getAliveUsers()[0];
+
+        user.rank = 1;
+
+        this.handleGameEnd(socket);
+      }
+    }, 1000);
+  }
+
   handleGameEnd(socket) {
     console.log(`게임 종료`);
     // 전체 유저 조회
@@ -129,6 +141,7 @@ class iceGame extends Game {
     this.clearAllPlayers();
   }
 
+  // * 게임 내 정보 리셋
   reset() {
     this.map = iceMap;
     this.setGameState(GAME_STATE.WAIT);

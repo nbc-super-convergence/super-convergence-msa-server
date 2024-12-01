@@ -77,16 +77,20 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
       throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
     }
 
+    //* 위치 검증
+    if (!iceUserManager.isValidUserPosition(user, game)) {
+      throw new Error(`데미지를 받을 위치가 아닙니다.`);
+    }
+
     // * icePlayerDamageNotification
-    const damageBuffer = await iceUserManager.icePlayerDamageNoti(user, game);
+    const buffer = await iceUserManager.icePlayerDamageNoti(user, game);
 
     // * icePlayerDeathNotification
-    const deathBuffer = await iceUserManager.icePlayerDeathNoti(user, game);
+    if (user.isDead()) {
+      buffer = await iceUserManager.icePlayerDeathNoti(user, game);
+    }
 
-    socket.write(deathBuffer ? deathBuffer : damageBuffer);
-
-    // * iceGameOverNotification
-    await iceGameManager.iceGameOver(socket, game);
+    socket.write(buffer);
   } catch (error) {
     console.error('[icePlayerDamageRequestHandler] ===> ', error);
   }

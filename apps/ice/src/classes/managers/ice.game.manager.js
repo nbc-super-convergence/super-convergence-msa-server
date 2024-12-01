@@ -37,6 +37,8 @@ class iceGameManager {
     // ? nickName, sessionId가 있겠지?
     const users = await redisUtil.getBoardPlayersBySessionId(sessionId);
 
+    console.log(`유저입니다`, users);
+
     await game.addUser(users, sessionId);
     this.games.push(game); // 게임 세션에 추가;
 
@@ -65,16 +67,18 @@ class iceGameManager {
   }
 
   // TODO: GlobalFailCode용 로직
-  gameValidation(game) {
-    if (this.games.includes(game)) {
-      const failCode = config.FAIL_CODE.GAME_NOT_FOUND;
-    }
+  // gameValidation(game) {
+  //   if (this.games.includes(game)) {
+  //     const failCode = config.FAIL_CODE.GAME_NOT_FOUND;
+  //   }
 
-    return failCode;
-  }
+  //   return failCode;
+  // }
 
   async iceMiniGameReadyNoti(game) {
     // * 게임 상태 변경
+    console.log(`[iceGameManager - iceMiniGameReadyNoti]`);
+
     game.setGameState(GAME_STATE.START);
 
     // * 게임 시작 Notification
@@ -93,6 +97,8 @@ class iceGameManager {
 
   async iceGameReadyNoti(user, game) {
     // * 플레이어 준비
+    console.log(`[iceGameManager - iceGameReadyNoti]`);
+
     user.gameReady();
 
     const sessionIds = game.getOtherSessionIds(user.id);
@@ -117,22 +123,12 @@ class iceGameManager {
 
     const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
 
-    // * 맵 변경, 게임 종료 타이머
+    // * 맵 변경, 게임 종료 타이머, 게임 종료 인터벌
     game.changeMap(socket);
     game.iceGameTimer(socket);
+    game.checkGameOverInterval(socket);
 
     return buffer;
-  }
-
-  async iceGameOver(socket, game) {
-    if (game.isOneAlive()) {
-      console.log(`유저 1명, 게임 종료`);
-      const user = game.getAliveUsers()[0];
-
-      user.rank = 1;
-
-      game.handleGameEnd(socket);
-    }
   }
 }
 

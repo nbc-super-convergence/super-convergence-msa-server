@@ -2,8 +2,7 @@ import { User, Vector } from '@repo/common/classes';
 import { USER_STATE } from '../../constants/states.js';
 
 class iceUser extends User {
-  constructor(id, gameId, sessionId, position, rotation) {
-    this.id = id;
+  constructor(gameId, sessionId, position, rotation) {
     this.gameId = gameId;
     this.sessionId = sessionId;
 
@@ -64,6 +63,10 @@ class iceUser extends User {
     this.rotation = this.startInfos.state;
     this.rank = undefined;
     this.isReady = false;
+  }
+
+  getPosition() {
+    return this.position;
   }
 }
 
