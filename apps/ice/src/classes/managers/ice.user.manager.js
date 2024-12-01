@@ -31,15 +31,6 @@ class iceUserManager {
     return user;
   }
 
-  // ! id = loginId
-  getUserById(id) {
-    return this.users.find((user) => user.id === id);
-  }
-
-  getUserByPlayerId(playerId) {
-    return this.users.find((user) => user.id === playerId);
-  }
-
   getUserBySessionId(sessionId) {
     return this.users.find((user) => user.sessionId === sessionId);
   }

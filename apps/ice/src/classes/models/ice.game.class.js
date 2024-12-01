@@ -36,8 +36,8 @@ class iceGame extends Game {
     return this.users.map((user) => user.sessionId);
   }
 
-  getOtherSessionIds(id) {
-    const users = this.users.filter((user) => user.id !== id);
+  getOtherSessionIds(sessionId) {
+    const users = this.users.filter((user) => user.sessionId !== sessionId);
 
     return users.map((user) => user.sessionId);
   }
