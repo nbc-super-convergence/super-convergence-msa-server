@@ -437,11 +437,11 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
 
 /**
  * * 첫 주사위 순서 게임 요청
- * * ORDER_OF_THE_DICE_REQUEST
+ * * DICE_GAME_REQUEST
  *
- * * => 응답 [ ORDER_OF_THE_DICE_RESPONSE ]
- * * => 알림 [ ORDER_OF_THE_DICE_NOTIFICATION ]
+ * * => 응답 [ DICE_GAME_RESPONSE ]
+ * * => 알림 [ DICE_GAME_NOTIFICATION ]
  */
-export const orderOfTheDiceRequestHandler = async ({ socket, payload }) => {
+export const diceGameRequestHandler = async ({ socket, payload }) => {
   //
 };
