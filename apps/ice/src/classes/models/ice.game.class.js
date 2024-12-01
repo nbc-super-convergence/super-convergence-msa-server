@@ -32,10 +32,6 @@ class iceGame extends Game {
     return this.users;
   }
 
-  getOtherUsers(id) {
-    return this.users.filter((user) => user.id !== id);
-  }
-
   getAllSessionIds() {
     return this.users.map((user) => user.sessionId);
   }

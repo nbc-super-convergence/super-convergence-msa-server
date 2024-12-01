@@ -98,7 +98,7 @@ class iceGameManager {
 
     user.gameReady();
 
-    const sessionIds = game.getOtherSessionIds(user.id);
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
 
     const message = iceGameReadyNotification(user.sessionId);
 
