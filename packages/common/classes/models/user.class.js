@@ -1,11 +1,8 @@
 class User {
-  constructor(id, gameId, sessionId) {
-    this.id = id;
-
+  constructor(gameId, sessionId) {
     // TODO: 테스트용 게임 세션 ID로 진행
     this.gameId = gameId; // Game Session ID
     this.sessionId = sessionId;
-    this.player; // Player
   }
 
   getGameId() {

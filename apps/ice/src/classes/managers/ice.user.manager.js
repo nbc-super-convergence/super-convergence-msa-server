@@ -5,7 +5,7 @@ import {
   icePlayerSyncNotification,
 } from '../../utils/ice.notifications.js';
 import iceUser from '../models/ice.user.class.js';
-import { config } from '../../config/config.js';
+import { iceConfig } from '../../config/config.js';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 class iceUserManager {
@@ -71,7 +71,7 @@ class iceUserManager {
   // TODO: GlobalFailCode용 로직
   // userValidation(user) {
   //   if (this.users.includes(user)) {
-  //     const failCode = config.FAIL_CODE.USER_IN_GAME_NOT_FOUND;
+  //     const failCode = iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND;
   //   }
 
   //   return failCode;

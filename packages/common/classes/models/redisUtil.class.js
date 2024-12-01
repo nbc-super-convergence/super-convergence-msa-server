@@ -472,7 +472,7 @@ class RedisUtil {
    */
   async getBoardPlayers(boardId) {
     const key = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-    const result = this.client.lrange(key, 0, -1);
+    const result = this.client.smembers(key);
     return result;
   }
 
@@ -482,8 +482,7 @@ class RedisUtil {
    * @returns
    */
   async getBoardPlayersBySessionId(sessionId) {
-    const boardId = await this.getUserLocationField(sessionId, 'board');
-    return await this.getBoardPlayers(boardId);
+    return await this.getBoardPlayers(sessionId);
   }
 
   /**

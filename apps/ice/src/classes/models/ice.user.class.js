@@ -3,6 +3,7 @@ import { USER_STATE } from '../../constants/states.js';
 
 class iceUser extends User {
   constructor(gameId, sessionId, position, rotation) {
+    super(gameId, sessionId);
     this.gameId = gameId;
     this.sessionId = sessionId;
 

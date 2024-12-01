@@ -1,9 +1,10 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 
 export const iceMiniGameReadyNotification = (users) => {
-  const type = MESSAGE_TYPE.ICE_MINI_GAME_START_NOTIFICATION;
+  const type = MESSAGE_TYPE.ICE_MINI_GAME_READY_NOTIFICATION;
+
   const payload = {
-    startPlayers: users.map((user) => ({
+    players: users.map((user) => ({
       sessionId: user.sessionId,
       position: user.position,
       rotation: user.rotation,
