@@ -22,13 +22,16 @@ export const gamePrepareRequestHandler = async ({ socket, payload }) => {
       const roomId = await redis.getUserLocationField(sessionId, 'room');
       const roomData = RoomDTO.fromRedis(await redis.getRoom(roomId));
 
-      const otherSessionIds = Room.getOtherSessionIds(roomData, sessionId);
+      const otherSessionIds = Room.getOtherSessionIds(
+        await RoomDTO.toResponse(roomData),
+        sessionId,
+      );
 
       if (otherSessionIds.length > 0) {
         const notificationPacket = createNotification(
           {
             userData: result.userData,
-            isReady: result.data.isReady,
+            isReady,
             state: result.state,
           },
           MESSAGE_TYPE.GAME_PREPARE_NOTIFICATION,
