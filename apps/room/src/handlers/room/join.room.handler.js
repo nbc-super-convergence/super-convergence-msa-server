@@ -14,7 +14,7 @@ export const joinRoomRequestHandler = async ({ socket, payload }) => {
     const responsePacket = createResponse(result, MESSAGE_TYPE.JOIN_ROOM_RESPONSE, sessionId);
     socket.write(responsePacket);
 
-    // 요청이 성공했으면 noti
+    //* 요청이 성공했으면 noti
     if (result.success) {
       const otherSessionIds = Room.getOtherSessionIds(result.data, sessionId);
 
