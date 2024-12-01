@@ -84,7 +84,7 @@ class RoomManager {
 
       //* 대기방이 있는 로비에 위치하는 유저인지 검증
       const matched = await RoomValidator.lobbyMatch(sessionId, redisData.lobbyId);
-      if (matched) {
+      if (!matched) {
         logger.error('[ joinRoom ] ====> user is in another lobby', { sessionId, matched });
         return ResponseHelper.fail(config.FAIL_CODE.WRONG_LOBBY);
       }

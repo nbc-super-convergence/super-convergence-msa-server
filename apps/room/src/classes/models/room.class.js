@@ -192,7 +192,7 @@ class Room {
 
       logger.info('[ updateReady ] ====> success');
 
-      return ResponseHelper.success(roomData.readyUsers.has(sessionId), { state: roomData.state });
+      return ResponseHelper.success(isReady, { state: roomData.state });
     } catch (error) {
       logger.error('[ updateReady ] ====> unknown error', error);
       return ResponseHelper.fail();
