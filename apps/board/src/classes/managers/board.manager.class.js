@@ -127,7 +127,8 @@ class BoardManager {
     try {
       const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
 
-      // TODO: [업적용] 타일 구매이력
+      // TODO: 1 - 타일 주인 정보 저장, [ 타일 주인 정보를 미리 넣어두어야하는가? undefined로 체크? ]
+      // TODO: 2 - [업적용] 타일 구매이력 저장
 
       return {
         success: true,
@@ -163,6 +164,77 @@ class BoardManager {
       };
     } catch (e) {
       console.error('[ BOARD : backTotheRoom ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 트로피 구매
+   * @param {String} sessionId
+   * @param {Number} tile
+   */
+  async purchaseTrophy(sessionId, tile) {
+    //
+    let nextTile = tile;
+    try {
+      const trophyValue = 2; // TODO: 임시 트로피 값
+      // * 해당 플레이어 정보 수정
+      const boardId = await this.getUserLocationField(sessionId, 'board');
+      const boardPlayerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
+      console.log('[ BOARD: purchaseTrophy ] boardPlayerInfo ===>> ', boardPlayerInfo);
+
+      // * 보유 골드가 트로피 금액보다 높은지?
+      if (boardPlayerInfo.gold >= trophyValue) {
+        boardPlayerInfo.gold = boardPlayerInfo.gold - trophyValue;
+        boardPlayerInfo.trophy++;
+
+        console.log('[ BOARD: purchaseTrophy ] changed boardPlayerInfo ===>> ', boardPlayerInfo);
+        await redis.updateBoardPlayerInfo(boardId, sessionId, boardPlayerInfo);
+
+        // TODO: 새로운 트로피 타일 생성, 보드 플레이어 정보 수정이랑 트랜잭션 묶어서 처리?
+        nextTile = tile; // TODO: 새로운 타일로 변경 예정
+      }
+
+      // * 전달할 플레이어 목록
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+      return {
+        success: true,
+        data: {
+          sessionIds,
+          boardPlayerInfo,
+          nextTile,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      console.error('[ BOARD : purchaseTrophy ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 타일 벌금 부여
+   * @param {String} sessionId
+   * @param {Number} tile
+   * @returns
+   */
+  async tilePenalty(sessionId, tile) {
+    try {
+      //
+
+      const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
+
+      return {
+        success: true,
+        data: {
+          sessionIds,
+          penaltyGold,
+          tile,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      console.error('[ BOARD : tilePenalty ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }

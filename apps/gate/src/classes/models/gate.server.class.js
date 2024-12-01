@@ -5,6 +5,7 @@ import {
   deserialize,
   packetParser,
   packetParserForGate,
+  serialize,
   serializeForClient,
 } from '@repo/common/utils';
 import { SERVER_HOST } from '../../constants/env.js';
@@ -12,7 +13,6 @@ import { SERVER_HOST } from '../../constants/env.js';
 class GateServer extends TcpServer {
   _map = {};
   _mapServices = {};
-  _mapClients = {};
 
   _isConnectedDistributor;
 
@@ -38,25 +38,51 @@ class GateServer extends TcpServer {
       );
 
       if (socket.buffer.length >= length) {
-        // * 로비 입장 시 sessionId로 socket 저장 [ LOBBY_JOIN_REQUEST: 11, ]
-        if (messageType === 11) {
-          //
+        if (
+          messageType === config.MESSAGE_TYPE.REGISTER_REQUEST ||
+          messageType === config.MESSAGE_TYPE.LOGIN_REQUEST
+        ) {
+          // * REGISTER_REQUEST(1) || LOGIN_REQUEST(3)
+          // * 로그인 & 회원가입 임시 소켓 id, 헤더 sequence에 삽입
           const packet = socket.buffer.subarray(offset, length);
           const payload = packetParser(messageType, packet);
-          console.log('[ Gate - _onData ] payload ===>>> \n', payload);
-          // * sessionId를 키값으로 socket 저장
-          this._mapClients[payload.sessionId] = {};
-          this._mapClients[payload.sessionId].socket = socket;
-        }
-        // * 연결되어있는 서비스서버의 type에 맞는 메세지 전달
-        for (const [key, value] of Object.entries(this._map)) {
-          if (value.types.includes(messageType)) {
-            // * messageType에 맞는 Client
-            const targetService = this._mapServices[key];
-            targetService.client.write(socket.buffer);
+
+          console.log('[ GATE : _onData ]  socket.id ====>>> ', socket.id);
+
+          // * 임시 소켓 id, 헤더 sequence에 삽입
+          const buffer = serialize(messageType, payload, socket.id);
+
+          // * 연결되어있는 서비스서버의 type에 맞는 메세지 전달
+          for (const [key, value] of Object.entries(this._map)) {
+            if (value.types.includes(messageType)) {
+              // * messageType에 맞는 Client
+              const targetService = this._mapServices[key];
+              targetService.client.write(buffer);
+            }
           }
+
+          socket.buffer = socket.buffer.subarray(length);
+        } else {
+          // * 로비 입장 시 sessionId로 socket 저장 [ LOBBY_JOIN_REQUEST: 11, ]
+          if (messageType === config.MESSAGE_TYPE.LOBBY_JOIN_REQUEST) {
+            //
+            const packet = socket.buffer.subarray(offset, length);
+            const payload = packetParser(messageType, packet);
+            console.log('[ Gate - _onData ] payload ===>>> \n', payload);
+            // * sessionId를 키값으로 socket 저장
+            this._socketMap[payload.sessionId] = { socket };
+          }
+
+          // * 연결되어있는 서비스서버의 type에 맞는 메세지 전달
+          for (const [key, value] of Object.entries(this._map)) {
+            if (value.types.includes(messageType)) {
+              // * messageType에 맞는 Client
+              const targetService = this._mapServices[key];
+              targetService.client.write(socket.buffer);
+            }
+          }
+          socket.buffer = socket.buffer.subarray(length);
         }
-        socket.buffer = socket.buffer.subarray(length);
       } else {
         //
         break;
@@ -145,24 +171,23 @@ class GateServer extends TcpServer {
         console.log('[ GATE: ] payload.sessionIds.length ===>>> ', payload.sessionIds.length);
         if (payload.sessionIds && payload.sessionIds.length > 0) {
           payload.sessionIds.forEach((sessionId) => {
-            if (this._mapClients[sessionId]) {
+            if (this._socketMap[sessionId]) {
               console.log(
                 ` FOR ====>>> ${sessionId} ====>>> `,
-                this._mapClients[sessionId].socket.remoteAddress,
+                this._socketMap[sessionId].socket.remoteAddress,
                 ':',
-                this._mapClients[sessionId].socket.remotePort,
+                this._socketMap[sessionId].socket.remotePort,
               );
-              this._mapClients[sessionId].socket.write(packetForClient);
+              this._socketMap[sessionId].socket.write(packetForClient);
             } else {
-              if (sessionId === 'self') {
-                this._socket.write(packetForClient);
-              } else {
-                console.log(` [ GATE: ] NOT FOUND SOCKET, sessionId ===>>> ${sessionId}`);
-              }
+              console.error(` [ GATE: ] NOT FOUND SOCKET, sessionId ===>>> ${sessionId}`);
             }
           });
         } else {
-          this._socket.write(packetForClient);
+          console.error(
+            ` [ GATE: ] NOT FOUND SOCKET, payload.sessionIds ===>>> `,
+            payload.sessionIds,
+          );
         }
       }
     }
