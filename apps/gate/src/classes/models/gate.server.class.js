@@ -103,6 +103,19 @@ class GateServer extends TcpServer {
     }
   };
 
+  _onEnd = (socket) => () => {
+    const sessionid = Object.keys(this._socketMap).find(
+      (key) => this._socketMap[key].socket === socket,
+    );
+    console.log(' [ GATE: _onEnd ] 클라이언트 연결이 종료되었습니다. ==>> ', sessionid);
+  };
+  _onError = (socket) => (err) => {
+    const sessionid = Object.keys(this._socketMap).find(
+      (key) => this._socketMap[key].socket === socket,
+    );
+    console.error(` [ GATE: _onError ]  소켓 오류가 발생하였습니다.:  ${sessionid} `, err);
+  };
+
   _onDistribute = (socket, data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
 
