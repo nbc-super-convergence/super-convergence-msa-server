@@ -26,9 +26,9 @@ export const registerRequestHandler = async ({ socket, payload }) => {
 
     // 회원가입 처리
     if (packet.failCode === config.FAIL_CODE.NONE_FAILCODE) {
-      packet.success = true;
       const hashedPassword = await bcrypt.hash(password, 10);
       await createUser(loginId, hashedPassword, nickname);
+      packet.success = true;
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.REGISTER_RESPONSE);
@@ -42,6 +42,8 @@ export const registerRequestHandler = async ({ socket, payload }) => {
     socket.write(registerResponse);
   } catch (error) {
     console.error(`[ registerRequestHandler ] error =>>> `, error);
+  } finally {
+    await redis.deleteLockKey('register', loginId);
   }
 };
 
@@ -70,9 +72,9 @@ export const loginRequestHandler = async ({ socket, payload }) => {
         nickname: checkExistId.nickname,
       };
 
+      await redis.createUserToSession(sessionId, redisData);
       packet.success = true;
       packet.sessionId = sessionId;
-      await redis.transaction.createUser(sessionId, checkExistId.login_id, redisData);
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);

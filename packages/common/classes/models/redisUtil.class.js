@@ -142,9 +142,9 @@ class RedisUtil {
    *
    */
 
-  async createUserLogin(loginId) {
+  async createUserLogin(nickname) {
     const key = `${this.prefix.LOGIN}`;
-    const result = await this.client.sadd(key, loginId);
+    const result = await this.client.sadd(key, nickname);
     return result;
   }
 
@@ -173,10 +173,10 @@ class RedisUtil {
    * @param {string} sessionId
    * @param {userdata} userData
    */
-  async createUserToSession(sessionId, nickname) {
+  async createUserToSession(sessionId, data) {
     const key = `${this.prefix.USER}:${sessionId}`;
     await this.client.hset(key, {
-      nickname: nickname,
+      nickname: data.nickname,
     });
     await this.client.expire(key, this.expire);
   }
@@ -512,7 +512,7 @@ class RedisUtil {
 
   async createLockKey(key, id) {
     const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
-    const lockAcquired = await this.client.set(lockKey, 'LOCK', 'NX', 'EX', 2);
+    const lockAcquired = await this.client.set(lockKey, 'LOCK', 'NX', 'EX', 5);
     return lockAcquired;
   }
 
