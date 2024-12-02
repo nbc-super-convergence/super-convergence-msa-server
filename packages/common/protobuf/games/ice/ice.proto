@@ -48,7 +48,6 @@ message S2C_IcePlayerDamageNotification {
 
 message S2C_IcePlayerDeathNotification {
     string sessionId = 1;
-    Vector position = 2;
 }
 
 message S2C_IceMapSyncNotification {
@@ -63,9 +62,6 @@ message S2C_IceGameOverNotification {
         int32 rank = 2; 
     }
 }
-
-
-
 
 
 

@@ -1,10 +1,12 @@
-import { Game } from '@repo/common/classes';
+import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
-import iceUserManager from '../managers/ice.user.manager.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
 import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
+import iceUser from './ice.user.class.js';
+import { iceConfig } from '../../config/config.js';
+import { redisUtil } from '../../utils/init/redis.js';
 
 class iceGame extends Game {
   constructor(id) {
@@ -12,20 +14,47 @@ class iceGame extends Game {
 
     this.map = iceMap;
     this.gameTimer = iceMap.timer;
-    this.timers = {};
+    this.intervalManager = new IntervalManager();
+    this.timeoutManager = new TimeoutManager();
     this.startPosition = iceMap.startPosition;
   }
 
-  async addUser(users, sessionId) {
-    users.forEach((userId, index) => {
-      //! nickName = id
-      const position = this.startPosition[index].pos;
-      const rotation = this.startPosition[index].rot;
+  async addUser(users, gameId) {
+    for (let key in users) {
+      const userId = users[key];
 
-      const newUser = iceUserManager.addUser(sessionId, userId, position, rotation);
+      const position = this.startPosition[key].pos;
+      const rotation = this.startPosition[key].rot;
+
+      await redisUtil.createUserLocation(userId, 'ice', gameId);
+
+      const newUser = new iceUser(gameId, userId, position, rotation);
 
       this.users.push(newUser);
-    });
+    }
+  }
+
+  getUserBySessionId(sessionId) {
+    return this.users.find((user) => user.sessionId === sessionId);
+  }
+
+  removeUser(sessionId) {
+    const index = this.users.findIndex((user) => user.sessionId === sessionId);
+
+    return this.users.splice(index, 1);
+  }
+
+  isValidUser(user) {
+    return this.users.includes(user) ? true : false;
+  }
+
+  // TODO: GlobalFailCode용 로직
+  userValidation(user) {
+    if (this.users.includes(user)) {
+      const failCode = iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND;
+
+      return failCode;
+    }
   }
 
   getAllUser() {
@@ -66,55 +95,77 @@ class iceGame extends Game {
     return this.map.sizes;
   }
 
-  changeMap(socket) {
+  changeMapTimer(socket) {
     for (let key in this.map.updateTime) {
       const mapKey = `map${key}`;
 
-      this.timers[mapKey] = setTimeout(() => {
-        console.log(`맵 변경 시작 : ${mapKey}`);
-        this.map.sizes.min += 5;
-        this.map.sizes.max -= 5;
+      // ! timeOut 추가
+      this.timeoutManager.addTimeout(
+        'changeMapTimer',
+        () => {
+          console.log(`맵 변경 시작 : ${mapKey}`);
+          this.map.sizes.min += 5;
+          this.map.sizes.max -= 5;
 
-        const sessionIds = this.getAllSessionIds();
+          const sessionIds = this.getAllSessionIds();
 
-        const message = iceMapSyncNotification();
+          const message = iceMapSyncNotification();
 
-        const payloadType = getPayloadNameByMessageType(message.type);
+          const payloadType = getPayloadNameByMessageType(message.type);
 
-        const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+          const buffer = serializeForGate(
+            message.type,
+            message.payload,
+            0,
+            payloadType,
+            sessionIds,
+          );
 
-        socket.write(buffer);
-
-        delete this.timers.map1;
-      }, this.map.updateTime[key] * 1000);
+          socket.write(buffer);
+        },
+        this.map.updateTime[key] * 1000,
+        'changeMap',
+      );
     }
   }
 
   iceGameTimer(socket) {
-    this.timers.iceGameTimer = setTimeout(() => {
-      console.log(`시간 경과로 게임 종료`);
-      let aliveUsers = this.getAliveUsers();
+    // ! timeOut 추가
+    this.timeoutManager.addTimeout(
+      'iceGameTimer',
+      () => {
+        console.log(`시간 경과로 게임 종료`);
+        let aliveUsers = this.getAliveUsers();
 
-      // * 살아있는 체력 순으로 내림차순 정렬 후, rank
-      aliveUsers = aliveUsers.sort((a, b) => b.hp - a.hp);
-      aliveUsers.forEach((user, index) => (user.rank = index + 1));
+        // * 살아있는 체력 순으로 내림차순 정렬 후, rank
+        aliveUsers = aliveUsers.sort((a, b) => b.hp - a.hp);
+        aliveUsers.forEach((user, index) => (user.rank = index + 1));
 
-      this.handleGameEnd(socket);
-    }, this.gameTimer);
+        this.handleGameEnd(socket);
+      },
+      this.gameTimer,
+      'iceGameTimer',
+    );
   }
 
   // * 살아있는 유저들 수 확인
   checkGameOverInterval(socket) {
-    this.timers.gameOverInterval = setInterval(() => {
-      if (this.isOneAlive()) {
-        console.log(`유저 1명, 게임 종료`);
-        const user = this.getAliveUsers()[0];
+    // ! interval 추가
+    this.intervalManager.addInterval(
+      'gameOverInterval',
+      () => {
+        if (this.isOneAlive()) {
+          console.log(`유저 1명, 게임 종료`);
+          const user = this.getAliveUsers()[0];
 
-        user.rank = 1;
+          user.rank = 1;
 
-        this.handleGameEnd(socket);
-      }
-    }, 1000);
+          this.handleGameEnd(socket);
+        }
+      },
+      1000,
+      'checkGameOver',
+    );
   }
 
   handleGameEnd(socket) {
@@ -141,12 +192,8 @@ class iceGame extends Game {
     this.map = iceMap;
     this.setGameState(GAME_STATE.WAIT);
 
-    for (const key in this.timers) {
-      clearTimeout(this.timers[key]); // 타이머 제거
-    }
-
-    // 모든 키 삭제
-    this.timers = {};
+    this.timeoutManager.clearAll();
+    this.intervalManager.clearAll();
   }
 }
 

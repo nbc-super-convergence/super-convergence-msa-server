@@ -56,7 +56,7 @@ export const icePlayerDamageNotification = (sessionId) => {
  */
 export const icePlayerDeathNotification = (user) => {
   const type = MESSAGE_TYPE.ICE_PLAYER_DEATH_NOTIFICATION;
-  const payload = { sessionId: user.sessionId, position: user.position };
+  const payload = { sessionId: user.sessionId };
 
   return { type, payload };
 };

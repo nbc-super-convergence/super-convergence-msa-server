@@ -2,9 +2,9 @@ import { MESSAGE_TYPE } from '@repo/common/header';
 import { loadProtos } from '@repo/common/load.protos';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import net from 'net';
-import { getPayloadNameByMessageType } from '../src/handlers/index.js';
 import { config } from '@repo/common/config';
 import { redisUtil } from '../src/utils/init/redis.js';
+import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 const clientRedisUtil = redisUtil;
 
