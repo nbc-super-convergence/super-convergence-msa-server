@@ -6,6 +6,9 @@ import {
   iceGameReadyNotification,
   iceMiniGameReadyNotification,
   iceMiniGameStartNotification,
+  icePlayerDamageNotification,
+  icePlayerDeathNotification,
+  icePlayerSyncNotification,
 } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
@@ -29,13 +32,14 @@ class iceGameManager {
     return iceGameManager.instance;
   }
 
-  async addGame(sessionId, users) {
+  async addGame(gameId, users) {
     // ! 방장 아이디로 새로운 게임 생성
-    const game = new iceGame(sessionId);
+    const game = new iceGame(gameId);
 
     console.log(`유저입니다`, users);
 
-    await game.addUser(users, sessionId);
+    // TODO: 현재 여기서 걸려서 유저 생성 후 넘어가야하는데 그러지 않고 바로 넘어감
+    await game.addUser(users, gameId);
     this.games.push(game); // 게임 세션에 추가;
 
     console.log(`현재 게임들`, this.games);
@@ -62,6 +66,22 @@ class iceGameManager {
     return this.games.includes(game) ? true : false;
   }
 
+  isValidUserPosition(user, game) {
+    const position = user.getPosition();
+
+    const mapSize = game.getMapSize();
+    if (
+      position.x > mapSize.max ||
+      position.z > mapSize.max ||
+      position.x < mapSize.min ||
+      position.z < mapSize.min
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // TODO: GlobalFailCode용 로직
   // gameValidation(game) {
   //   if (this.games.includes(game)) {
@@ -80,6 +100,8 @@ class iceGameManager {
     // * 게임 시작 Notification
     const sessionIds = game.getAllSessionIds();
 
+    console.log(`게임입니다`, game);
+    console.log(`세션 아이디들`, sessionIds);
     const users = game.getAllUser();
 
     const message = iceMiniGameReadyNotification(users);
@@ -114,11 +136,64 @@ class iceGameManager {
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     // * 맵 변경, 게임 종료 타이머, 게임 종료 인터벌
-    game.changeMap(socket);
+    game.changeMapTimer(socket);
     game.iceGameTimer(socket);
     game.checkGameOverInterval(socket);
 
     return buffer;
+  }
+
+  icePlayerSyncNoti(user, game, payload) {
+    //* 유저 위치 정보 업데이트
+    console.log(`[iceGameManager - icePlayerSyncNoti]`);
+
+    user.updateUserInfos(payload.position, payload.rotation, payload.state);
+
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
+
+    const message = icePlayerSyncNotification(user);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+
+    return buffer;
+  }
+
+  icePlayerDamageNoti(user, game) {
+    // * 플레이어에 데미지
+    console.log(`[iceGameManager - icePlayerDamageNoti]`);
+
+    user.damage();
+
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
+
+    const message = icePlayerDamageNotification(user.sessionId);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+
+    return buffer;
+  }
+
+  icePlayerDeathNoti(user, game) {
+    // * 플레이어 사망
+    console.log(`[iceGameManager - icePlayerDeathNoti]`);
+
+    user.Dead();
+
+    // * 사망시 랭킹
+    user.rank = game.getAliveUser().length + 1;
+
+    const sessionIds = game.getOtherSessionIds(user.sessionId);
+
+    const message = icePlayerDeathNotification(user);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+
+    return buffer;
+  }
+
+  icePlayerExitNoti() {
+    // * 플레이어 탈주
+    console.log(`[iceGameManager - icePlayerExitNoti]`);
   }
 }
 

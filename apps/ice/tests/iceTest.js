@@ -4,6 +4,7 @@ import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import net from 'net';
 import { config } from '@repo/common/config';
 import { redisUtil } from '../src/utils/init/redis.js';
+import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 const clientRedisUtil = redisUtil;
 

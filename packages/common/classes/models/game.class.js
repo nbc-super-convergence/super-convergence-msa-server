@@ -1,3 +1,4 @@
+// ! 추상 클래스
 class Game {
   constructor(id) {
     this.id = id;
