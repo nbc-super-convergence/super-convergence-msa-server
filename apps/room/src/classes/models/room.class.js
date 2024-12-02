@@ -111,9 +111,6 @@ class Room {
         return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
-      //* 퇴장 전 대기방 상태
-      const prevState = roomData.state;
-
       //* 준비중이였던 유저가 나간 경우
       if (roomData.readyUsers.has(sessionId)) {
         roomData.state = ROOM_STATE.WAIT;
@@ -131,15 +128,9 @@ class Room {
         roomData.state = ROOM_STATE.WAIT;
       }
 
-      //* 대기방 상태 변경 여부
-      const stateChanged = prevState !== roomData.state;
-
       logger.info('[ leave ] ====> success');
 
-      return ResponseHelper.success(roomData, {
-        stateChanged,
-        ownerId: roomData.ownerId,
-      });
+      return ResponseHelper.success(roomData);
     } catch (error) {
       logger.error('[ leave ] ====> unknown error', error);
       return ResponseHelper.fail();

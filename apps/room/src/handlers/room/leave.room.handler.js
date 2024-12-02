@@ -30,25 +30,11 @@ export const leaveRoomRequestHandler = async ({ socket, payload }) => {
       if (otherSessionIds.length > 0) {
         //* 퇴장 알림
         const leaveNotificationPacket = createNotification(
-          { userData: result.userData, ownerId: result.ownerId },
+          { room: result.data },
           MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION,
           otherSessionIds,
         );
         socket.write(leaveNotificationPacket);
-
-        //* 상태가 변경되었다면 게임 준비 상태 알림도 전송
-        if (result.stateChanged) {
-          const gamePrepareNotificationPacket = createNotification(
-            {
-              userData: result.userData,
-              isReady: false,
-              state: result.data.state,
-            },
-            MESSAGE_TYPE.GAME_PREPARE_NOTIFICATION,
-            otherSessionIds,
-          );
-          socket.write(gamePrepareNotificationPacket);
-        }
       }
     }
   } catch (error) {
