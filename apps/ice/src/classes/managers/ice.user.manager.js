@@ -6,7 +6,6 @@ import {
 } from '../../utils/ice.notifications.js';
 import iceUser from '../models/ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 class iceUserManager {
   constructor() {
@@ -78,9 +77,7 @@ class iceUserManager {
 
     const message = icePlayerSyncNotification(user);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }
@@ -95,9 +92,7 @@ class iceUserManager {
 
     const message = icePlayerDamageNotification(user.sessionId);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, sessionIds);
 
     return buffer;
   }
@@ -115,9 +110,7 @@ class iceUserManager {
 
     const message = icePlayerDeathNotification(user);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }

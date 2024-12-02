@@ -7,7 +7,6 @@ import {
   iceMiniGameReadyNotification,
   iceMiniGameStartNotification,
 } from '../../utils/ice.notifications.js';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
 
@@ -85,9 +84,7 @@ class iceGameManager {
 
     const message = iceMiniGameReadyNotification(users);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }
@@ -102,9 +99,7 @@ class iceGameManager {
 
     const message = iceGameReadyNotification(user.sessionId);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }
@@ -116,9 +111,7 @@ class iceGameManager {
 
     const message = iceMiniGameStartNotification();
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     // * 맵 변경, 게임 종료 타이머, 게임 종료 인터벌
     game.changeMap(socket);

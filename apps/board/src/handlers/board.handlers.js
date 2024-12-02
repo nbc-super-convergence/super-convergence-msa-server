@@ -1,7 +1,6 @@
 import { serializeForGate } from '@repo/common/utils';
 import boardManager from '../classes/managers/board.manager.class.js';
 import { MESSAGE_TYPE } from '@repo/common/header';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { handleError } from '../utils/errors/handle.error.js';
 import { logger } from '../utils/logger.utils.js';
 
@@ -38,13 +37,7 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
       failCode: result.failCode,
     };
     const messageType = MESSAGE_TYPE.GAME_START_NOTIFICATION;
-    const packet = serializeForGate(
-      messageType,
-      notification,
-      0,
-      getPayloadNameByMessageType(messageType),
-      sessionIds,
-    );
+    const packet = serializeForGate(messageType, notification, 0, sessionIds);
     socket.write(packet);
   } catch (err) {
     console.error('[ BOARD: gameStartRequestHandler ] ERROR ==>> ', err);
@@ -86,7 +79,6 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
       notificationMessageType,
       notification,
       0,
-      getPayloadNameByMessageType(notificationMessageType),
       sessionIds,
     );
     socket.write(notificationPacket);
@@ -99,13 +91,7 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
       diceResult: result.data.diceResult,
       failCode: result.failCode,
     };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
 
     // * 업적용 이력 저장
@@ -148,7 +134,6 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
       notificationMessageType,
       notification,
       0,
-      getPayloadNameByMessageType(notificationMessageType),
       sessionIds,
     );
     socket.write(notificationPacket);
@@ -160,13 +145,7 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
       success: result.success,
       failCode: result.failCode,
     };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
     console.error('[ BOARD: movePlayerBoardRequestHandler ] ERROR ==>> ', err);
@@ -209,7 +188,6 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
       notificationMessageType,
       notification,
       0,
-      getPayloadNameByMessageType(notificationMessageType),
       sessionIds,
     );
     socket.write(notificationPacket);
@@ -222,13 +200,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
       tile: result.data.tile,
       failCode: result.failCode,
     };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
     console.error('[ BOARD: purchaseTileRequestHandler ] ERROR ==>> ', err);
@@ -267,7 +239,6 @@ export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
       notificationMessageType,
       notification,
       0,
-      getPayloadNameByMessageType(notificationMessageType),
       sessionIds,
     );
     socket.write(notificationPacket);
@@ -280,13 +251,7 @@ export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
       room: result.data.room,
       failCode: result.failCode,
     };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
     console.error('[ BOARD: backToTheRoomRequestHandler ] ERROR ==>> ', err);
@@ -342,7 +307,6 @@ export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
       notificationMessageType,
       notification,
       0,
-      getPayloadNameByMessageType(notificationMessageType),
       sessionIds,
     );
     socket.write(notificationPacket);
@@ -356,13 +320,7 @@ export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
       nextTile: result.data.nextTile,
       failCode: result.failCode,
     };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
     console.error('[ BOARD: purchaseTrophyRequestHandler ] ERROR ==>> ', err);
@@ -406,7 +364,6 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
       notificationMessageType,
       notification,
       0,
-      getPayloadNameByMessageType(notificationMessageType),
       sessionIds,
     );
     socket.write(notificationPacket);
@@ -419,13 +376,7 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
       playersInfo: result.data.playersInfo,
       failCode: result.failCode,
     };
-    const responsePacket = serializeForGate(
-      responseMessageType,
-      response,
-      0,
-      getPayloadNameByMessageType(responseMessageType),
-      sessionIds,
-    );
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
     logger.error('[ BOARD: tilePenaltyRequestHandler ] ERROR ==>> ', err);

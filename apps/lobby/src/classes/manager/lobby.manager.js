@@ -125,7 +125,7 @@ class LobbyManager {
       const user = Lobby.formatUserData(userData, targetSessionId);
       return ResponseHelper.success(user);
     } catch (error) {
-      logger.error('[ getUserDetail ] ====> unknown error', { sessionId, error });
+      logger.error('[ getUserDetail ] ====> unknown error', { targetSessionId, error });
       return ResponseHelper.fail();
     }
   }
@@ -161,7 +161,7 @@ class LobbyManager {
 
       return ResponseHelper.success(userList);
     } catch (error) {
-      logger.error('[ getUserList ] ====> unknown error', { sessionId, error });
+      logger.error('[ getUserList ] ====> unknown error', { error });
       return ResponseHelper.fail();
     }
   }

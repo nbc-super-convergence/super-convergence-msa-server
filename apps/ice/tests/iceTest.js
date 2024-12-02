@@ -2,7 +2,6 @@ import { MESSAGE_TYPE } from '@repo/common/header';
 import { loadProtos } from '@repo/common/load.protos';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import net from 'net';
-import { getPayloadNameByMessageType } from '../src/handlers/index.js';
 import { config } from '@repo/common/config';
 import { redisUtil } from '../src/utils/init/redis.js';
 
@@ -30,8 +29,7 @@ const client = net.connect(gateOptions, async () => {
 
   const sequence = 0;
 
-  const payloadType = getPayloadNameByMessageType(messageType);
-  const gamePacket = serialize(messageType, packet, sequence, payloadType);
+  const gamePacket = serialize(messageType, packet, sequence);
 
   client.buffer = Buffer.alloc(0);
 
@@ -52,8 +50,7 @@ const client = net.connect(gateOptions, async () => {
         const packet = client.buffer.subarray(offset, length);
         client.buffer = client.buffer.subarray(length);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
-        const payload = packetParser(messageType, packet, payloadType);
+        const payload = packetParser(messageType, packet);
 
         console.log(' [ IceServer _onData ] payload ====>> ', payload);
 
@@ -93,9 +90,7 @@ const moveInterval = (client, payload) => {
       state,
     };
 
-    const payloadType = getPayloadNameByMessageType(messageType);
-
-    const packet = serialize(messageType, message, sequence, payloadType);
+    const packet = serialize(messageType, message, sequence);
 
     client.write(packet);
   }, 3000);

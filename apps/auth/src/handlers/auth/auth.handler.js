@@ -1,7 +1,6 @@
 import { MESSAGE_TYPE } from '../../constants/header.js';
 import { createUser, findUserId } from '../../db/user/user.db.js';
 import { serializeForGate } from '@repo/common/utils';
-import { getPayloadNameByMessageType } from '../index.js';
 import { redis } from '../../redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { loginValidation, registerValidation } from '../../utils/auth.utils.js';
@@ -31,14 +30,9 @@ export const registerRequestHandler = async ({ socket, payload }) => {
       packet.success = true;
     }
 
-    const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.REGISTER_RESPONSE);
-    const registerResponse = serializeForGate(
-      MESSAGE_TYPE.REGISTER_RESPONSE,
-      packet,
-      0,
-      payloadType,
-      [payload.sequence],
-    );
+    const registerResponse = serializeForGate(MESSAGE_TYPE.REGISTER_RESPONSE, packet, 0, [
+      payload.sequence,
+    ]);
     socket.write(registerResponse);
   } catch (error) {
     console.error(`[ registerRequestHandler ] error =>>> `, error);
@@ -77,8 +71,7 @@ export const loginRequestHandler = async ({ socket, payload }) => {
       packet.sessionId = sessionId;
     }
 
-    const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
-    const loginResponse = serializeForGate(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, payloadType, [
+    const loginResponse = serializeForGate(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, [
       payload.sequence,
     ]);
     socket.write(loginResponse);

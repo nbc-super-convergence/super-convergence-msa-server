@@ -3,7 +3,6 @@ import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import { loadProtos } from '@repo/common/load.protos';
 import { redis } from '../src/init/redis.js';
 import { MESSAGE_TYPE } from '@repo/common/header';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 class TestClient {
   constructor() {
@@ -11,7 +10,6 @@ class TestClient {
     this.sessionId = 'test-session-' + (Math.random() * 3).toString();
     this.sequence = 0;
     this.userData = {
-      loginId: 'testUser' + (Math.random() * 3).toString(),
       nickname: 'TestNick' + (Math.random() * 3).toString(),
     };
     this.roomId = null;
@@ -39,14 +37,12 @@ class TestClient {
       while (this.socket.buffer.length >= 11) {
         const { messageType, version, sequence, offset, length } = deserialize(this.socket.buffer);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
-
         if (this.socket.buffer.length >= length) {
           try {
             const packet = this.socket.buffer.subarray(offset, length);
             this.socket.buffer = this.socket.buffer.subarray(length);
 
-            const payload = packetParser(messageType, packet, payloadType);
+            const payload = packetParser(messageType, packet);
             if (messageType === MESSAGE_TYPE.CREATE_ROOM_RESPONSE) {
               console.log('payload 타입:', payload.room);
               // * 생성된 대기방으로 roomId 설정
