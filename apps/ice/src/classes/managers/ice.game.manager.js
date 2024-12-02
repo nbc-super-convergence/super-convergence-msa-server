@@ -153,9 +153,7 @@ class iceGameManager {
 
     const message = icePlayerSyncNotification(user);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }
@@ -170,9 +168,7 @@ class iceGameManager {
 
     const message = icePlayerDamageNotification(user.sessionId);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }
@@ -190,9 +186,7 @@ class iceGameManager {
 
     const message = icePlayerDeathNotification(user);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
   }

@@ -110,19 +110,7 @@ class iceGame extends Game {
 
           const message = iceMapSyncNotification();
 
-<<<<<<< HEAD
-          const payloadType = getPayloadNameByMessageType(message.type);
-
-          const buffer = serializeForGate(
-            message.type,
-            message.payload,
-            0,
-            payloadType,
-            sessionIds,
-          );
-=======
-        const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
->>>>>>> develop
+          const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
           socket.write(buffer);
         },
