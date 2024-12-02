@@ -4,13 +4,13 @@ import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType } from '../../handlers/index.js';
 import iceGameManager from '../managers/ice.game.manager.js';
 import { iceConfig } from '../../config/config.js';
-import { redisClient } from '../../utils/init/redis.js';
+import { subRedisClient } from '../../utils/init/redis.js';
 
 class IceServer extends TcpServer {
   constructor(name, port, types = []) {
     super(name, port, types);
 
-    this.subScriber = redisClient;
+    this.subScriber = subRedisClient;
 
     this.subScriber.subscribe(iceConfig.REDIS.CHANNEL, (err, count) => {
       if (err) {
@@ -27,8 +27,12 @@ class IceServer extends TcpServer {
       const [boardId, users] = message.split(':');
 
       await iceGameManager.addGame(boardId, users.split(','));
+    });
 
-      const game = iceGameManager.getGameBySessionId(boardId);
+    this.subScriber.on('iceGameChannel', async (channel, message) => {
+      const { boardId } = message;
+
+      const game = await iceGameManager.getGameBySessionId(boardId);
 
       const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
 
