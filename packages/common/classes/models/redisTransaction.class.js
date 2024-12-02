@@ -136,8 +136,10 @@ class redisTransaction {
       });
       multi.expire(boardKey, this.expire);
 
-      console.log('[ createBoardGame ] board.users ===>> ', board.users);
-      board.users.forEach((sessionId) => {
+      const users = JSON.parse(board.users);
+      users.forEach((sessionId) => {
+        console.log('[ createBoardGame : for ] sessionId ===> ', sessionId);
+
         // * 보드 플레이어 목록 저장
         multi.sadd(playersKey, sessionId);
         multi.expire(playersKey, this.expire);
