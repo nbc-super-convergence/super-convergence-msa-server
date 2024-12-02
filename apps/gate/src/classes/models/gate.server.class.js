@@ -9,6 +9,7 @@ import {
   serializeForClient,
 } from '@repo/common/utils';
 import { SERVER_HOST } from '../../constants/env.js';
+import { makeLogoutRequest } from '../../utils/request/logout.utils.js';
 
 class GateServer extends TcpServer {
   _map = {};
@@ -108,12 +109,24 @@ class GateServer extends TcpServer {
       (key) => this._socketMap[key].socket === socket,
     );
     console.log(' [ GATE: _onEnd ] 클라이언트 연결이 종료되었습니다. ==>> ', sessionid);
+
+    // * 로그아웃 처리
+    const logOutPacket = makeLogoutRequest(sessionid);
+    console.log('\n [ GATE: _onEnd ]  [ keys ] ', Object.keys(this._mapServices));
+    const targetService = this._mapServices['Auth_1'];
+    targetService.client.write(logOutPacket);
   };
   _onError = (socket) => (err) => {
     const sessionid = Object.keys(this._socketMap).find(
       (key) => this._socketMap[key].socket === socket,
     );
     console.error(` [ GATE: _onError ]  소켓 오류가 발생하였습니다.:  ${sessionid} `, err);
+
+    // * 로그아웃 처리
+    const logOutPacket = makeLogoutRequest(sessionid);
+    console.log('\n [ GATE: _onEnd ]  [ keys ] ', Object.keys(this._mapServices));
+    const targetService = this._mapServices['Auth_1'];
+    targetService.client.write(logOutPacket);
   };
 
   _onDistribute = (socket, data) => {
