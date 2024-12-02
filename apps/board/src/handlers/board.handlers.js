@@ -29,16 +29,14 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
   try {
     // * 보드 게임 방, 플레이어 리스트 생성 및 보드 채널 published
     const result = await boardManager.createBoard(sessionId);
-
-    try {
-      sessionIds = JSON.parse(result.data.users);
-      console.log(' [ BOARD: gameStartRequestHandler ] sessionIds  ===>>> ', sessionIds);
-    } catch (e) {
-      sessionIds = [sessionId];
-    }
+    sessionIds = result.data.users;
 
     // * 게임 인원 전체에게 Noti
-    const notification = { success: result.success, players: [], failCode: result.failCode };
+    const notification = {
+      success: result.success,
+      players: result.data.players,
+      failCode: result.failCode,
+    };
     const messageType = MESSAGE_TYPE.GAME_START_NOTIFICATION;
     const packet = serializeForGate(
       messageType,
