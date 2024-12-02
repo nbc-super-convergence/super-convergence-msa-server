@@ -2,11 +2,11 @@ import { MESSAGE_TYPE } from '../../constants/header.js';
 import { createUser, findUserId } from '../../db/user/user.db.js';
 import { serializeForGate } from '@repo/common/utils';
 import { getPayloadNameByMessageType } from '../index.js';
-import bcrypt from 'bcrypt';
 import { redis } from '../../redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { loginValidation, registerValidation } from '../../utils/auth.utils.js';
 import { config } from '@repo/common/config';
+import bcrypt from 'bcrypt';
 
 /**
  * 회원가입 핸들러
@@ -26,9 +26,9 @@ export const registerRequestHandler = async ({ socket, payload }) => {
 
     // 회원가입 처리
     if (packet.failCode === config.FAIL_CODE.NONE_FAILCODE) {
+      packet.success = true;
       const hashedPassword = await bcrypt.hash(password, 10);
       await createUser(loginId, hashedPassword, nickname);
-      packet.success = true;
     }
 
     const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.REGISTER_RESPONSE);
@@ -53,7 +53,6 @@ export const loginRequestHandler = async ({ socket, payload }) => {
     const { loginId, password } = payload;
     const loginPayload = { loginId, password };
 
-    console.log('loginPayload', loginPayload);
     const checkExistId = await findUserId(loginId);
     const resultFailcode = await loginValidation(loginPayload, checkExistId);
 

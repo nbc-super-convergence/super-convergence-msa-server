@@ -10,10 +10,10 @@ export const logoutHandler = async ({ socket, payload }) => {
     //
     const { sessionId } = payload;
 
-    const findLoginId = await redis.getUserToSessionfield(sessionId, 'loginId');
+    const findNickname = await redis.getUserToSessionfield(sessionId, 'nickname');
 
-    if (findLoginId) {
-      await redis.deleteUserToLogin(findLoginId);
+    if (findNickname) {
+      await redis.deleteUserToLogin(findNickname);
       await redis.deleteUserToSession(sessionId);
     } else {
       throw new Error('Wrong Session Id');

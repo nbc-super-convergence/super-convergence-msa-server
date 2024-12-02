@@ -35,10 +35,12 @@ export const registerValidation = async (payload, loginId) => {
 
     // 이미 존재하는 닉네임
     const existNick = await findUserNickname(payload.nickname);
+
     if (existNick) {
       console.error('ALREADY_EXIST_NICKNAME', '이미 가입된 NICK_NAME');
       return config.FAIL_CODE.ALREADY_EXIST_NICKNAME;
     }
+
     return config.FAIL_CODE.NONE_FAILCODE;
   } finally {
     await redis.deleteLockKey('register', value.loginId);
@@ -67,22 +69,12 @@ export const loginValidation = async (payload, loginId) => {
     return config.FAIL_CODE.ID_OR_PASSWORD_MISS;
   }
 
-  try {
-    // 동시성 제어
-    const lockAcquired = await redis.createLockKey('login', value.loginId);
-    if (!lockAcquired) {
-      console.error('ALREADY_LOGGED_IN_ID ==>>', '동시 접근, 탈락');
-      return config.FAIL_CODE.ALREADY_LOGGED_IN_ID;
-    }
-
-    // 중복로그인 체크
-    const isAlreadyLoggedIn = await redis.getUserToLogin(loginId.nickname);
-    if (isAlreadyLoggedIn === 1) {
-      console.error('ALREADY_LOGGED_IN_ID ==>>', '이미 접속중인 ID');
-      return config.FAIL_CODE.ALREADY_LOGGED_IN_ID;
-    }
-    return config.FAIL_CODE.NONE_FAILCODE;
-  } finally {
-    await redis.deleteLockKey('login', value.loginId);
+  // 중복 로그인 검사 KEY
+  const loginKey = await redis.createUserLogin(value.nickname);
+  if (loginKey < 1) {
+    console.error('ALREADY_LOGGED_IN_ID ==>>', '이미 접속중인 ID');
+    return config.FAIL_CODE.ALREADY_LOGGED_IN_ID;
   }
+
+  return config.FAIL_CODE.NONE_FAILCODE;
 };

@@ -144,7 +144,8 @@ class RedisUtil {
 
   async createUserLogin(loginId) {
     const key = `${this.prefix.LOGIN}`;
-    await this.client.sadd(key, loginId);
+    const result = await this.client.sadd(key, loginId);
+    return result;
   }
 
   /**
@@ -161,9 +162,9 @@ class RedisUtil {
    * 중복 로그인 세션에서 유저 삭제
    */
 
-  async deleteUserToLogin(loginId) {
+  async deleteUserToLogin(nickname) {
     const key = `${this.prefix.LOGIN}`;
-    await this.client.srem(key, loginId);
+    await this.client.srem(key, nickname);
   }
 
   //* 유저 데이터
