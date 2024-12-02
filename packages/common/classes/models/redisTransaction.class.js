@@ -192,12 +192,12 @@ class redisTransaction {
    * @param {string} sessionId
    * @param {string} loginId
    */
-  async deleteUser(sessionId, loginId) {
+  async deleteUser(sessionId, nickname) {
     return this.execute(async (multi) => {
       const userKey = `${this.prefix.USER}:${sessionId}`;
       const loginKey = `${this.prefix.LOGIN}`;
 
-      multi.del(loginKey, loginId);
+      multi.del(loginKey, nickname);
       multi.del(userKey);
     });
   }

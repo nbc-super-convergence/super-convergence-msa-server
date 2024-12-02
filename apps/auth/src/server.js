@@ -1,9 +1,14 @@
 import AuthServer from './classes/models/auth.server.class.js';
+import { config } from './config/config.js';
 import { SERVER_HOST } from './constants/env.js';
 
-const SERVER_NAME = 'Auth';
-const SERVER_PORT = 7012;
-const server = new AuthServer(SERVER_NAME, SERVER_PORT, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const TYPE_LENGTH = config.MAX_AUTH_MESSAGE_TYPE;
+const TYPES = Array.from({ length: TYPE_LENGTH }, (_, i) => i + 1);
+
+console.log(TYPES);
+const SERVER_NAME = config.SERVER_NAME;
+const SERVER_PORT = config.SERVER_PORT;
+const server = new AuthServer(SERVER_NAME, SERVER_PORT, TYPES);
 
 await server.start();
 

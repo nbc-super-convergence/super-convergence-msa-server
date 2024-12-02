@@ -1,23 +1,20 @@
 import net from 'net';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import { loadProtos } from '@repo/common/load.protos';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 // 테스트 코드를 작성해 주세요.
-const SESSION_ID = '1cd93571-8b42-4e9b-af81-62edb129ad88';
+const SESSION_ID = 'f30db7d7-ef0e-4592-86fc-a36637249beb';
 
 // 대상 - GATE SERVER
 const HOST = '127.0.0.1';
 const PORT = 7011;
 
 /**
- *  로그아웃 요청 TEST CODE (임시)
+ *  로그아웃 요청 TEST CODE
  *  response 돌려받지 않음
  */
 const runClient = async () => {
   try {
-    // Protocol Buffers 파일 로드
-
     await loadProtos();
 
     const client = new net.Socket();
@@ -48,7 +45,7 @@ const runClient = async () => {
         // deserialized
         const { messageType, version, sequence, offset, length } = deserialize(client.buffer);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
+        const payloadType = 'none';
 
         if (client.buffer.length >= length) {
           try {

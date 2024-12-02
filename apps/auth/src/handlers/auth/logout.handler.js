@@ -1,8 +1,8 @@
 import { redis } from '../../redis.js';
 
 /**
- *  로그아웃 핸들러 (임시)
- *  게이트가 로그아웃한 클라이언트(소켓)의 uuid를 알려준다.
+ *  로그아웃 핸들러
+ *  => lobby Server 에서 일괄 처리로 현재 사용하지 않음
  */
 
 export const logoutHandler = async ({ socket, payload }) => {
@@ -13,10 +13,9 @@ export const logoutHandler = async ({ socket, payload }) => {
     const findNickname = await redis.getUserToSessionfield(sessionId, 'nickname');
 
     if (findNickname) {
-      await redis.deleteUserToLogin(findNickname);
-      await redis.deleteUserToSession(sessionId);
+      await redis.transaction.deleteUser(sessionId, findNickname);
     } else {
-      throw new Error('Wrong Session Id');
+      console.error('해당 SessionId 의 접속 기록 없음');
     }
   } catch (error) {
     console.error(`[ logoutHandler ] error =>>> `, error.message);

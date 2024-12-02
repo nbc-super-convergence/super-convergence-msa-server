@@ -1,7 +1,6 @@
 import net from 'net';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import { loadProtos } from '@repo/common/load.protos';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { config } from '@repo/common/config';
 
 // 테스트 코드를 작성해 주세요.
@@ -19,8 +18,6 @@ const PORT = 7011;
  */
 const runClient = async () => {
   try {
-    // Protocol Buffers 파일 로드
-
     await loadProtos();
 
     const client = new net.Socket();
@@ -114,7 +111,7 @@ const runClient = async () => {
 
       // TEST 6 회원가입 동시 시도
       setTimeout(() => {
-        console.log(`회원가입 동시 시도 ===>>> FailCode:${config.FAIL_CODE.NONE_FAILCODE}`);
+        console.log(`회원가입 동시 시도 ===>>> FailCode:${config.FAIL_CODE.ALREADY_EXIST_ID}`);
 
         const payload5 = {
           loginId: LOGIN_ID,
@@ -143,7 +140,7 @@ const runClient = async () => {
         // deserialized
         const { messageType, version, sequence, offset, length } = deserialize(client.buffer);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
+        const payloadType = 'registerResponse';
 
         if (client.buffer.length >= length) {
           try {
