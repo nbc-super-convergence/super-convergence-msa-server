@@ -111,6 +111,22 @@ const runClient = async () => {
         client.write(buffer5);
         // console.log(`C2S buffer ===>>> `, buffer);
       }, 1600);
+
+      // TEST 6 회원가입 동시 시도
+      setTimeout(() => {
+        console.log(`회원가입 동시 시도 ===>>> FailCode:${config.FAIL_CODE.NONE_FAILCODE}`);
+
+        const payload5 = {
+          loginId: LOGIN_ID,
+          password: PASSWORD,
+          passwordConfirm: PASSWORD_CONFIRM,
+          nickname: NICKNAME,
+        };
+
+        const buffer5 = serialize(1, payload5, 0, 'registerRequest');
+        client.write(buffer5);
+        // console.log(`C2S buffer ===>>> `, buffer);
+      }, 1600);
     });
 
     // 서버로부터 데이터 수신
