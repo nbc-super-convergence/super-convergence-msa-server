@@ -9,14 +9,13 @@ export const createNotification = (data, messageType, sessionIds) => {
   switch (messageType) {
     case MESSAGE_TYPE.JOIN_ROOM_NOTIFICATION:
       notification = {
-        user: data.userData,
+        room: data.room,
       };
       break;
 
     case MESSAGE_TYPE.LEAVE_ROOM_NOTIFICATION:
       notification = {
-        user: data.userData,
-        ownerId: data.ownerId,
+        room: data.room,
       };
       break;
 
