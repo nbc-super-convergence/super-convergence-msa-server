@@ -1,6 +1,6 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
-import { getHandlerByMessageType, getPayloadNameByMessageType } from '../../handlers/index.js';
+import { getHandlerByMessageType } from '../../handlers/index.js';
 import { deserialize, packetParser } from '@repo/common/utils';
 
 /**
@@ -25,7 +25,7 @@ class BoardServer extends TcpServer {
         const packet = socket.buffer.subarray(offset, length);
         socket.buffer = socket.buffer.subarray(length);
 
-        const payload = packetParser(messageType, packet, getPayloadNameByMessageType(messageType));
+        const payload = packetParser(messageType, packet);
 
         console.log(' [ onData ] payload ===>> ', payload);
 

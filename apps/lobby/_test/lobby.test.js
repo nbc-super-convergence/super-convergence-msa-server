@@ -1,7 +1,6 @@
 import net from 'net';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import { MESSAGE_TYPE } from '../src/utils/constants.js';
-import { getPayloadNameByMessageType } from '../src/handlers/index.js';
 import { loadProtos } from '@repo/common/load.protos';
 import { redis } from '../src/init/redis.js';
 
@@ -11,7 +10,6 @@ class TestClient {
     this.sessionId = 'test-session-' + (Math.random() * 3).toString();
     this.sequence = 0;
     this.userData = {
-      loginId: 'testUser' + (Math.random() * 3).toString(),
       nickname: 'TestNick' + (Math.random() * 3).toString(),
     };
   }
@@ -38,14 +36,12 @@ class TestClient {
       while (this.socket.buffer.length >= 11) {
         const { messageType, version, sequence, offset, length } = deserialize(this.socket.buffer);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
-
         if (this.socket.buffer.length >= length) {
           try {
             const packet = this.socket.buffer.subarray(offset, length);
             this.socket.buffer = this.socket.buffer.subarray(length);
 
-            const payload = packetParser(messageType, packet, payloadType);
+            const payload = packetParser(messageType, packet);
 
             console.log('payload', payload);
             console.log('\n=== 서버 응답 ===');

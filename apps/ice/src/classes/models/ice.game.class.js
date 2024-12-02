@@ -2,7 +2,6 @@ import { Game } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
 import iceUserManager from '../managers/ice.user.manager.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
 
@@ -79,9 +78,7 @@ class iceGame extends Game {
 
         const message = iceMapSyncNotification();
 
-        const payloadType = getPayloadNameByMessageType(message.type);
-
-        const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+        const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
         socket.write(buffer);
 
@@ -126,9 +123,7 @@ class iceGame extends Game {
 
     const message = iceGameOverNotification(users);
 
-    const payloadType = getPayloadNameByMessageType(message.type);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, payloadType, sessionIds);
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     socket.write(buffer);
 
