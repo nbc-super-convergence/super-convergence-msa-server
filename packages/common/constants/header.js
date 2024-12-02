@@ -4,12 +4,14 @@ export const SEQUENCE_LENGTH = 4;
 export const PAYLOAD_LENGTH = 4;
 
 export const MESSAGE_TYPE = {
-  // Auth (1~9)
+  // Auth (1~8)
   REGISTER_REQUEST: 1,
   REGISTER_RESPONSE: 2,
   LOGIN_REQUEST: 3,
   LOGIN_RESPONSE: 4,
 
+  // Gate
+  CLOSE_SOCKET_REQUEST: 9,
   // Distributor (10)
   SERVER_INFO_NOTIFICATION: 10,
 
