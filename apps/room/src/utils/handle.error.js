@@ -1,4 +1,3 @@
-import { getPayloadNameByMessageType } from '../handlers/index.js';
 import { serializeForGate } from '@repo/common/utils';
 import { logger } from '@repo/common/config';
 
@@ -9,13 +8,5 @@ export const handleError = (socket, messageType, sessionId, error) => {
     stack: error.stack,
   });
 
-  socket.write(
-    serializeForGate(
-      messageType,
-      { success: false, failCode: 1 },
-      0,
-      getPayloadNameByMessageType(messageType),
-      [sessionId],
-    ),
-  );
+  socket.write(serializeForGate(messageType, { success: false, failCode: 1 }, 0, [sessionId]));
 };

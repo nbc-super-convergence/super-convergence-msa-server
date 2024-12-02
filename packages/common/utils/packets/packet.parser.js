@@ -1,56 +1,55 @@
-import { getPayloadNameByMessageType } from '../../handlers/index.js';
 import { getProtoMessages } from '../../init/load.protos.js';
+import { config } from '../../config/config.js';
 
-export const packetParser = (
-  messageType,
-  data,
-  payloadType = getPayloadNameByMessageType(messageType),
-) => {
-  let payload;
+const { FIELD_NAME } = config;
+
+/**
+ * 서비스 packetParser
+ * @param {Number} messageType
+ * @param {Object} data
+ * @returns {Object || null}
+ */
+export const packetParser = (messageType, data) => {
   try {
     const protoMessages = getProtoMessages();
-    const gamePacket = protoMessages.game.GamePacket;
-    const decodedGamePacket = gamePacket.decode(data);
+    const gameMessage = protoMessages.game.GamePacket;
+    const decodedGamePacket = gameMessage.decode(data);
+    const fieldName = FIELD_NAME[messageType];
+    if (!fieldName) {
+      console.error('[ packetParser ] Unknown message type ===>>> ', messageType);
+      return null;
+    }
+
     console.log('[ packetParser ] decodedGamePacket ===>> ', decodedGamePacket);
-    const field = decodedGamePacket[payloadType];
-    payload = { ...field };
+
+    const payload = decodedGamePacket[fieldName];
+
+    console.log('[ packetParser ] payload ===>> ', payload);
+
+    return payload;
   } catch (e) {
     console.error('[ packetParser ] ===> ', e);
+    return null;
   }
-
-  return payload;
 };
 
 /**
  * gate용 packetParser
- * @param {*} messageType
- * @param {*} data
- * @param {*} payloadType
- * @returns
+ * @param {Number} messageType
+ * @param {Object} data
+ * @returns {Object || null}
  */
-export const packetParserForGate = (
-  messageType,
-  data,
-  payloadType = getPayloadNameByMessageType(messageType),
-) => {
-  let payload;
+export const packetParserForGate = (messageType, data) => {
   try {
     const protoMessages = getProtoMessages();
-    const gatePacket = protoMessages.gate.GatePacket;
-    const decodedGatePacket = gatePacket.decode(data);
+    const gateMessage = protoMessages.gate.GatePacket;
+    const decodedGatePacket = gateMessage.decode(data);
+
     console.log('[ packetParserForGate ] decodedGatePacket  ===>>> \n', decodedGatePacket);
 
-    const gamePacket = protoMessages.game.GamePacket;
-    const decodedGamePacket = gamePacket.decode(decodedGatePacket.gamePacket);
-    const field = decodedGamePacket[payloadType];
-    payload = { ...field };
-    console.log('[ packetParserForGate ] field - payload  ===>>> \n', payload);
-
-    payload = { ...decodedGatePacket };
-    console.log('[ packetParserForGate ] gatePacketField - payload  ===>>> \n', payload);
+    return { ...decodedGatePacket };
   } catch (e) {
     console.error('[ packetParserForGate ] ===> ', e);
+    return null;
   }
-
-  return payload;
 };

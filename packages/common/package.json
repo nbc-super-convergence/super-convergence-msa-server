@@ -24,7 +24,6 @@
     "./config": "./config/index.js",
     "./header": "./constants/header.js",
     "./failcodes": "./constants/failcodes.js",
-    "./handlers": "./handlers/index.js",
     "./load.protos": "./init/load.protos.js",
     "./protobuf": "./protobuf"
   },
@@ -33,7 +32,6 @@
     "classes/**/*",
     "config/**/*",
     "constants/**/*",
-    "handlers/**/*",
     "init/**/*",
     "protobuf/**/*.proto"
   ]

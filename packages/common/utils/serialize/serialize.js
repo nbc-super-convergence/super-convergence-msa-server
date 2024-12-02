@@ -1,44 +1,60 @@
 import { config } from '../../config/config.js';
-import { getPayloadNameByMessageType } from '../../handlers/index.js'; // handlers/index.js
 import { getProtoMessages } from '../../init/load.protos.js';
 
-export const serialize = (
-  messageType,
-  data,
-  sequence,
-  payloadType = getPayloadNameByMessageType(messageType),
-) => {
-  const messageTypeBuffer = Buffer.alloc(config.PACKET.MESSAGE_TYPE_LENGTH);
-  messageTypeBuffer.writeUintBE(messageType, 0, config.PACKET.MESSAGE_TYPE_LENGTH);
+const { PACKET, FIELD_NAME, CLIENT } = config;
 
-  const version = config.CLIENT.VERSION;
-  const versionBuffer = Buffer.from(version);
-  const versionLengthBuffer = Buffer.alloc(config.PACKET.VERSION_LENGTH);
-  versionLengthBuffer.writeUintBE(versionBuffer.length, 0, config.PACKET.VERSION_LENGTH);
+/**
+ * * 직렬화 함수
+ * @param {Number} messageType
+ * @param {Object} data
+ * @param {Number} sequence
+ * @returns {Buffer}
+ */
+export const serialize = (messageType, data, sequence) => {
+  const version = CLIENT.VERSION;
+  const versionBuffer = Buffer.from(version, 'utf-8'); //* 버전 문자열을 버퍼로 변환
+  const versionLength = versionBuffer.length;
+  const buffer = Buffer.alloc(PACKET.TOTAL_LENGTH + versionLength);
+  let offset = 0;
 
-  const sequenceBuffer = Buffer.alloc(config.PACKET.SEQUENCE_LENGTH);
-  sequenceBuffer.writeUintBE(sequence, 0, config.PACKET.SEQUENCE_LENGTH);
+  console.log('Encoding data:', data);
 
+  //* messageType 쓰기
+  buffer.writeUInt16BE(messageType, offset);
+  offset += PACKET.MESSAGE_TYPE_LENGTH;
+
+  //* version 길이 쓰기
+  buffer.writeUInt8(versionLength, offset);
+  offset += PACKET.VERSION_LENGTH;
+
+  //* version 쓰기)
+  versionBuffer.copy(buffer, offset);
+  offset += versionLength;
+
+  //* sequence 쓰기
+  buffer.writeUInt32BE(sequence, offset);
+  offset += PACKET.SEQUENCE_LENGTH;
+
+  //* data 메시지 타입에 맞게 쓰기
   const protoMessages = getProtoMessages();
+  const gameMessage = protoMessages.game.GamePacket;
 
-  const gamePacket = protoMessages.game.GamePacket;
-  const payload = { [payloadType]: data };
+  const field = FIELD_NAME[messageType];
+  console.log('field name:', field);
 
-  console.log('  [ serialize ] payload ===>>> ', payload);
+  const payload = gameMessage.encode({ [field]: data }).finish();
+  const payloadLength = payload.length;
 
-  const payloadBuffer = gamePacket.encode(payload).finish();
+  console.log('  [ serializeForGate ] payload ===>>> ', payload);
 
-  const payloadLengthBuffer = Buffer.alloc(config.PACKET.PAYLOAD_LENGTH);
-  payloadLengthBuffer.writeUintBE(payloadBuffer.length, 0, config.PACKET.PAYLOAD_LENGTH);
+  //* payload 길이 쓰기
+  buffer.writeUInt32BE(payloadLength, offset);
+  offset += PACKET.PAYLOAD_LENGTH;
 
-  return Buffer.concat([
-    messageTypeBuffer,
-    versionLengthBuffer,
-    versionBuffer,
-    sequenceBuffer,
-    payloadLengthBuffer,
-    payloadBuffer,
-  ]);
+  const result = Buffer.concat([buffer, payload]);
+  offset += payloadLength;
+
+  return result;
 };
 
 /**
@@ -46,79 +62,101 @@ export const serialize = (
  * @param {Number} messageType
  * @param {Object} data
  * @param {Number} sequence
- * @param {Number} payloadType
  * @param {Array} sessionIds
- * @returns
+ * @returns {Buffer}
  */
-export const serializeForGate = (
-  messageType,
-  data,
-  sequence,
-  payloadType = getPayloadNameByMessageType(messageType),
-  sessionIds,
-) => {
-  const messageTypeBuffer = Buffer.alloc(config.PACKET.MESSAGE_TYPE_LENGTH);
-  messageTypeBuffer.writeUintBE(messageType, 0, config.PACKET.MESSAGE_TYPE_LENGTH);
+export const serializeForGate = (messageType, data, sequence, sessionIds) => {
+  const version = CLIENT.VERSION;
+  const versionBuffer = Buffer.from(version, 'utf-8'); //* 버전 문자열을 버퍼로 변환
+  const versionLength = versionBuffer.length;
+  const buffer = Buffer.alloc(PACKET.TOTAL_LENGTH + versionLength);
+  let offset = 0;
 
-  const version = config.CLIENT.VERSION;
-  const versionBuffer = Buffer.from(version);
-  const versionLengthBuffer = Buffer.alloc(config.PACKET.VERSION_LENGTH);
-  versionLengthBuffer.writeUintBE(versionBuffer.length, 0, config.PACKET.VERSION_LENGTH);
+  console.log('Encoding data:', data);
 
-  const sequenceBuffer = Buffer.alloc(config.PACKET.SEQUENCE_LENGTH);
-  sequenceBuffer.writeUintBE(sequence, 0, config.PACKET.SEQUENCE_LENGTH);
+  //* messageType 쓰기
+  buffer.writeUInt16BE(messageType, offset);
+  offset += PACKET.MESSAGE_TYPE_LENGTH;
 
+  //* version 길이 쓰기
+  buffer.writeUInt8(versionLength, offset);
+  offset += PACKET.VERSION_LENGTH;
+
+  //* version 쓰기)
+  versionBuffer.copy(buffer, offset);
+  offset += versionLength;
+
+  //* sequence 쓰기
+  buffer.writeUInt32BE(sequence, offset);
+  offset += PACKET.SEQUENCE_LENGTH;
+
+  //* data 메시지 타입에 맞게 쓰기
   const protoMessages = getProtoMessages();
+  const gameMessage = protoMessages.game.GamePacket;
 
-  const gamePacket = protoMessages.game.GamePacket;
-  const payload = { [payloadType]: data };
+  const field = FIELD_NAME[messageType];
+  console.log('field name:', field);
+
+  const payload = gameMessage.encode({ [field]: data }).finish();
 
   console.log('  [ serializeForGate ] payload ===>>> ', payload);
 
-  const payloadBuffer = gamePacket.encode(payload).finish();
-
-  const gatePacket = protoMessages.gate.GatePacket;
-  const gatePayload = {
+  //* gate패킷으로 다시 쓰기
+  const gateMessage = protoMessages.gate.GatePacket;
+  const gatePacket = {
     sessionIds,
-    gamePacket: payloadBuffer,
+    gamePacket: payload,
   };
-  console.log('  [ serializeForGate ] gatePayload ===>>> ', gatePayload);
-  const gatePayloadBuffer = gatePacket.encode(gatePayload).finish();
 
-  const payloadLengthBuffer = Buffer.alloc(config.PACKET.PAYLOAD_LENGTH);
-  payloadLengthBuffer.writeUintBE(gatePayloadBuffer.length, 0, config.PACKET.PAYLOAD_LENGTH);
+  console.log('gatePacket', gatePacket);
+  const gatePayload = gateMessage.encode(gatePacket).finish();
+  const payloadLength = gatePayload.length;
 
-  return Buffer.concat([
-    messageTypeBuffer,
-    versionLengthBuffer,
-    versionBuffer,
-    sequenceBuffer,
-    payloadLengthBuffer,
-    gatePayloadBuffer,
-  ]);
+  //* payload 길이 쓰기
+  buffer.writeUInt32BE(payloadLength, offset);
+  offset += PACKET.PAYLOAD_LENGTH;
+
+  const result = Buffer.concat([buffer, gatePayload]);
+  offset += payloadLength;
+
+  return result;
 };
 
+/**
+ * * 게이트에서 클라이언트로 보내기 전 직렬화
+ * @param {Number} messageType
+ * @param {Number} sequence
+ * @param {Buffer} gamePacketBuffer
+ * @returns {Buffer}
+ */
 export const serializeForClient = (messageType, sequence, gamePacketBuffer) => {
-  const messageTypeBuffer = Buffer.alloc(config.PACKET.MESSAGE_TYPE_LENGTH);
-  messageTypeBuffer.writeUintBE(messageType, 0, config.PACKET.MESSAGE_TYPE_LENGTH);
+  const version = CLIENT.VERSION;
+  const versionBuffer = Buffer.from(version, 'utf-8'); //* 버전 문자열을 버퍼로 변환
+  const versionLength = versionBuffer.length;
+  const buffer = Buffer.alloc(PACKET.TOTAL_LENGTH + versionLength);
+  let offset = 0;
 
-  const version = config.CLIENT.VERSION;
-  const versionBuffer = Buffer.from(version);
-  const versionLengthBuffer = Buffer.alloc(config.PACKET.VERSION_LENGTH);
-  versionLengthBuffer.writeUintBE(versionBuffer.length, 0, config.PACKET.VERSION_LENGTH);
+  //* messageType 쓰기
+  buffer.writeUInt16BE(messageType, offset);
+  offset += PACKET.MESSAGE_TYPE_LENGTH;
 
-  const sequenceBuffer = Buffer.alloc(config.PACKET.SEQUENCE_LENGTH);
-  sequenceBuffer.writeUintBE(sequence, 0, config.PACKET.SEQUENCE_LENGTH);
+  //* version 길이 쓰기
+  buffer.writeUInt8(versionLength, offset);
+  offset += PACKET.VERSION_LENGTH;
 
-  const payloadLengthBuffer = Buffer.alloc(config.PACKET.PAYLOAD_LENGTH);
-  payloadLengthBuffer.writeUintBE(gamePacketBuffer.length, 0, config.PACKET.PAYLOAD_LENGTH);
+  //* version 쓰기)
+  versionBuffer.copy(buffer, offset);
+  offset += versionLength;
 
-  return Buffer.concat([
-    messageTypeBuffer,
-    versionLengthBuffer,
-    versionBuffer,
-    sequenceBuffer,
-    payloadLengthBuffer,
-    gamePacketBuffer,
-  ]);
+  //* sequence 쓰기
+  buffer.writeUInt32BE(sequence, offset);
+  offset += PACKET.SEQUENCE_LENGTH;
+
+  //* payload 길이 쓰기
+  buffer.writeUInt32BE(gamePacketBuffer.length, offset);
+  offset += PACKET.PAYLOAD_LENGTH;
+
+  const result = Buffer.concat([buffer, gamePacketBuffer]);
+
+  return result;
 };

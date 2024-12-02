@@ -1,7 +1,6 @@
 import { logger } from '@repo/common/config';
 import { MESSAGE_TYPE } from '../utils/constants.js';
 import { serializeForGate } from '@repo/common/utils';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 export const createNotification = (data, messageType, sessionIds) => {
   let notification = {};
@@ -37,11 +36,5 @@ export const createNotification = (data, messageType, sessionIds) => {
     ...data,
   });
 
-  return serializeForGate(
-    messageType,
-    notification,
-    0,
-    getPayloadNameByMessageType(messageType),
-    sessionIds,
-  );
+  return serializeForGate(messageType, notification, 0, sessionIds);
 };

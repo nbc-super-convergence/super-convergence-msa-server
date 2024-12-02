@@ -1,7 +1,8 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
-import { getHandlerByMessageType, getPayloadNameByMessageType } from '../../handlers/index.js';
+import { getHandlerByMessageType } from '../../handlers/index.js';
 import { deserialize, packetParser } from '@repo/common/utils';
+import { logger } from '../../utils/logger.utils.js';
 
 /**
  * 보드게임 서버
@@ -22,18 +23,22 @@ class BoardServer extends TcpServer {
       );
 
       if (socket.buffer.length >= length) {
-        const packet = socket.buffer.subarray(offset, length);
-        socket.buffer = socket.buffer.subarray(length);
+        try {
+          const packet = socket.buffer.subarray(offset, length);
+          socket.buffer = socket.buffer.subarray(length);
 
-        const payload = packetParser(messageType, packet, getPayloadNameByMessageType(messageType));
+          const payload = packetParser(messageType, packet);
 
-        console.log(' [ onData ] payload ===>> ', payload);
+          console.log(' [ onData ] payload ===>> ', payload);
 
-        const handler = getHandlerByMessageType(messageType);
+          const handler = getHandlerByMessageType(messageType);
 
-        await handler({ socket, payload });
+          await handler({ socket, payload });
 
-        console.log(' [ BoardServer _onData ] payload ====>> ', payload);
+          console.log(' [ BoardServer _onData ] payload ====>> ', payload);
+        } catch (e) {
+          logger.error('[ BOARD: _onData ] ERROR ====>> ', e);
+        }
       } else {
         break;
       }

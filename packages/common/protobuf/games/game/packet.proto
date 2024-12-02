@@ -8,16 +8,19 @@ import '../../auth/auth.proto';
 import '../../lobby/lobby.proto';
 import '../../room/room.proto';
 import '../../board/board.proto';
+import '../../gate/gate.proto';
 
 message GamePacket {
     oneof payload {
-        // Auth (1~9)
+        // Auth (1~8)
         C2S_RegisterRequest registerRequest = 1;
         S2C_RegisterResponse registerResponse = 2;
         C2S_LoginRequest loginRequest = 3;
         S2C_LoginResponse loginResponse = 4;
         C2S_LoggoutRequest logoutRequest = 5;
         
+        // Gate 
+        S2S_CloseSocketRequest closeSocketRequest = 9;
         // distributor noti (10)
         S2S_ServerInfoNotification serverInfoNotification = 10;
 
@@ -75,6 +78,7 @@ message GamePacket {
         C2S_BackToTheRoomRequest backToTheRoomRequest = 91;
         S2C_BackToTheRoomResponse backToTheRoomResponse = 92;
         S2C_BackToTheRoomNotification backToTheRoomNotification = 93;
+        
 
         // Mini Game (101-110)
         C2S_StartMiniGameRequest startMiniGameRequest = 101;

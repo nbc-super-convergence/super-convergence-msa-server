@@ -1,12 +1,11 @@
 import { MESSAGE_TYPE } from '../../constants/header.js';
 import { createUser, findUserId } from '../../db/user/user.db.js';
 import { serializeForGate } from '@repo/common/utils';
-import { getPayloadNameByMessageType } from '../index.js';
-import bcrypt from 'bcrypt';
 import { redis } from '../../redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { loginValidation, registerValidation } from '../../utils/auth.utils.js';
 import { config } from '@repo/common/config';
+import bcrypt from 'bcrypt';
 
 /**
  * 회원가입 핸들러
@@ -31,17 +30,14 @@ export const registerRequestHandler = async ({ socket, payload }) => {
       packet.success = true;
     }
 
-    const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.REGISTER_RESPONSE);
-    const registerResponse = serializeForGate(
-      MESSAGE_TYPE.REGISTER_RESPONSE,
-      packet,
-      0,
-      payloadType,
-      [payload.sequence],
-    );
+    const registerResponse = serializeForGate(MESSAGE_TYPE.REGISTER_RESPONSE, packet, 0, [
+      payload.sequence,
+    ]);
     socket.write(registerResponse);
   } catch (error) {
     console.error(`[ registerRequestHandler ] error =>>> `, error);
+  } finally {
+    await redis.deleteLockKey('register', loginId);
   }
 };
 
@@ -53,7 +49,6 @@ export const loginRequestHandler = async ({ socket, payload }) => {
     const { loginId, password } = payload;
     const loginPayload = { loginId, password };
 
-    console.log('loginPayload', loginPayload);
     const checkExistId = await findUserId(loginId);
     const resultFailcode = await loginValidation(loginPayload, checkExistId);
 
@@ -71,13 +66,12 @@ export const loginRequestHandler = async ({ socket, payload }) => {
         nickname: checkExistId.nickname,
       };
 
+      await redis.createUserToSession(sessionId, redisData);
       packet.success = true;
       packet.sessionId = sessionId;
-      await redis.transaction.createUser(sessionId, checkExistId.login_id, redisData);
     }
 
-    const payloadType = getPayloadNameByMessageType(MESSAGE_TYPE.LOGIN_RESPONSE);
-    const loginResponse = serializeForGate(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, payloadType, [
+    const loginResponse = serializeForGate(MESSAGE_TYPE.LOGIN_RESPONSE, packet, 0, [
       payload.sequence,
     ]);
     socket.write(loginResponse);

@@ -9,6 +9,8 @@ import {
   serializeForClient,
 } from '@repo/common/utils';
 import { SERVER_HOST } from '../../constants/env.js';
+import { makeCloseSocketRequest } from '../../utils/request/message.utils.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class GateServer extends TcpServer {
   _map = {};
@@ -32,8 +34,8 @@ class GateServer extends TcpServer {
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
-        `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
+      logger.info(
+        `[ GATE :_onData ]\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
       if (socket.buffer.length >= length) {
@@ -46,7 +48,7 @@ class GateServer extends TcpServer {
           const packet = socket.buffer.subarray(offset, length);
           const payload = packetParser(messageType, packet);
 
-          console.log('[ GATE : _onData ]  socket.id ====>>> ', socket.id);
+          logger.info('[ GATE : _onData ]  socket.id ====>>> ', socket.id);
 
           // * 임시 소켓 id, 헤더 sequence에 삽입
           const buffer = serialize(messageType, payload, socket.id);
@@ -67,16 +69,17 @@ class GateServer extends TcpServer {
             //
             const packet = socket.buffer.subarray(offset, length);
             const payload = packetParser(messageType, packet);
-            console.log('[ Gate - _onData ] payload ===>>> \n', payload);
+            logger.info('[ GATE - _onData ] payload ===>>> \n', payload);
 
             // * 저장되어있는 소켓값 삭제
             try {
-              console.log(' [ GATE: _onData ] KEYS ===>>> ', Object.keys(this._socketMap));
+              logger.info(' [ GATE: _onData ] KEYS ===>>> ', Object.keys(this._socketMap));
               const mapKey = Object.keys(this._socketMap).find(
                 (key) => this._socketMap[key].socket === socket,
               );
               if (mapKey) {
-                delete this._socketMap[mapKey];
+                // TODO: 테스트 후, 주석 풀기
+                // delete this._socketMap[mapKey];
               }
             } catch (err) {
               console.error('[ GATE: _onData ] 임시 소켓 삭제 시도 실패, ERR ==>> ', err);
@@ -104,16 +107,38 @@ class GateServer extends TcpServer {
   };
 
   _onEnd = (socket) => () => {
-    const sessionid = Object.keys(this._socketMap).find(
+    const sessionId = Object.keys(this._socketMap).find(
       (key) => this._socketMap[key].socket === socket,
     );
-    console.log(' [ GATE: _onEnd ] 클라이언트 연결이 종료되었습니다. ==>> ', sessionid);
+    logger.info(' [ GATE: _onEnd ] 클라이언트 연결이 종료되었습니다. ==>> ', sessionId);
+
+    this._closeSocketSend(sessionId);
   };
   _onError = (socket) => (err) => {
-    const sessionid = Object.keys(this._socketMap).find(
+    const sessionId = Object.keys(this._socketMap).find(
       (key) => this._socketMap[key].socket === socket,
     );
-    console.error(` [ GATE: _onError ]  소켓 오류가 발생하였습니다.:  ${sessionid} `, err);
+    logger.error(` [ GATE: _onError ]  소켓 오류가 발생하였습니다.:  ${sessionId} `, err);
+
+    // * 로그아웃 처리
+    this._closeSocketSend(sessionId);
+  };
+
+  /**
+   * * 종료 이벤트시 , 각 서비스서버에 전송
+   * @param {String} sessionId
+   */
+  _closeSocketSend = (sessionId) => {
+    logger.info('\n [ GATE: _closeSocketSend ]  [ keys ] ', Object.keys(this._mapServices));
+
+    const closeSocketPacket = makeCloseSocketRequest(sessionId);
+    // * 인증, 로비, 룸, 보드, 아이스, [+]?
+    const serviceList = ['lobby', 'room', 'board', 'ice'];
+    for (let i = 0; i < serviceList.length; i++) {
+      const targetService = this._mapServices[serviceList[i] + '_1'];
+      // TODO: 다른 서버 준비되면 주석 풀기
+      // targetService.client.write(closeSocketPacket);
+    }
   };
 
   _onDistribute = (socket, data) => {
@@ -172,13 +197,13 @@ class GateServer extends TcpServer {
 
   // 마이크로서비스 접속 이벤트 처리
   onCreateClient = (options) => {
-    console.log('[ onCreateClient ] options ==> ', options);
+    logger.info('[ onCreateClient ] options ==> ', options);
   };
 
   // 마이크로서비스 응답 처리
   // * 서비스 서버에게 받은 데이터
   onReadClient = (options, packet) => {
-    console.log('[ gate - onReadClient ] =========> \n', packet);
+    logger.info('[ gate - onReadClient ] =========> \n', packet);
     this._clientBuffer = Buffer.concat([this._clientBuffer, packet]);
 
     while (this._clientBuffer.length >= config.PACKET.TOTAL_LENGTH) {
@@ -189,16 +214,16 @@ class GateServer extends TcpServer {
         this._clientBuffer = this._clientBuffer.subarray(length);
 
         const payload = packetParserForGate(messageType, packetV2);
-        console.log(`[ gate - onReadClient ]payload=========> \n`, payload);
+        logger.info(`[ gate - onReadClient ]payload=========> \n`, payload);
 
         const packetForClient = serializeForClient(messageType, sequence, payload.gamePacket);
 
-        console.log(`[ gate - onReadClient ]payload.sessionIds =========> \n`, payload.sessionIds);
-        console.log('[ GATE: ] payload.sessionIds.length ===>>> ', payload.sessionIds.length);
+        logger.info(`[ gate - onReadClient ]payload.sessionIds =========> \n`, payload.sessionIds);
+        logger.info('[ GATE: ] payload.sessionIds.length ===>>> ', payload.sessionIds.length);
         if (payload.sessionIds && payload.sessionIds.length > 0) {
           payload.sessionIds.forEach((sessionId) => {
             if (this._socketMap[sessionId]) {
-              console.log(
+              logger.info(
                 ` FOR ====>>> ${sessionId} ====>>> `,
                 this._socketMap[sessionId].socket.remoteAddress,
                 ':',
@@ -222,12 +247,12 @@ class GateServer extends TcpServer {
   // 마이크로서비스 접속 종료 처리
   onEndClient = (options) => {
     var key = options.host + ':' + options.port;
-    console.log('onEndClient', this._mapServices[key]);
+    logger.info('onEndClient', this._mapServices[key]);
   };
 
   // 마이크로서비스 접속 에러 처리
   onErrorClient = (options) => {
-    console.log('onErrorClient');
+    logger.info('onErrorClient');
   };
 
   // *
@@ -235,7 +260,7 @@ class GateServer extends TcpServer {
     await this.initialize();
 
     this.server.listen(this.context.port, () => {
-      console.log(`${this.context.name} server listening on port ${this.context.port}`);
+      logger.info(`${this.context.name} server listening on port ${this.context.port}`);
 
       const packet = createServerInfoNotification(
         [
@@ -249,7 +274,7 @@ class GateServer extends TcpServer {
         ],
         ++this._sequence,
       );
-      console.log(`\n [ start ]  packet ==>> ${packet} \n`);
+      logger.info(`\n [ start ]  packet ==>> ${packet} \n`);
 
       // * Distributor와 통신 처리
       this._isConnectedDistributor = false;
@@ -258,7 +283,7 @@ class GateServer extends TcpServer {
         SERVER_HOST,
         7010,
         (options) => {
-          console.log(' onCreate ==>> ');
+          logger.info(' onCreate ==>> ');
           this._isConnectedDistributor = true;
           this._clientDistributor.write(packet);
         },
@@ -266,11 +291,11 @@ class GateServer extends TcpServer {
           this._onDistribute(socket, data);
         },
         (options) => {
-          console.log(' onEnd ==>> ', options);
+          logger.info(' onEnd ==>> ', options);
           this._isConnectedDistributor = false;
         },
         (options, err) => {
-          console.log(' onError ==>> ', err);
+          logger.info(' onError ==>> ', err);
           this._isConnectedDistributor = false;
         },
       );
@@ -281,7 +306,7 @@ class GateServer extends TcpServer {
         }
       }, 3000);
 
-      console.log(' start () ');
+      logger.info(' start () ');
     });
   };
 }

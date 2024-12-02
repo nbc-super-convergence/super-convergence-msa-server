@@ -34,11 +34,11 @@ class BoardManager {
       console.log('[ BOARD: gameStartRequestHandler ] userLocation ===>>> ', userLocation);
 
       // * room 정보 조회
-      const roomData = await redis.getRoom(userLocation.roomId);
+      const roomData = await redis.getRoom(userLocation.room);
       console.log('[ BOARD: gameStartRequestHandler ] roomData ===>>> ', roomData);
 
       // * 방장만 시작 요청 가능
-      if (roomData.ownerSessionId === sessionId) {
+      if (roomData.ownerId === sessionId) {
         // const playerNumber = Math.floor(Math.random() * 4);
         const board = {
           boardId: uuidv4(),
@@ -48,12 +48,33 @@ class BoardManager {
           state: BOARD_STATE.WAITING,
         };
 
+        console.log(' [ BOARD: createBoard ] IF  board ===>>> ', board);
+
         // * redisUtil에서 redisTransaction으로 변경
         await redis.transaction.createBoardGame(board);
 
-        return { success: true, data: roomData, failCode: 0 };
+        const users = JSON.parse(roomData.users);
+        const data = {};
+        data.users = [];
+        data.players = [];
+
+        for (let i = 0; i < users.length; i++) {
+          const sId = users[i];
+          const user = await redis.getUserToSession(sId);
+          const playeData = {
+            sessionId: sId,
+            nickname: user.nickname,
+            position: 1, // TODO: 0? 1?
+          };
+          data.players.push(playeData);
+          data.users.push(sId);
+        }
+
+        console.log('[ data ]  ===>> ', data);
+
+        return { success: true, data: data, failCode: 0 };
       } else {
-        console.error('방장만 게임시작 요청을 할 수 있습니다.', roomData, userData);
+        console.error('방장만 게임시작 요청을 할 수 있습니다. : sessionId ==>> ', sessionId);
         return { success: false, data: null, failCode: FAIL_CODE.INVALID_REQUEST };
       }
     } catch (e) {

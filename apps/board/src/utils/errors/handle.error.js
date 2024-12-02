@@ -1,5 +1,4 @@
 import { FAIL_CODE } from '@repo/common/failcodes';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { serializeForGate } from '@repo/common/utils';
 
 export const handleError = (socket, messageType, sessionIds, error) => {
@@ -11,7 +10,6 @@ export const handleError = (socket, messageType, sessionIds, error) => {
       messageType,
       { success: false, failCode: FAIL_CODE.UNKNOWN_ERROR },
       0,
-      getPayloadNameByMessageType(messageType),
       sessionIds,
     ),
   );

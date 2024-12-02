@@ -30,8 +30,7 @@ const client = net.connect(gateOptions, async () => {
 
   const sequence = 0;
 
-  const payloadType = getPayloadNameByMessageType(messageType);
-  const gamePacket = serialize(messageType, packet, sequence, payloadType);
+  const gamePacket = serialize(messageType, packet, sequence);
 
   client.buffer = Buffer.alloc(0);
 
@@ -52,8 +51,7 @@ const client = net.connect(gateOptions, async () => {
         const packet = client.buffer.subarray(offset, length);
         client.buffer = client.buffer.subarray(length);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
-        const payload = packetParser(messageType, packet, payloadType);
+        const payload = packetParser(messageType, packet);
 
         console.log(' [ IceServer _onData ] payload ====>> ', payload);
 
@@ -93,9 +91,7 @@ const moveInterval = (client, payload) => {
       state,
     };
 
-    const payloadType = getPayloadNameByMessageType(messageType);
-
-    const packet = serialize(messageType, message, sequence, payloadType);
+    const packet = serialize(messageType, message, sequence);
 
     client.write(packet);
   }, 3000);
