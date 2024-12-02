@@ -15,7 +15,6 @@ class GateServer extends TcpServer {
   _mapServices = {};
 
   _isConnectedDistributor;
-
   _clientBuffer = Buffer.alloc(0);
 
   constructor(name, port) {
@@ -69,6 +68,20 @@ class GateServer extends TcpServer {
             const packet = socket.buffer.subarray(offset, length);
             const payload = packetParser(messageType, packet);
             console.log('[ Gate - _onData ] payload ===>>> \n', payload);
+
+            // * 저장되어있는 소켓값 삭제
+            try {
+              console.log(' [ GATE: _onData ] KEYS ===>>> ', Object.keys(this._socketMap));
+              const mapKey = Object.keys(this._socketMap).find(
+                (key) => this._socketMap[key].socket === socket,
+              );
+              if (mapKey) {
+                delete this._socketMap[mapKey];
+              }
+            } catch (err) {
+              console.error('[ GATE: _onData ] 임시 소켓 삭제 시도 실패, ERR ==>> ', err);
+            }
+
             // * sessionId를 키값으로 socket 저장
             this._socketMap[payload.sessionId] = { socket };
           }
@@ -88,6 +101,19 @@ class GateServer extends TcpServer {
         break;
       }
     }
+  };
+
+  _onEnd = (socket) => () => {
+    const sessionid = Object.keys(this._socketMap).find(
+      (key) => this._socketMap[key].socket === socket,
+    );
+    console.log(' [ GATE: _onEnd ] 클라이언트 연결이 종료되었습니다. ==>> ', sessionid);
+  };
+  _onError = (socket) => (err) => {
+    const sessionid = Object.keys(this._socketMap).find(
+      (key) => this._socketMap[key].socket === socket,
+    );
+    console.error(` [ GATE: _onError ]  소켓 오류가 발생하였습니다.:  ${sessionid} `, err);
   };
 
   _onDistribute = (socket, data) => {
