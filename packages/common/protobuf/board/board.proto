@@ -4,10 +4,24 @@ package board;
 
 import '../common.proto';
 
+message BoardPlayerData {
+	string sessionId = 1;
+	int32 gold = 2;
+	int32 trophy = 3;
+	int32 tileLocation = 4;
+}
+
+message DiceGameData {
+	string sessionId = 1;
+	int32 value = 2;
+	int32 rank = 3; 
+}
+
 message C2S_GameStartRequest {
     string sessionId = 1;
 }
 
+// 수정필요?
 message S2C_GameStartNotification {
     bool success = 1;
     repeated PlayerData players = 2;
@@ -21,6 +35,7 @@ message S2C_GameStartNotification {
 }
 
 message C2S_RollDiceRequest {
+	string sessionId = 1;
 }
 
 message S2C_RollDiceResponse {
@@ -87,6 +102,52 @@ message C2S_StartMiniGameRequest {
     string sessionId = 1;
 }
 
-message S2C_StartMiniGameNotification {
-	int32 gameType = 1; // 랜덤으로 돌린 미니 게임 중 하나
+// 
+message  C2S_PurchaseTrophyRequest {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
+message  S2C_PurchaseTrophyResponse {
+  	bool success = 1;
+  	BoardPlayerData playerInfo = 2; ///
+  	int32 nextTile = 3;
+	  GlobalFailCode failCode = 4;
+}
+
+message  S2C_PurchaseTrophyNotification {
+	string sessionId = 1;
+	int32 beforeTile = 2;
+	int32 nextTile = 3;
+}
+
+message  C2S_TilePenaltyRequest {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
+message  S2C_TilePenaltyResponse {
+  	bool success = 1;
+  	repeated BoardPlayerData playersInfo = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message  S2C_TilePenaltyNotification {
+	string sessionId = 1;
+	int32 tile = 2;
+	repeated BoardPlayerData playersInfo = 3;
+}
+
+message C2S_DiceGameRequest{
+    string sessionId = 1;
+}
+
+message S2C_DiceGameResponse{
+    bool success = 1;
+	repeated DiceGameData result = 2;
+  	GlobalFailCode failCode = 3;
+}
+
+message S2C_DiceGameNotification {
+	repeated DiceGameData result = 1;
 }

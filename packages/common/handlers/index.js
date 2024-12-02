@@ -217,6 +217,51 @@ const handlers = {
     message: 'board.S2C_BackToTheRoomNotification',
     payload: 'backToTheRoomNotification',
   },
+  [MESSAGE_TYPE.PURCHASE_TROPHY_REQUEST]: {
+    handler: undefined,
+    message: 'board.C2S_PurchaseTrophyRequest',
+    payload: 'purchaseTrophyRequest',
+  },
+  [MESSAGE_TYPE.TILE_PENALTY_REQUEST]: {
+    handler: undefined,
+    message: 'board.C2S_TilePenaltyRequest',
+    payload: 'tilePenaltyRequest',
+  },
+  [MESSAGE_TYPE.DICE_GAME_REQUEST]: {
+    handler: undefined,
+    message: 'board.C2S_DiceGameRequest',
+    payload: 'diceGameRequest',
+  },
+  [MESSAGE_TYPE.PURCHASE_TROPHY_RESPONSE]: {
+    handler: undefined,
+    message: 'board.S2C_PurchaseTrophyResponse',
+    payload: 'purchaseTrophyResponse',
+  },
+  [MESSAGE_TYPE.TILE_PENALTY_RESPONSE]: {
+    handler: undefined,
+    message: 'board.S2C_TilePenaltyResponse',
+    payload: 'tilePenaltyResponse',
+  },
+  [MESSAGE_TYPE.DICE_GAME_RESPONSE]: {
+    handler: undefined,
+    message: 'board.S2C_DiceGameResponse',
+    payload: 'diceGameResponse',
+  },
+  [MESSAGE_TYPE.PURCHASE_TROPHY_NOTIFICATION]: {
+    handler: undefined,
+    message: 'board.S2C_PurchaseTrophyNotification',
+    payload: 'purchaseTrophyNotification',
+  },
+  [MESSAGE_TYPE.TILE_PENALTY_NOTIFICATION]: {
+    handler: undefined,
+    message: 'board.S2C_TilePenaltyNotification',
+    payload: 'tilePenaltyNotification',
+  },
+  [MESSAGE_TYPE.DICE_GAME_NOTIFICATION]: {
+    handler: undefined,
+    message: 'board.S2C_DiceGameNotification',
+    payload: 'diceGameNotification',
+  },
 
   // Ice Game (201-212)
   [MESSAGE_TYPE.ICE_MINI_GAME_READY_NOTIFICATION]: {

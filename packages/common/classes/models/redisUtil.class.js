@@ -45,6 +45,8 @@ class RedisUtil {
       BOARD: 'board',
       BOARD_PLAYER_INFO: 'boardPlayerInfo',
       BOARD_PLAYERS: 'boardPlayers',
+      BOARD_PURCHASE_TILE_MAP: 'purchaseTileMap',
+      BOARD_PURCHASE_TILE_HISTORY: 'purchaseTileHistory',
       LOCK: 'lock',
     };
 

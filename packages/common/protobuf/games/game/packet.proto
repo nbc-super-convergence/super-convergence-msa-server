@@ -61,6 +61,15 @@ message GamePacket {
         S2C_PurchaseTileResponse purchaseTileResponse = 68;
         S2C_PurchaseTileNotification purchaseTileNotification = 69;
         S2C_GameEndNotification gameEndNotification = 70;
+        C2S_PurchaseTrophyRequest purchaseTrophyRequest = 71;
+        S2C_PurchaseTrophyResponse purchaseTrophyResponse = 72;
+        S2C_PurchaseTrophyNotification purchaseTrophyNotification = 73;
+        C2S_TilePenaltyRequest tilePenaltyRequest = 74;
+        S2C_TilePenaltyResponse tilePenaltyResponse = 75;
+        S2C_TilePenaltyNotification tilePenaltyNotification = 76;
+        C2S_DiceGameRequest diceGameRequest = 77;
+        S2C_DiceGameResponse diceGameResponse = 78;
+        S2C_DiceGameNotification diceGameNotification = 79;
 
         // Post Game (91-100)
         C2S_BackToTheRoomRequest backToTheRoomRequest = 91;
@@ -69,7 +78,6 @@ message GamePacket {
 
         // Mini Game (101-110)
         C2S_StartMiniGameRequest startMiniGameRequest = 101;
-        S2C_StartMiniGameNotification startMiniGameNotification = 102;
 
         // ice  (201)
         S2C_IceMiniGameReadyNotification iceMiniGameReadyNotification = 201;

@@ -199,6 +199,76 @@ class redisTransaction {
       multi.del(userKey);
     });
   }
+
+  /**
+   * 보드 - 타일 구매 정보 및 이력 저장
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {Number} tile
+   */
+  async createPurchaseTileInfo(boardId, sessionId, tile) {
+    return this.execute(async (multi) => {
+      /**
+       * 1. 타일 주인 매핑 정보 저장 hash
+       * 2. 구매 이력 정보 저장 list
+       */
+      const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
+      const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
+
+      multi.hset(mapKey, tile, sessionId);
+      multi.sadd(historyKey, tile);
+    });
+  }
+
+  /**
+   * 보드 - 타일 페널티에 의한 결과를 반영한 플레이어들 정보 반환
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {Number} tile
+   * @param {Number} penalty
+   */
+  async tilePenalty(boardId, sessionId, tile, penalty) {
+    //
+    const result = {};
+    await this.execute(async (multi) => {
+      // * Keys
+      const tileOwner = await multi.hget(mapKey, tile);
+      const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
+      const penaltyPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+      const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner}`;
+
+      //
+      let pennaltyPlayerGold = await multi.hget(penaltyPlayerInfoKey, 'gold');
+      console.log(
+        '[ redisTransaction - tilePenalty ] pennaltyPlayerGold ==>> ',
+        pennaltyPlayerGold,
+      );
+      let ownerPlayerGold = await multi.hget(ownerPlayerInfoKey, 'gold');
+      console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
+
+      pennaltyPlayerGold = pennaltyPlayerGold - penalty;
+      ownerPlayerGold = ownerPlayerGold + penalty;
+
+      await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
+      await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+
+      // TODO: 페널티 이력 저장?
+
+      // * 페널티가 적용된 플레이어 정보 반환
+      result.playersInfo = [];
+      const PlayersInfoKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+      const playerSessionIds = this.client.lrange(PlayersInfoKey, 0, -1);
+      playerSessionIds.forEach(async (sId) => {
+        const playerInfo = await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`);
+        playerInfo.sessionId = sId;
+        result.playersInfo.push(playerInfo);
+      });
+    });
+
+    return result;
+  }
+
+  //
 }
 
 export default redisTransaction;

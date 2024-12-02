@@ -1,10 +1,13 @@
 import { MESSAGE_TYPE } from '../constants/header.js';
 import {
   backToTheRoomRequestHandler,
+  diceGameRequestHandler,
   gameStartRequestHandler,
   movePlayerBoardRequestHandler,
   purchaseTileRequestHandler,
+  purchaseTrophyRequestHandler,
   rollDiceRequestHandler,
+  tilePenaltyRequestHandler,
 } from './board.handlers.js';
 
 //
@@ -35,6 +38,21 @@ const handlers = {
     message: 'board.C2S_BackToTheRoomRequest',
     payload: 'backToTheRoomRequest',
   },
+  [MESSAGE_TYPE.PURCHASE_TROPHY_REQUEST]: {
+    handler: purchaseTrophyRequestHandler,
+    message: 'board.C2S_PurchaseTrophyRequest',
+    payload: 'purchaseTrophyRequest',
+  },
+  [MESSAGE_TYPE.TILE_PENALTY_REQUEST]: {
+    handler: tilePenaltyRequestHandler,
+    message: 'board.C2S_TilePenaltyRequest',
+    payload: 'tilePenaltyRequest',
+  },
+  [MESSAGE_TYPE.DICE_GAME_REQUEST]: {
+    handler: diceGameRequestHandler,
+    message: 'board.C2S_DiceGameRequest',
+    payload: 'diceGameRequest',
+  },
 
   // * RESPONSE [handler X]
   [MESSAGE_TYPE.ROLL_DICE_RESPONSE]: {
@@ -56,6 +74,21 @@ const handlers = {
     handler: undefined,
     message: 'board.S2C_BackToTheRoomResponse',
     payload: 'backToTheRoomResponse',
+  },
+  [MESSAGE_TYPE.PURCHASE_TROPHY_RESPONSE]: {
+    handler: undefined,
+    message: 'board.S2C_PurchaseTrophyResponse',
+    payload: 'purchaseTrophyResponse',
+  },
+  [MESSAGE_TYPE.TILE_PENALTY_RESPONSE]: {
+    handler: undefined,
+    message: 'board.S2C_TilePenaltyResponse',
+    payload: 'tilePenaltyResponse',
+  },
+  [MESSAGE_TYPE.DICE_GAME_RESPONSE]: {
+    handler: undefined,
+    message: 'board.S2C_DiceGameResponse',
+    payload: 'diceGameResponse',
   },
 
   // * NOTIFICATION [handler X]
@@ -88,6 +121,21 @@ const handlers = {
     handler: undefined,
     message: 'board.S2C_BackToTheRoomNotification',
     payload: 'backToTheRoomNotification',
+  },
+  [MESSAGE_TYPE.PURCHASE_TROPHY_NOTIFICATION]: {
+    handler: undefined,
+    message: 'board.S2C_PurchaseTrophyNotification',
+    payload: 'purchaseTrophyNotification',
+  },
+  [MESSAGE_TYPE.TILE_PENALTY_NOTIFICATION]: {
+    handler: undefined,
+    message: 'board.S2C_TilePenaltyNotification',
+    payload: 'tilePenaltyNotification',
+  },
+  [MESSAGE_TYPE.DICE_GAME_NOTIFICATION]: {
+    handler: undefined,
+    message: 'board.S2C_DiceGameNotification',
+    payload: 'diceGameNotification',
   },
 };
 
