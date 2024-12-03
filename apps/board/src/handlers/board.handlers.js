@@ -124,6 +124,9 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
 
     // * 나머지 NOTIFICATION
     sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+
+    logger.info('[ BOARD: movePlayerBoardRequestHandler ] sessionIds ===>> ', sessionIds);
+
     const notificationMessageType = MESSAGE_TYPE.MOVE_PLAYER_BOARD_NOTIFICATION;
     const notification = {
       sessionId: sessionId,

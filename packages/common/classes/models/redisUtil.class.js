@@ -485,7 +485,8 @@ class RedisUtil {
    * @returns
    */
   async getBoardPlayersBySessionId(sessionId) {
-    return await this.getBoardPlayers(sessionId);
+    const boardId = await this.getUserLocationField(sessionId, 'board');
+    return await this.getBoardPlayers(boardId);
   }
 
   /**

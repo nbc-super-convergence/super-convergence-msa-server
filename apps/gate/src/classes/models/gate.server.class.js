@@ -75,7 +75,7 @@ class GateServer extends TcpServer {
             try {
               logger.info(' [ GATE: _onData ] KEYS ===>>> ', Object.keys(this._socketMap));
               const mapKey = Object.keys(this._socketMap).find(
-                (key) => String(key).length > 3 && this._socketMap[key].socket === socket,
+                (key) => String(key).length < 5 && this._socketMap[key].socket === socket,
               );
               if (mapKey) {
                 // TODO: 테스트 후, 주석 풀기
@@ -108,7 +108,7 @@ class GateServer extends TcpServer {
 
   _onEnd = (socket) => () => {
     const sessionId = Object.keys(this._socketMap).find(
-      (key) => this._socketMap[key].socket === socket,
+      (key) => String(key).length > 3 && this._socketMap[key].socket === socket,
     );
     logger.info(' [ GATE: _onEnd ] 클라이언트 연결이 종료되었습니다. ==>> ', sessionId);
 
@@ -116,7 +116,7 @@ class GateServer extends TcpServer {
   };
   _onError = (socket) => (err) => {
     const sessionId = Object.keys(this._socketMap).find(
-      (key) => this._socketMap[key].socket === socket,
+      (key) => String(key).length > 3 && this._socketMap[key].socket === socket,
     );
     logger.error(` [ GATE: _onError ]  소켓 오류가 발생하였습니다.:  ${sessionId} `, err);
 
