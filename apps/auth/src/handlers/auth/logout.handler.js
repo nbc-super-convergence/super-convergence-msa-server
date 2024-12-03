@@ -65,7 +65,11 @@ export const logoutHandler = async ({ socket, payload }) => {
         }
 
         if (room.readyUsers.includes(sessionId)) {
-          await redis.updateRoomField(userLocation['room'], 'readyUsers', otherRoomUsers);
+          await redis.updateRoomField(
+            userLocation['room'],
+            'readyUsers',
+            JSON.stringify(otherRoomUsers),
+          );
         }
       }
       location = 'room';
@@ -89,7 +93,7 @@ export const logoutHandler = async ({ socket, payload }) => {
       }
 
       // 남은 유저가 없을 경우
-      if (boardUsers.length === 0) {
+      if (otherUsers.length === 0) {
         await redis.deleteBoardGame(userLocation['board']);
       }
 
@@ -111,6 +115,6 @@ export const logoutHandler = async ({ socket, payload }) => {
       socket.write(closeSocketNotification);
     }
   } catch (error) {
-    console.error(`[ logoutHandler ] error =>>> `, error.message);
+    console.error(`[ logoutHandler ] error =>>> `, error);
   }
 };
