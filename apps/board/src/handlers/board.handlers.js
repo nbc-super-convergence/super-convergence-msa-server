@@ -391,7 +391,7 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
  * * => 응답 [ DICE_GAME_RESPONSE ]
  * * => 알림 [ DICE_GAME_NOTIFICATION ]
  */
-export const diceGameRequestHandler = async ({ socket, payload }) => {
+export const firstDiceGameRequestHandler = async ({ socket, payload }) => {
   /**
    * 1. 첫 주사위 순서 게임 결과
    * 2. 주사위 순서 게임 로직 처리
@@ -404,6 +404,9 @@ export const diceGameRequestHandler = async ({ socket, payload }) => {
 
   try {
     // TODO: 주사위 순서 게임은 어떤 게임인가...?
+    const result = await boardManager.firstDiceGame(sessionId);
+
+    logger.info('[ BOARD: diceGameRequestHandler ] result ===>>> ', result);
   } catch (err) {
     logger.error('[ BOARD: diceGameRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.DICE_GAME_RESPONSE, sessionIds, err);

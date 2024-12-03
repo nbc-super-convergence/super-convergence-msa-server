@@ -270,6 +270,42 @@ class BoardManager {
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
+
+  /**
+   * 보드 - 첫 주사위 순서를 정하는 게임
+   * @param {String} sessionId
+   * @returns
+   */
+  async firstDiceGame(sessionId) {
+    try {
+      const boardId = await this.getUserLocationField(sessionId, 'board');
+      const sessionIds = await this.getBoardPlayers(boardId);
+
+      const result = [];
+
+      // TODO: 테스트용 코드
+      for (let i = 0; i < sessionIds.length; i++) {
+        const diceGameData = {
+          sessionId: sessionIds[i],
+          value: sessionIds.length - i,
+          rank: i + 1,
+        };
+        result.push(diceGameData);
+      }
+
+      return {
+        success: true,
+        data: {
+          sessionIds,
+          result,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      logger.error('[ BOARD : firstDiceGame ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
 } //* class end
 
 const boardManagerInstance = BoardManager.getInstance();
