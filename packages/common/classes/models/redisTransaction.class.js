@@ -127,7 +127,6 @@ class redisTransaction {
     const result = await this.execute(async (multi) => {
       const boardKey = `${this.prefix.BOARD}:${board.boardId}`;
       const playersKey = `${this.prefix.BOARD_PLAYERS}:${board.boardId}`;
-      const locationKey = `${this.prefix.LOCATION}:${board.ownerId}`;
 
       multi.exists(boardKey);
 
@@ -156,11 +155,12 @@ class redisTransaction {
           trophy: 0,
           tileLocation: 0, // TODO: 시작 위치?
         });
-      });
 
-      // * 유저 위치정보 - 보드 저장
-      multi.hset(locationKey, 'board', board.boardId);
-      multi.expire(locationKey, this.expire);
+        const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
+        // * 유저 위치정보 - 보드 저장
+        multi.hset(locationKey, 'board', board.boardId);
+        multi.expire(locationKey, this.expire);
+      });
     });
 
     // * 트랜잭션 성공했을 때만 publish

@@ -43,7 +43,7 @@ class BoardManager {
         // const playerNumber = Math.floor(Math.random() * 4);
         const board = {
           boardId: uuidv4(),
-          roomId: userLocation.roomId,
+          roomId: userLocation.room,
           ownerId: sessionId,
           users: roomData.users,
           state: BOARD_STATE.WAITING,
