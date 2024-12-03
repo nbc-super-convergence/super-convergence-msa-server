@@ -1,4 +1,4 @@
-import { SERVER_HOST } from '../config/env.js';
+import { SERVER_HOST } from './config/env.js';
 import LobbyServer from './classes/models/lobby.server.js';
 import { MESSAGE_TYPE } from './utils/constants.js';
 import { logger } from './utils/logger.utils.js';
