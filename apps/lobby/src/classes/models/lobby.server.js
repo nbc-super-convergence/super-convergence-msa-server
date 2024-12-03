@@ -2,6 +2,7 @@ import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { getHandlerByMessageType } from '../../handlers/index.js';
 import { deserialize, packetParser } from '@repo/common/utils';
+import { logger } from '../../utils/logger.utils.js';
 
 class LobbyServer extends TcpServer {
   _onData = (socket) => async (data) => {
@@ -10,7 +11,7 @@ class LobbyServer extends TcpServer {
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
+      logger.info(
         `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
@@ -19,7 +20,7 @@ class LobbyServer extends TcpServer {
         socket.buffer = socket.buffer.subarray(length);
 
         const payload = packetParser(messageType, packet);
-        console.log(' [ Lobby_onData ] payload ====>> ', payload);
+        logger.info(' [ Lobby_onData ] payload ====>> ', payload);
 
         const handler = getHandlerByMessageType(messageType);
         await handler({ socket, payload });

@@ -1,5 +1,6 @@
 import { serializeForGate } from '@repo/common/utils';
-import { config, logger } from '@repo/common/config';
+import { config } from '@repo/common/config';
+import { logger } from './logger.utils.js';
 
 export const handleError = (socket, messageType, sessionId, error) => {
   logger.error(`[ ${messageType} ] ====>  error `, {

@@ -1,8 +1,9 @@
 import Lobby from '../models/lobby.class.js';
 import { v4 as uuidv4 } from 'uuid';
 import { redis } from '../../init/redis.js';
-import { config, logger } from '@repo/common/config';
+import { config } from '@repo/common/config';
 import { ResponseHelper } from '@repo/common/classes';
+import { logger } from '../../utils/logger.utils.js';
 
 class LobbyManager {
   constructor() {
