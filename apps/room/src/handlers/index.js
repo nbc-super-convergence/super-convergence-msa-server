@@ -1,10 +1,10 @@
 import { MESSAGE_TYPE } from '../utils/constants.js';
+import { logger } from '../utils/logger.utils.js';
 import { createRoomRequestHandler } from './room/create.room.handler.js';
 import { roomListHandler } from './room/room.list.handler.js';
 import { joinRoomRequestHandler } from './room/join.room.handler.js';
 import { leaveRoomRequestHandler } from './room/leave.room.handler.js';
 import { gamePrepareRequestHandler } from './room/game.prepare.handler.js';
-import { logger } from '../utils/logger.utils.js';
 
 const handlers = {
   // * room
@@ -13,6 +13,7 @@ const handlers = {
   [MESSAGE_TYPE.JOIN_ROOM_REQUEST]: { handler: joinRoomRequestHandler },
   [MESSAGE_TYPE.LEAVE_ROOM_REQUEST]: { handler: leaveRoomRequestHandler },
   [MESSAGE_TYPE.GAME_PREPARE_REQUEST]: { handler: gamePrepareRequestHandler },
+  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: leaveRoomRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {
