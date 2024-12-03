@@ -6,6 +6,7 @@ import { GAME_STATE } from '../../constants/states.js';
 import iceUser from './ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
 import { redisUtil } from '../../utils/init/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class iceGame extends Game {
   constructor(id) {
@@ -104,7 +105,8 @@ class iceGame extends Game {
       this.timeoutManager.addTimeout(
         'changeMapTimer',
         () => {
-          console.log(`맵 변경 시작 : ${mapKey}`);
+          logger.info(`[changeMapTimer] ==>, ${mapKey}`);
+
           this.map.sizes.min += 5;
           this.map.sizes.max -= 5;
 
@@ -127,7 +129,7 @@ class iceGame extends Game {
     this.timeoutManager.addTimeout(
       'iceGameTimer',
       () => {
-        console.log(`시간 경과로 게임 종료`);
+        logger.info(`[iceGameTimer] ===> 게임 종료`);
         let aliveUsers = this.getAliveUsers();
 
         // * 살아있는 체력 순으로 내림차순 정렬 후, rank
@@ -148,7 +150,7 @@ class iceGame extends Game {
       'gameOverInterval',
       () => {
         if (this.isOneAlive()) {
-          console.log(`유저 1명, 게임 종료`);
+          logger.info(`[checkGameOverInterval] ===> 게임 종료`);
           const user = this.getAliveUsers()[0];
 
           user.rank = 1;
@@ -162,7 +164,7 @@ class iceGame extends Game {
   }
 
   handleGameEnd(socket) {
-    console.log(`게임 종료`);
+    logger.info(`[handleGameEnd] ===> 게임 종료`);
     // 전체 유저 조회
     const users = this.getAllUser();
 

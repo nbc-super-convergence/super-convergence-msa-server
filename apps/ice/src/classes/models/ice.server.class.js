@@ -5,6 +5,7 @@ import { getHandlerByMessageType } from '../../handlers/index.js';
 import iceGameManager from '../managers/ice.game.manager.js';
 import { iceConfig } from '../../config/config.js';
 import { subRedisClient } from '../../utils/init/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class IceServer extends TcpServer {
   constructor(name, port, types = []) {
@@ -14,14 +15,14 @@ class IceServer extends TcpServer {
 
     this.subScriber.subscribe(iceConfig.REDIS.CHANNEL, (err, count) => {
       if (err) {
-        console.error('Subscribe error:', err);
+        logger.error(`[Sbuscribe error] ==> `, err);
         return;
       }
-      console.log(`Subscribed to ${count} channel(s).`);
+      logger.info(`[Subscribed to ${count} channel(s).]`);
     });
 
     this.subScriber.on('message', async (channel, message) => {
-      console.info(`[Received ${iceConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
+      logger.info(`[Received ${iceConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
 
       //* `${boardId}:${users}`
       const [boardId, users] = message.split(':');
@@ -55,16 +56,20 @@ class IceServer extends TcpServer {
       );
 
       if (socket.buffer.length >= length) {
-        const packet = socket.buffer.subarray(offset, length);
-        socket.buffer = socket.buffer.subarray(length);
+        try {
+          const packet = socket.buffer.subarray(offset, length);
+          socket.buffer = socket.buffer.subarray(length);
 
-        const payload = packetParser(messageType, packet);
+          const payload = packetParser(messageType, packet);
 
-        const handler = getHandlerByMessageType(messageType);
+          const handler = getHandlerByMessageType(messageType);
 
-        await handler({ socket, payload });
+          await handler({ socket, payload });
 
-        console.log(' [ IceServer _onData ] payload ====>> ', payload);
+          console.log(' [ IceServer _onData ] payload ====>> ', payload);
+        } catch (error) {
+          logger.error('[ Ice: _onData ] ERROR ====>> ', error);
+        }
       } else {
         break;
       }

@@ -1,10 +1,11 @@
 import iceGameManager from '../classes/managers/ice.game.manager.js';
 import { iceConfig } from '../config/config.js';
 import { redisUtil } from '../utils/init/redis.js';
+import { logger } from '../utils/logger.utils.js';
 
 export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [iceGameReadyRequestHandler]`);
+    logger.log(`Start [iceGameReadyRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -36,13 +37,13 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
     // TODO: 마지막 남은 유저가 준비했을 때 굳이 2개를 보내야 할까?
     socket.write(buffer);
   } catch (error) {
-    console.error(`[iceGameReadyRequestHandler] ===> `, error);
+    logger.error(`[iceGameReadyRequestHandler] ===> `, error);
   }
 };
 
 export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [icePlayerSyncRequestHandler]`);
+    logger.log(`Start [icePlayerSyncRequestHandler]`);
 
     const { sessionId, position, rotation, state } = payload;
 
@@ -68,13 +69,13 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     socket.write(buffer);
   } catch (error) {
-    console.error(`[icePlayerSyncRequestHandler] ===> `, error);
+    logger.error(`[icePlayerSyncRequestHandler] ===> `, error);
   }
 };
 
 export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [icePlayerDamageRequestHandler]`);
+    logger.log(`Start [icePlayerDamageRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -115,13 +116,13 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     socket.write(buffer);
   } catch (error) {
-    console.error('[icePlayerDamageRequestHandler] ===> ', error);
+    logger.error(`[icePlayerDamageRequestHandler] ===> `, error);
   }
 };
 
 export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [iceCloseSocketRequestHandler]`);
+    logger.log(`Start [iceCloseSocketRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -150,7 +151,7 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     socket.write(buffer);
   } catch (error) {
-    console.error('[iceCloseSocketRequestHandler] ===> ', error);
+    logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
     //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중
   }
 };
