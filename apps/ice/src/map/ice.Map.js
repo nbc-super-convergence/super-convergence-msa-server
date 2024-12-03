@@ -5,10 +5,10 @@ export const iceMap = {
   },
   updateTime: [30, 60],
   startPosition: [
-    { pos: { x: -6, y: 1.9, z: 6 }, rot: 135 },
-    { pos: { x: 6, y: 1.9, z: 6 }, rot: -135 },
-    { pos: { x: -6, y: 1.9, z: -6 }, rot: 45 },
-    { pos: { x: 6, y: 1.9, z: -6 }, rot: -45 },
+    { pos: { x: -4, y: 0.2, z: 4 }, rot: 135 },
+    { pos: { x: 4, y: 0.2, z: 4 }, rot: -135 },
+    { pos: { x: 4, y: 0.2, z: -4 }, rot: -45 },
+    { pos: { x: -4, y: 0.2, z: -4 }, rot: 45 },
   ],
   timer: 120000,
 };
