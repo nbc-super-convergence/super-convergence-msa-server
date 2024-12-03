@@ -7,6 +7,7 @@ const handlers = {
   [MESSAGE_TYPE.REGISTER_REQUEST]: { handler: registerRequestHandler },
   [MESSAGE_TYPE.LOGIN_REQUEST]: { handler: loginRequestHandler },
   [MESSAGE_TYPE.LOGOUT_REQUEST]: { handler: logoutHandler },
+  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: logoutHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {

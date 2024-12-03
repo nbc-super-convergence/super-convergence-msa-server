@@ -1,10 +1,9 @@
 import net from 'net';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import { loadProtos } from '@repo/common/load.protos';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 // 테스트 코드를 작성해 주세요.
-const SESSION_ID = '1cd93571-8b42-4e9b-af81-62edb129ad88';
+const SESSION_ID = '2e2e337f-0f66-474d-b403-c939adf6f85d';
 
 // 대상 - GATE SERVER
 const HOST = '127.0.0.1';
@@ -48,7 +47,7 @@ const runClient = async () => {
         // deserialized
         const { messageType, version, sequence, offset, length } = deserialize(client.buffer);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
+        const payloadType = 'closeSocketNotification';
 
         if (client.buffer.length >= length) {
           try {
