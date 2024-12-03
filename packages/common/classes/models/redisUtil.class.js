@@ -473,6 +473,11 @@ class RedisUtil {
     await this.client.hset(boardKey, field, value);
   }
 
+  async deleteBoardGame(boardId) {
+    const boardKey = `${this.prefix.BOARD}:${boardId}`;
+    await this.client.del(boardKey);
+  }
+
   /**
    * 보드 전체 플레이어 조회
    * @param {String} boardId
