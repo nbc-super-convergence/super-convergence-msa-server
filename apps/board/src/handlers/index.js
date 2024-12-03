@@ -2,7 +2,6 @@ import { MESSAGE_TYPE } from '../constants/header.js';
 import { logger } from '../utils/logger.utils.js';
 import {
   backToTheRoomRequestHandler,
-  closeSocketRequestHandler,
   firstDiceGameRequestHandler,
   gameStartRequestHandler,
   movePlayerBoardRequestHandler,
@@ -23,7 +22,6 @@ const handlers = {
   [MESSAGE_TYPE.PURCHASE_TROPHY_REQUEST]: { handler: purchaseTrophyRequestHandler },
   [MESSAGE_TYPE.TILE_PENALTY_REQUEST]: { handler: tilePenaltyRequestHandler },
   [MESSAGE_TYPE.DICE_GAME_REQUEST]: { handler: firstDiceGameRequestHandler },
-  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: closeSocketRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {
