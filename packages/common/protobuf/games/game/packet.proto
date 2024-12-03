@@ -18,7 +18,7 @@ message GamePacket {
         C2S_LoginRequest loginRequest = 3;
         S2C_LoginResponse loginResponse = 4;
         C2S_LoggoutRequest logoutRequest = 5;
-        C2S_CloseSocketNotification closeSocketNotification = 8;
+        S2C_CloseSocketNotification closeSocketNotification = 8;
         // Gate 
         S2S_CloseSocketRequest closeSocketRequest = 9;
         // distributor noti (10)

@@ -33,7 +33,7 @@ message C2S_LoggoutRequest {
     string sessionId = 1;
 }
 
-message C2S_CloseSocketNotification {
+message S2C_CloseSocketNotification {
     string location = 1;
     string sessionId = 2;
 }
