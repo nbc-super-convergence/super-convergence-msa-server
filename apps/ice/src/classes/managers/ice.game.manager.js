@@ -8,6 +8,7 @@ import {
   iceMiniGameStartNotification,
   icePlayerDamageNotification,
   icePlayerDeathNotification,
+  icePlayerExitNotification,
   icePlayerSyncNotification,
 } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
@@ -115,8 +116,6 @@ class iceGameManager {
     // * 플레이어 준비
     console.log(`[iceGameManager - iceGameReadyNoti]`);
 
-    user.gameReady();
-
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
     const message = iceGameReadyNotification(user.sessionId);
@@ -143,11 +142,9 @@ class iceGameManager {
     return buffer;
   }
 
-  icePlayerSyncNoti(user, game, payload) {
+  async icePlayerSyncNoti(user, game) {
     //* 유저 위치 정보 업데이트
     console.log(`[iceGameManager - icePlayerSyncNoti]`);
-
-    user.updateUserInfos(payload.position, payload.rotation, payload.state);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -158,11 +155,9 @@ class iceGameManager {
     return buffer;
   }
 
-  icePlayerDamageNoti(user, game) {
+  async icePlayerDamageNoti(user, game) {
     // * 플레이어에 데미지
     console.log(`[iceGameManager - icePlayerDamageNoti]`);
-
-    user.damage();
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -173,14 +168,9 @@ class iceGameManager {
     return buffer;
   }
 
-  icePlayerDeathNoti(user, game) {
+  async icePlayerDeathNoti(user, game) {
     // * 플레이어 사망
     console.log(`[iceGameManager - icePlayerDeathNoti]`);
-
-    user.Dead();
-
-    // * 사망시 랭킹
-    user.rank = game.getAliveUser().length + 1;
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -191,9 +181,17 @@ class iceGameManager {
     return buffer;
   }
 
-  icePlayerExitNoti() {
+  async icePlayerExitNoti(deletedUser, game) {
     // * 플레이어 탈주
     console.log(`[iceGameManager - icePlayerExitNoti]`);
+
+    const sessionIds = game.getOtherSessionIds(deletedUser.sessionId);
+
+    const message = icePlayerExitNotification(deletedUser.sessionId);
+
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+
+    return buffer;
   }
 }
 

@@ -40,7 +40,9 @@ class iceGame extends Game {
   removeUser(sessionId) {
     const index = this.users.findIndex((user) => user.sessionId === sessionId);
 
-    return this.users.splice(index, 1);
+    if (index !== -1) {
+      return this.users.splice(index, 1);
+    }
   }
 
   isValidUser(user) {
