@@ -1,4 +1,5 @@
 import { MESSAGE_TYPE } from '../utils/constants.js';
+import { logger } from '../utils/logger.utils.js';
 import { createRoomRequestHandler } from './room/create.room.handler.js';
 import { roomListHandler } from './room/room.list.handler.js';
 import { joinRoomRequestHandler } from './room/join.room.handler.js';
@@ -16,8 +17,7 @@ const handlers = {
 
 export const getHandlerByMessageType = (messageType) => {
   if (!handlers[messageType]) {
-    console.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
-    throw new Error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
+    logger.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
   }
   return handlers[messageType].handler;
 };

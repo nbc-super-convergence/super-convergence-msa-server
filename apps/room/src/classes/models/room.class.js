@@ -1,5 +1,6 @@
 import { ResponseHelper } from '@repo/common/classes';
-import { config, logger } from '@repo/common/config';
+import { config } from '@repo/common/config';
+import { logger } from '../../utils/logger.utils.js';
 
 /**
  * @typedef UserData

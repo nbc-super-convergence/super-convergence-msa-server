@@ -19,6 +19,9 @@ export const FIELD_NAME = {
   4: 'loginResponse',
   5: 'logoutRequest',
 
+  // close socket (9)
+  9: 'closeSocketRequest',
+
   // distributor noti (10)
   10: 'serverInfoNotification',
 

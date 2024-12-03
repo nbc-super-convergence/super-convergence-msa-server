@@ -1,4 +1,4 @@
-import { logger } from '@repo/common/config';
+import { logger } from './logger.utils.js';
 import { MESSAGE_TYPE } from '../utils/constants.js';
 import { serializeForGate } from '@repo/common/utils';
 

@@ -1,4 +1,5 @@
 import { MESSAGE_TYPE } from '../utils/constants.js';
+import { logger } from '../utils/logger.utils.js';
 import { lobbyJoinRequestHandler } from './lobby/lobby.join.handler.js';
 import { lobbyLeaveRequestHandler } from './lobby/lobby.leave.handler.js';
 import { lobbyUserDetailRequestHandler } from './lobby/lobby.user.detail.handler.js';
@@ -14,8 +15,7 @@ const handlers = {
 
 export const getHandlerByMessageType = (messageType) => {
   if (!handlers[messageType]) {
-    console.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
-    throw new Error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
+    logger.error(`[ handler not found ] ====> : ${messageType}`);
   }
   return handlers[messageType].handler;
 };

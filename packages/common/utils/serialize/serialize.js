@@ -45,7 +45,7 @@ export const serialize = (messageType, data, sequence) => {
   const payload = gameMessage.encode({ [field]: data }).finish();
   const payloadLength = payload.length;
 
-  console.log('  [ serializeForGate ] payload ===>>> ', payload);
+  console.log('  [ serialize ] payload ===>>> ', payload);
 
   //* payload 길이 쓰기
   buffer.writeUInt32BE(payloadLength, offset);

@@ -18,8 +18,6 @@ export const joinRoomRequestHandler = async ({ socket, payload }) => {
     if (result.success) {
       const otherSessionIds = Room.getOtherSessionIds(result.data, sessionId);
 
-      console.log('룸 데이터니?', result.data);
-
       if (otherSessionIds.length > 0) {
         const notificationPacket = createNotification(
           { room: result.data },

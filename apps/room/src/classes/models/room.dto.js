@@ -1,5 +1,5 @@
-import { logger } from '@repo/common/config';
 import { redis } from '../../init/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class RoomDTO {
   static fromRedis(redisData) {

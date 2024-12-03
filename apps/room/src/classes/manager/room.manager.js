@@ -2,9 +2,10 @@ import Room from '../models/room.class.js';
 import { v4 as uuidv4 } from 'uuid';
 import { redis } from '../../init/redis.js';
 import RoomDTO from '../models/room.dto.js';
-import { config, logger } from '@repo/common/config';
+import { config } from '@repo/common/config';
 import { ResponseHelper } from '@repo/common/classes';
 import RoomValidator from '../models/room.validator.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class RoomManager {
   constructor() {
