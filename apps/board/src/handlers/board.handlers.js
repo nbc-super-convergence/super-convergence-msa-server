@@ -116,7 +116,7 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
    * 3. 요청 플레이어에게 확인 응답
    * TODO: 4. [업적용] 플레이어 이동 위치 저장
    */
-  const { sessionId, targetPoint } = payload;
+  const { sessionId, targetPoint, rotation } = payload;
 
   let sessionIds = [sessionId];
   try {
@@ -128,6 +128,7 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
     const notification = {
       sessionId: sessionId,
       targetPoint: result.data.targetPoint,
+      rotation: rotation,
     };
 
     const notificationPacket = serializeForGate(

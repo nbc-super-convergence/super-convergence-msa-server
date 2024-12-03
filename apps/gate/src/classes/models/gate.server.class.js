@@ -75,11 +75,11 @@ class GateServer extends TcpServer {
             try {
               logger.info(' [ GATE: _onData ] KEYS ===>>> ', Object.keys(this._socketMap));
               const mapKey = Object.keys(this._socketMap).find(
-                (key) => this._socketMap[key].socket === socket,
+                (key) => String(key).length > 3 && this._socketMap[key].socket === socket,
               );
               if (mapKey) {
                 // TODO: 테스트 후, 주석 풀기
-                // delete this._socketMap[mapKey];
+                delete this._socketMap[mapKey];
               }
             } catch (err) {
               logger.error('[ GATE: _onData ] 임시 소켓 삭제 시도 실패, ERR ==>> ', err);
@@ -132,12 +132,14 @@ class GateServer extends TcpServer {
     logger.info('\n [ GATE: _closeSocketSend ]  [ keys ] ', Object.keys(this._mapServices));
 
     const closeSocketPacket = makeCloseSocketRequest(sessionId);
-    // * 인증, 로비, 룸, 보드, 아이스, [+]?
-    const serviceList = ['lobby', 'room', 'board', 'ice'];
+    // * 인증, 아이스, 그 외 미니게임들 추가 예정
+    const serviceList = ['auth', 'ice'];
     for (let i = 0; i < serviceList.length; i++) {
       const targetService = this._mapServices[serviceList[i] + '_1'];
-      // TODO: 다른 서버 준비되면 주석 풀기
-      // targetService.client.write(closeSocketPacket);
+      if (targetService && targetService.client) {
+        // TODO: 다른 서버 준비되면 주석 풀기
+        targetService.client.write(closeSocketPacket);
+      }
     }
   };
 
