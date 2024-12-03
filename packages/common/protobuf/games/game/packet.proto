@@ -95,6 +95,6 @@ message GamePacket {
         S2C_IcePlayerDeathNotification icePlayerDeathNotification = 209;
         S2C_IceGameOverNotification iceGameOverNotification = 210;
         S2C_IceMapSyncNotification iceMapSyncNotification = 211;
-
+        S2C_IcePlayerExitNotification icePlayerExitNotification = 212;
     }
 }

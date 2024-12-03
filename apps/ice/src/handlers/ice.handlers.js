@@ -1,28 +1,30 @@
 import iceGameManager from '../classes/managers/ice.game.manager.js';
+import { iceConfig } from '../config/config.js';
 import { redisUtil } from '../utils/init/redis.js';
+import { logger } from '../utils/logger.utils.js';
 
 export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [iceGameReadyRequestHandler]`);
+    logger.log(`Start [iceGameReadyRequestHandler]`);
 
     const { sessionId } = payload;
 
-    console.log(`세션아이디`, sessionId);
     const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
 
-    console.log(`게임 아이디`, gameId);
     const game = await iceGameManager.getGameBySessionId(gameId);
 
-    console.log(`게임 확인`, game);
     if (!iceGameManager.isValidGame(game)) {
-      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
+      throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
-    const user = await game.getUserBySessionId(sessionId);
+    const user = game.getUserBySessionId(sessionId);
 
     if (!game.isValidUser(user)) {
-      throw new Error(`유저가 존재하지 않습니다.`);
+      throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
+
+    // ! 유저 준비 = true
+    user.gameReady();
 
     // * iceGameReadyNotification
     let buffer = await iceGameManager.iceGameReadyNoti(user, game);
@@ -35,42 +37,45 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
     // TODO: 마지막 남은 유저가 준비했을 때 굳이 2개를 보내야 할까?
     socket.write(buffer);
   } catch (error) {
-    console.error(`[iceGameReadyRequestHandler] ===> `, error);
+    logger.error(`[iceGameReadyRequestHandler] ===> `, error);
   }
 };
 
 export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [icePlayerSyncRequestHandler]`);
+    logger.log(`Start [icePlayerSyncRequestHandler]`);
 
-    const { sessionId } = payload;
+    const { sessionId, position, rotation, state } = payload;
 
     const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
 
     const game = iceGameManager.getGameBySessionId(gameId);
 
     if (!iceGameManager.isValidGame(game)) {
-      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
+      throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
     if (!game.isValidUser(user)) {
-      throw new Error(`유저가 존재하지 않습니다.`);
+      throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
+
+    // ! 유저 position 변경
+    user.updateUserInfos(position, rotation, state);
 
     // * icePlayerSyncNotification
     const buffer = await iceGameManager.icePlayerSyncNoti(user, game, payload);
 
     socket.write(buffer);
   } catch (error) {
-    console.error(`[icePlayerSyncRequestHandler] ===> `, error);
+    logger.error(`[icePlayerSyncRequestHandler] ===> `, error);
   }
 };
 
 export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
   try {
-    console.log(`Start [icePlayerDamageRequestHandler]`);
+    logger.log(`Start [icePlayerDamageRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -79,30 +84,74 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
     const game = iceGameManager.getGameBySessionId(gameId);
 
     if (!iceGameManager.isValidGame(game)) {
-      throw new Error(`sessionId가 일치하는 게임이 존재하지 않습니다.`);
+      throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
     if (!game.isValidUser(user)) {
-      throw new Error(`유저가 존재하지 않습니다.`);
+      throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
     //* 위치 검증
     if (!iceGameManager.isValidUserPosition(user, game)) {
-      throw new Error(`데미지를 받을 위치가 아닙니다.`);
+      throw new Error(`데미지를 받을 위치가 아닙니다.`, iceConfig.FAIL_CODE.INVALID_USER_POSITION);
     }
+
+    // ! 유저 체력 - 1
+    user.damage();
 
     // * icePlayerDamageNotification
     let buffer = await iceGameManager.icePlayerDamageNoti(user, game);
 
     // * icePlayerDeathNotification
     if (user.isDead()) {
+      user.Dead();
+
+      // * 사망시 랭킹
+      user.rank = game.getAliveUser().length + 1;
+
       buffer = await iceGameManager.icePlayerDeathNoti(user, game);
     }
 
     socket.write(buffer);
   } catch (error) {
-    console.error('[icePlayerDamageRequestHandler] ===> ', error);
+    logger.error(`[icePlayerDamageRequestHandler] ===> `, error);
+  }
+};
+
+export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
+  try {
+    logger.log(`Start [iceCloseSocketRequestHandler]`);
+
+    const { sessionId } = payload;
+
+    const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+
+    const game = iceGameManager.getGameBySessionId(gameId);
+
+    if (!iceGameManager.isValidGame(game)) {
+      throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
+    }
+
+    const user = game.getUserBySessionId(sessionId);
+
+    if (!game.isValidUser(user)) {
+      throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
+    }
+
+    // ! 삭제된 유저
+    const deletedUser = game.removeUser(sessionId);
+
+    if (game.isValidUser(deletedUser)) {
+      throw new Error(`유저가 삭제 되지 않음`, iceConfig.FAIL_CODE.DELETED_USER_IN_GAME);
+    }
+
+    const buffer = await iceGameManager.icePlayerExitNoti(deletedUser, game);
+
+    socket.write(buffer);
+  } catch (error) {
+    logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
+    //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중
   }
 };

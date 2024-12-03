@@ -1,5 +1,6 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 import {
+  iceCloseSocketRequestHandler,
   iceGameReadyRequestHandler,
   icePlayerDamageRequestHandler,
   icePlayerSyncRequestHandler,
@@ -10,6 +11,7 @@ const handlers = {
   [MESSAGE_TYPE.ICE_GAME_READY_REQUEST]: { handler: iceGameReadyRequestHandler },
   [MESSAGE_TYPE.ICE_PLAYER_SYNC_REQUEST]: { handler: icePlayerSyncRequestHandler },
   [MESSAGE_TYPE.ICE_PLAYER_DAMAGE_REQUEST]: { handler: icePlayerDamageRequestHandler },
+  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: iceCloseSocketRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {
