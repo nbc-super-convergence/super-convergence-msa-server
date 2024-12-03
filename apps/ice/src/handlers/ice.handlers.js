@@ -5,7 +5,7 @@ import { logger } from '../utils/logger.utils.js';
 
 export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
-    logger.log(`Start [iceGameReadyRequestHandler]`);
+    logger.info(`Start [iceGameReadyRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -43,7 +43,7 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
 
 export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
   try {
-    logger.log(`Start [icePlayerSyncRequestHandler]`);
+    logger.info(`Start [icePlayerSyncRequestHandler]`);
 
     const { sessionId, position, rotation, state } = payload;
 
@@ -75,7 +75,7 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
 
 export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
   try {
-    logger.log(`Start [icePlayerDamageRequestHandler]`);
+    logger.info(`Start [icePlayerDamageRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -122,7 +122,7 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
 export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
   try {
-    logger.log(`Start [iceCloseSocketRequestHandler]`);
+    logger.info(`Start [iceCloseSocketRequestHandler]`);
 
     const { sessionId } = payload;
 
@@ -147,9 +147,7 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
       throw new Error(`유저가 삭제 되지 않음`, iceConfig.FAIL_CODE.DELETED_USER_IN_GAME);
     }
 
-    const buffer = await iceGameManager.icePlayerExitNoti(deletedUser, game);
-
-    socket.write(buffer);
+    logger.info(`End [iceCloseSocketRequestHandler]`);
   } catch (error) {
     logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
     //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중
