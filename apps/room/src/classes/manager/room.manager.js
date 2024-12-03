@@ -7,6 +7,8 @@ import { ResponseHelper } from '@repo/common/classes';
 import RoomValidator from '../models/room.validator.js';
 import { logger } from '../../utils/logger.utils.js';
 
+const { FAIL_CODE, ROOM_STATE } = config;
+
 class RoomManager {
   constructor() {
     if (RoomManager.instance) {
@@ -34,14 +36,14 @@ class RoomManager {
       const userData = await RoomValidator.userSession(sessionId);
       if (!userData) {
         logger.error('[ createRoom ] ====> userData is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
       }
 
       //* 로비에 있는지 검증
       const lobbyId = await RoomValidator.userLobbyLocation(sessionId);
       if (!lobbyId) {
         logger.error('[ createRoom ] ====> lobbyId is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.WRONG_LOBBY);
+        return ResponseHelper.fail(FAIL_CODE.WRONG_LOBBY);
       }
 
       //* 대기방 생성
@@ -73,28 +75,28 @@ class RoomManager {
           sessionId,
           currentRoomId,
         });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_ALREADY_IN_ROOM);
+        return ResponseHelper.fail(FAIL_CODE.USER_ALREADY_IN_ROOM);
       }
 
       //* 입장하려는 대기방이 있는지 검증
       const redisData = await RoomValidator.roomExists(roomId);
       if (!redisData) {
         logger.error('[ joinRoom ] ====> redisData is undefined', { roomId });
-        return ResponseHelper.fail(config.FAIL_CODE.ROOM_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.ROOM_NOT_FOUND);
       }
 
       //* 대기방이 있는 로비에 위치하는 유저인지 검증
       const matched = await RoomValidator.lobbyMatch(sessionId, redisData.lobbyId);
       if (!matched) {
         logger.error('[ joinRoom ] ====> user is in another lobby', { sessionId, matched });
-        return ResponseHelper.fail(config.FAIL_CODE.WRONG_LOBBY);
+        return ResponseHelper.fail(FAIL_CODE.WRONG_LOBBY);
       }
 
       //* 유저 세션 검증
       const userData = await RoomValidator.userSession(sessionId);
       if (!userData) {
         logger.error('[ joinRoom ] ====> userData is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
       }
 
       //* 입장
@@ -125,21 +127,21 @@ class RoomManager {
       const roomId = await RoomValidator.userRoomLocation(sessionId);
       if (!roomId) {
         logger.error('[ leaveRoom ] ====> not a user in the room', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       //* 유저 세션 검증
       const userData = await RoomValidator.userSession(sessionId);
       if (!userData) {
         logger.error('[ leaveRoom ] ====> userData is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
       }
 
       //* 대기방이 있는지 검증
       const redisData = await RoomValidator.roomExists(roomId);
       if (!redisData) {
         logger.error('[ leaveRoom ] ====> redisData is undefined', { roomId });
-        return ResponseHelper.fail(config.FAIL_CODE.ROOM_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.ROOM_NOT_FOUND);
       }
 
       //* 퇴장
@@ -178,27 +180,27 @@ class RoomManager {
       const roomId = await RoomValidator.userRoomLocation(sessionId);
       if (!roomId) {
         logger.error('[ updateReady ] ====> roomId is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       //* 유저 세션 검증
       const userData = await RoomValidator.userSession(sessionId);
       if (!userData) {
         logger.error('[ updateReady ] ====> userData is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
       }
 
       //* 대기방이 있는지 검증
       const redisData = await RoomValidator.roomExists(roomId);
       if (!redisData) {
         logger.error('[ updateReady ] ====> redisData is undefined', { roomId });
-        return ResponseHelper.fail(config.FAIL_CODE.ROOM_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.ROOM_NOT_FOUND);
       }
 
       //* 현재 대기방에 있는 유저가 맞는지 검증
       if (roomId !== redisData.roomId) {
         logger.error('[ updateReady ] ====> invalid user', { roomId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       const roomData = RoomDTO.fromRedis(redisData);
@@ -206,7 +208,7 @@ class RoomManager {
       // * 방장은 준비 불가
       if (roomData.ownerId === sessionId) {
         logger.error('[ updateReady ] ====> owner can not prepare', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.OWNER_CANNOT_READY);
+        return ResponseHelper.fail(FAIL_CODE.OWNER_CANNOT_READY);
       }
 
       //* 준비 상태 설정
@@ -240,7 +242,7 @@ class RoomManager {
       const lobbyId = await RoomValidator.userLobbyLocation(sessionId);
       if (!lobbyId) {
         logger.error('[ getRoomList ] ====> lobbyId is undefined', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.WRONG_LOBBY);
+        return ResponseHelper.fail(FAIL_CODE.WRONG_LOBBY);
       }
 
       //* 로비에 있는 대기방 목록 조회
@@ -255,7 +257,10 @@ class RoomManager {
         }),
       );
 
-      const validRoomResponses = roomResponses.filter((room) => room !== null);
+      const validRoomResponses = roomResponses.filter(
+        (room) =>
+          room.state !== ROOM_STATE.BOARD && room.state !== ROOM_STATE.MINI && room !== null,
+      );
       logger.info('[ getRoomList ] ====> success', { roomCount: validRoomResponses.length });
 
       return ResponseHelper.success(validRoomResponses);
@@ -277,14 +282,14 @@ class RoomManager {
       //* 대기방의 상태값이 맞는지 확인
       if (!Room.validateState(state)) {
         logger.error('[ updateRoomState ] ====> validateState fail', { state });
-        return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
+        return ResponseHelper.fail(FAIL_CODE.INVALID_ROOM_STATE);
       }
 
       //* 대기방이 존재하는지 확인
       const redisData = await RoomValidator.roomExists(roomId);
       if (!redisData) {
         logger.error('[ updateRoomState ] ====> redisData is undefined', { roomId });
-        return ResponseHelper.fail(config.FAIL_CODE.ROOM_NOT_FOUND);
+        return ResponseHelper.fail(FAIL_CODE.ROOM_NOT_FOUND);
       }
 
       //* 상태 변경
