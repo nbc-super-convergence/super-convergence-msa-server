@@ -13,7 +13,6 @@ const handlers = {
   [MESSAGE_TYPE.JOIN_ROOM_REQUEST]: { handler: joinRoomRequestHandler },
   [MESSAGE_TYPE.LEAVE_ROOM_REQUEST]: { handler: leaveRoomRequestHandler },
   [MESSAGE_TYPE.GAME_PREPARE_REQUEST]: { handler: gamePrepareRequestHandler },
-  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: leaveRoomRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {
