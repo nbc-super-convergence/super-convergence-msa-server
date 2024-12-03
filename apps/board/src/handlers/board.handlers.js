@@ -21,7 +21,7 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
    */
   const { sessionId } = payload;
   //
-  console.log(' [ BOARD: gameStartRequestHandler ] sessionId ===>> ', sessionId);
+  logger.info(' [ BOARD: gameStartRequestHandler ] sessionId ===>> ', sessionId);
 
   let sessionIds = [sessionId];
 
@@ -40,7 +40,7 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
     const packet = serializeForGate(messageType, notification, 0, sessionIds);
     socket.write(packet);
   } catch (err) {
-    console.error('[ BOARD: gameStartRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: gameStartRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.GAME_START_NOTIFICATION, sessionIds, err);
   }
 };
@@ -96,7 +96,7 @@ export const rollDiceRequestHandler = async ({ socket, payload }) => {
 
     // * 업적용 이력 저장
   } catch (err) {
-    console.error('[ BOARD: rollDiceRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: rollDiceRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.ROLL_DICE_RESPONSE, sessionIds, err);
   }
 };
@@ -148,7 +148,7 @@ export const movePlayerBoardRequestHandler = async ({ socket, payload }) => {
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
-    console.error('[ BOARD: movePlayerBoardRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: movePlayerBoardRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.MOVE_PLAYER_BOARD_RESPONSE, sessionIds, err);
   }
 };
@@ -203,7 +203,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
-    console.error('[ BOARD: purchaseTileRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: purchaseTileRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.PURCHASE_TILE_RESPONSE, sessionIds, err);
   }
 };
@@ -254,7 +254,7 @@ export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
-    console.error('[ BOARD: backToTheRoomRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: backToTheRoomRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.BACK_TO_THE_ROOM_RESPONSE, sessionIds, err);
   }
 };
@@ -323,7 +323,7 @@ export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
     socket.write(responsePacket);
   } catch (err) {
-    console.error('[ BOARD: purchaseTrophyRequestHandler ] ERROR ==>> ', err);
+    logger.error('[ BOARD: purchaseTrophyRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.PURCHASE_TROPHY_RESPONSE, sessionIds, err);
   }
 };

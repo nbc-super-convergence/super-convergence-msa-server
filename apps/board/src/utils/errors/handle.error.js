@@ -1,9 +1,10 @@
 import { FAIL_CODE } from '@repo/common/failcodes';
 import { serializeForGate } from '@repo/common/utils';
+import { logger } from '../logger.utils.js';
 
 export const handleError = (socket, messageType, sessionIds, error) => {
   //
-  console.error(`[ handleError ] messageType : ${messageType}, ERROR ===>> `, error);
+  logger.error(`[ handleError ] messageType : ${messageType}, ERROR ===>> `, error);
 
   socket.write(
     serializeForGate(

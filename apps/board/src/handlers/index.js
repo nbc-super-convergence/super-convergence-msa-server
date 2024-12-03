@@ -1,4 +1,5 @@
 import { MESSAGE_TYPE } from '../constants/header.js';
+import { logger } from '../utils/logger.utils.js';
 import {
   backToTheRoomRequestHandler,
   diceGameRequestHandler,
@@ -25,7 +26,7 @@ const handlers = {
 
 export const getHandlerByMessageType = (messageType) => {
   if (!handlers[messageType]) {
-    console.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
+    logger.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
     throw new Error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
   }
   return handlers[messageType].handler;

@@ -1,5 +1,6 @@
 import { RedisClient, RedisUtil } from '@repo/common/classes';
 import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from '../constants/env.js';
+import { logger } from './logger.utils.js';
 
 const redisConfig = {
   host: REDIS_HOST,
@@ -18,15 +19,15 @@ export const createRedisSubcriber = (channel) => {
   // 구독
   subscriber.subscribe(channel, (err, count) => {
     if (err) {
-      console.error('Subscribe error:', err);
+      logger.error('Subscribe error:', err);
       return;
     }
-    console.log(`Subscribed to ${count} channel(s).`);
+    logger.info(`Subscribed to ${count} channel(s).`);
   });
 
   // 메시지 수신 이벤트
   subscriber.on('message', (channel, message) => {
-    console.log(`Received notification on ${channel}: ${message}`);
+    logger.info(`Received notification on ${channel}: ${message}`);
 
     // 알림에 따라 데이터를 가져올 수도 있음
     if (message.includes('key1')) {
