@@ -44,7 +44,7 @@ class redisTransaction {
    * @param {string} sessionId
    * @param {string} lobbyId
    */
-  async leaveLobby(sessionId, lobbyId) {
+  async leaveLobby(sessionId, lobbyId, nickname) {
     return this.execute(async (multi) => {
       const lobbyKey = `${this.prefix.LOBBY_USERS}:${lobbyId}`;
       const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
@@ -54,7 +54,7 @@ class redisTransaction {
       multi.srem(lobbyKey, sessionId);
       multi.hdel(locationKey, 'lobby');
       multi.del(userKey);
-      multi.srem(loginKey, sessionId);
+      multi.srem(loginKey, nickname);
     });
   }
 

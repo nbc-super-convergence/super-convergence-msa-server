@@ -77,7 +77,13 @@ class LobbyManager {
    */
   async leaveUser(sessionId) {
     try {
-      const { lobbyId } = await this.getUserDataAndLocation(sessionId);
+      const { userData, lobbyId } = await this.getUserDataAndLocation(sessionId);
+
+      //* 유저가 존재하지 않는 경우
+      if (!userData) {
+        logger.error('[ joinUser ] ====> user is undefined', { sessionId });
+        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_FOUND);
+      }
 
       //* 로비에 존재하는 유저가 맞는지 검증
       if (!lobbyId) {
@@ -86,7 +92,7 @@ class LobbyManager {
       }
 
       //* 로비 퇴장
-      await redis.transaction.leaveLobby(sessionId, lobbyId);
+      await redis.transaction.leaveLobby(sessionId, lobbyId, userData.nickname);
 
       logger.info('[ leaveUser ] ====> success');
 
