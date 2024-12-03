@@ -4,6 +4,7 @@ import { roomListHandler } from './room/room.list.handler.js';
 import { joinRoomRequestHandler } from './room/join.room.handler.js';
 import { leaveRoomRequestHandler } from './room/leave.room.handler.js';
 import { gamePrepareRequestHandler } from './room/game.prepare.handler.js';
+import { logger } from '../utils/logger.utils.js';
 
 const handlers = {
   // * room
@@ -16,8 +17,7 @@ const handlers = {
 
 export const getHandlerByMessageType = (messageType) => {
   if (!handlers[messageType]) {
-    console.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
-    throw new Error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
+    logger.error(`핸들러를 찾을 수 없습니다 : messageType : ${messageType}`);
   }
   return handlers[messageType].handler;
 };

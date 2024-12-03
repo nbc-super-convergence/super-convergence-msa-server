@@ -1,7 +1,8 @@
 import { TcpServer } from '@repo/common/classes';
-import { config, logger } from '@repo/common/config';
+import { config } from '@repo/common/config';
 import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType } from '../../handlers/index.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class RoomServer extends TcpServer {
   _onData = (socket) => async (data) => {
