@@ -6,8 +6,8 @@
 export const getRollDiceResult = (diceMaxValue, diceCount) => {
   let result = 0;
 
-  for (let i = 0; i <= diceCount; i++) {
-    result += Math.floor(Math.random() * diceMaxValue);
+  for (let i = 0; i < diceCount; i++) {
+    result += Math.floor(Math.random() * diceMaxValue) + 1;
   }
 
   return result;

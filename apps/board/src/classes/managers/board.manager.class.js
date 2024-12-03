@@ -91,7 +91,7 @@ class BoardManager {
   async rollDice(sessionId) {
     //
     try {
-      const DICE_MAX_VALUE = 10;
+      const DICE_MAX_VALUE = 6;
       const DICE_COUNT = 1;
 
       const diceResult = getRollDiceResult(DICE_MAX_VALUE, DICE_COUNT);
@@ -147,8 +147,8 @@ class BoardManager {
   async purchaseTileInBoard(sessionId, tile) {
     //
     try {
-      const boardId = await this.getUserLocationField(sessionId, 'board');
-      const sessionIds = await this.getBoardPlayers(boardId);
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
+      const sessionIds = await redis.getBoardPlayers(boardId);
 
       // TODO: 1 - 타일 주인 정보 저장,
       // TODO: 2 - [업적용] 타일 구매이력 저장
@@ -203,7 +203,7 @@ class BoardManager {
     try {
       const trophyValue = 2; // TODO: 임시 트로피 값
       // * 해당 플레이어 정보 수정
-      const boardId = await this.getUserLocationField(sessionId, 'board');
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
       const boardPlayerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
       logger.info('[ BOARD: purchaseTrophy ] boardPlayerInfo ===>> ', boardPlayerInfo);
 
@@ -244,8 +244,8 @@ class BoardManager {
    */
   async tilePenalty(sessionId, tile) {
     try {
-      const boardId = await this.getUserLocationField(sessionId, 'board');
-      const sessionIds = await this.getBoardPlayers(boardId);
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
+      const sessionIds = await redis.getBoardPlayers(boardId);
 
       // TODO: 벌급 정해야 함, Game Data에서??
       const penalty = 10;
@@ -278,8 +278,8 @@ class BoardManager {
    */
   async firstDiceGame(sessionId) {
     try {
-      const boardId = await this.getUserLocationField(sessionId, 'board');
-      const sessionIds = await this.getBoardPlayers(boardId);
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
+      const sessionIds = await redis.getBoardPlayers(boardId);
 
       const result = [];
 
@@ -304,6 +304,35 @@ class BoardManager {
     } catch (e) {
       logger.error('[ BOARD : firstDiceGame ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 미니게임 시작 요청, 미니게임 정해서 해당 미니게임 채널에 publish
+   * Channel : iceGameChannel
+   * Message : {boardId}
+   * @param {String} sessionId 방장 sessionId
+   */
+  async startMiniGameRequest(sessionId) {
+    try {
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
+      const message = boardId;
+
+      // TODO: iceGameChannel 임시 고정
+      let channel = redis.channel.ICE;
+      const gameType = 1;
+
+      // TODO: switch? messageType? 처럼?
+      switch (gameType) {
+        case 1:
+          break;
+      }
+      await redis.client.publish(channel, message);
+      console.log(
+        `[ BOARD : startMiniGameRequest ] : [${channel}] Channel Notification Sent: [${message}]`,
+      );
+    } catch (e) {
+      logger.error('[ BOARD : startMiniGameRequest ] ERRROR ==>> ', e);
     }
   }
 } //* class end
