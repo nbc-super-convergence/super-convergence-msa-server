@@ -468,6 +468,11 @@ class RedisUtil {
     return result;
   }
 
+  async updateBoardGameField(boardId, field, value) {
+    const boardKey = `${this.prefix.BOARD}:${boardId}`;
+    await this.client.hset(boardKey, field, value);
+  }
+
   /**
    * 보드 전체 플레이어 조회
    * @param {String} boardId
@@ -486,6 +491,16 @@ class RedisUtil {
    */
   async getBoardPlayersBySessionId(sessionId) {
     return await this.getBoardPlayers(sessionId);
+  }
+
+  /**
+   * 보드 플레이어 목록에서 제거
+   * @param {String} boardId
+   * @returns
+   */
+  async deleteBoardPlayers(boardId, sessionId) {
+    const key = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+    await this.client.srem(key, sessionId);
   }
 
   /**
@@ -508,6 +523,16 @@ class RedisUtil {
   async updateBoardPlayerInfo(boardId, sessionId, boardPlayerInfo) {
     const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
     await this.client.hset(key, boardPlayerInfo);
+  }
+
+  /**
+   * 보드게임 플레이어 정보 삭제
+   * @param {String} boardId
+   * @param {String} sessionId
+   */
+  async deleteBoardPlayerInfo(boardId, sessionId) {
+    const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+    await this.client.del(key);
   }
 
   async createLockKey(key, id) {
