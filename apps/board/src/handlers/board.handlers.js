@@ -412,3 +412,14 @@ export const firstDiceGameRequestHandler = async ({ socket, payload }) => {
     handleError(socket, MESSAGE_TYPE.DICE_GAME_RESPONSE, sessionIds, err);
   }
 };
+
+export const closeSocketRequestHandler = async ({ socket, payload }) => {
+  const { sessionId } = payload;
+  let sessionIds = [sessionId];
+
+  try {
+    logger.info('[ BOARD: closeSocketRequestHandler ] sessionId ==>> ', sessionId);
+  } catch (err) {
+    logger.error('[ BOARD: closeSocketRequestHandler ] ERROR ==>> ', err);
+  }
+};
