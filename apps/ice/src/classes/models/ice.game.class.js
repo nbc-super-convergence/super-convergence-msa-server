@@ -5,7 +5,6 @@ import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
 import iceUser from './ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
-import { redisUtil } from '../../utils/init/redis.js';
 import { logger } from '../../utils/logger.utils.js';
 
 class iceGame extends Game {
@@ -25,8 +24,6 @@ class iceGame extends Game {
 
       const position = this.startPosition[key].pos;
       const rotation = this.startPosition[key].rot;
-
-      await redisUtil.createUserLocation(userId, 'ice', gameId);
 
       const newUser = new iceUser(gameId, userId, position, rotation);
 

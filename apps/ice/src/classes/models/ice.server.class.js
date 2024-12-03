@@ -4,7 +4,7 @@ import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType } from '../../handlers/index.js';
 import iceGameManager from '../managers/ice.game.manager.js';
 import { iceConfig } from '../../config/config.js';
-import { subRedisClient } from '../../utils/init/redis.js';
+import { redisUtil, subRedisClient } from '../../utils/init/redis.js';
 import { logger } from '../../utils/logger.utils.js';
 
 class IceServer extends TcpServer {
@@ -27,13 +27,17 @@ class IceServer extends TcpServer {
       //* `${boardId}:${users}`
       const [boardId, users] = message.split(':');
 
-      await iceGameManager.addGame(boardId, users.split(','));
+      await iceGameManager.addGame(boardId, JSON.parse(users));
     });
 
     this.subScriber.on('iceGameChannel', async (channel, message) => {
       const { boardId } = message;
 
       const game = await iceGameManager.getGameBySessionId(boardId);
+
+      for (let user of game.users) {
+        await redisUtil.createUserLocation(user.sessonId, 'ice', game.id);
+      }
 
       const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
 
