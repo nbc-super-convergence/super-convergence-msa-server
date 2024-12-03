@@ -1,21 +1,14 @@
-import { RedisClient, RedisUtil } from '@repo/common/classes';
 import iceGame from '../models/ice.game.class.js';
-import { REDIS } from '../../constants/env.js';
-import { iceConfig } from '../../config/config.js';
 import {
   iceGameReadyNotification,
   iceMiniGameReadyNotification,
   iceMiniGameStartNotification,
   icePlayerDamageNotification,
   icePlayerDeathNotification,
-  icePlayerExitNotification,
   icePlayerSyncNotification,
 } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
-
-const redisClient = new RedisClient(REDIS).getClient();
-const redisUtil = new RedisUtil(redisClient);
 
 class iceGameManager {
   constructor() {
@@ -175,19 +168,6 @@ class iceGameManager {
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
     const message = icePlayerDeathNotification(user);
-
-    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
-
-    return buffer;
-  }
-
-  async icePlayerExitNoti(deletedUser, game) {
-    // * 플레이어 탈주
-    console.log(`[iceGameManager - icePlayerExitNoti]`);
-
-    const sessionIds = game.getOtherSessionIds(deletedUser.sessionId);
-
-    const message = icePlayerExitNotification(deletedUser.sessionId);
 
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 

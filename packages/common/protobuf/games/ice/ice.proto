@@ -63,9 +63,4 @@ message S2C_IceGameOverNotification {
     }
 }
 
-message S2C_IcePlayerExitNotification {
-    string sessionId = 1;
-}
-
-
 

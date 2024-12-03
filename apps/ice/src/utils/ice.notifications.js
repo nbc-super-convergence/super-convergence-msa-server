@@ -87,11 +87,3 @@ export const iceMapSyncNotification = () => {
 
   return { type, payload };
 };
-
-export const icePlayerExitNotification = (sessionId) => {
-  const type = MESSAGE_TYPE.ICE_PLAYER_EXIT_NOTIFICATION;
-
-  const payload = { sessionId };
-
-  return { type, payload };
-};
