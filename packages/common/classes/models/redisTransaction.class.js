@@ -1,3 +1,5 @@
+import { config } from '../../config/config.js';
+
 class redisTransaction {
   constructor(redisUtil) {
     this.redisUtil = redisUtil;
@@ -129,6 +131,10 @@ class redisTransaction {
       const playersKey = `${this.prefix.BOARD_PLAYERS}:${board.boardId}`;
 
       multi.exists(boardKey);
+
+      // * 룸 상태 변경 [BOARD]
+      const roomKey = `${this.prefix.ROOM}:${board.roomId}`;
+      multi.hset(roomKey, 'state', config.ROOM_STATE.BOARD);
 
       // * 보드 정보 저장
       multi.hset(boardKey, {
