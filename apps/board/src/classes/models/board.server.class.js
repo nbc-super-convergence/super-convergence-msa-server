@@ -13,13 +13,13 @@ class BoardServer extends TcpServer {
   _onData = (socket) => async (data) => {
     //
     socket.buffer = Buffer.concat([socket.buffer, data]);
-    console.log(' [ BoardServer _onData ]  data ', data);
+    logger.info(' [ BoardServer _onData ]  data ', data);
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
-        `==>>>\nmessageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
+      logger.info(
+        `[ BOARD: _onData ] ==>>>\nmessageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
       if (socket.buffer.length >= length) {
@@ -29,13 +29,13 @@ class BoardServer extends TcpServer {
 
           const payload = packetParser(messageType, packet);
 
-          console.log(' [ onData ] payload ===>> ', payload);
+          logger.info(' [ onData ] payload ===>> ', payload);
 
           const handler = getHandlerByMessageType(messageType);
 
           await handler({ socket, payload });
 
-          console.log(' [ BoardServer _onData ] payload ====>> ', payload);
+          logger.info(' [ BoardServer _onData ] payload ====>> ', payload);
         } catch (e) {
           logger.error('[ BOARD: _onData ] ERROR ====>> ', e);
         }

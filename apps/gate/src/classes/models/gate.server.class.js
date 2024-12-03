@@ -82,7 +82,7 @@ class GateServer extends TcpServer {
                 // delete this._socketMap[mapKey];
               }
             } catch (err) {
-              console.error('[ GATE: _onData ] 임시 소켓 삭제 시도 실패, ERR ==>> ', err);
+              logger.error('[ GATE: _onData ] 임시 소켓 삭제 시도 실패, ERR ==>> ', err);
             }
 
             // * sessionId를 키값으로 socket 저장
@@ -231,11 +231,11 @@ class GateServer extends TcpServer {
               );
               this._socketMap[sessionId].socket.write(packetForClient);
             } else {
-              console.error(` [ GATE: ] NOT FOUND SOCKET, sessionId ===>>> ${sessionId}`);
+              logger.error(` [ GATE: ] NOT FOUND SOCKET, sessionId ===>>> ${sessionId}`);
             }
           });
         } else {
-          console.error(
+          logger.error(
             ` [ GATE: ] NOT FOUND SOCKET, payload.sessionIds ===>>> `,
             payload.sessionIds,
           );

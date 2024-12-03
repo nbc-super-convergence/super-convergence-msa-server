@@ -3,6 +3,7 @@ import { redis } from '../../utils/redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { BOARD_STATE } from '../../constants/state.js';
 import { getRollDiceResult } from '../../utils/dice.utils.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class BoardManager {
   constructor() {
@@ -27,15 +28,15 @@ class BoardManager {
     try {
       // * redis에서 유저 정보 조회 [ getUserToSession ]
       const userData = await redis.getUserToSession(sessionId);
-      console.log('[ BOARD: gameStartRequestHandler ] userData ===>>> ', userData);
+      logger.info('[ BOARD: gameStartRequestHandler ] userData ===>>> ', userData);
 
       // * redis에서 유저 roomId 조회
       const userLocation = await redis.getUserLocation(sessionId);
-      console.log('[ BOARD: gameStartRequestHandler ] userLocation ===>>> ', userLocation);
+      logger.info('[ BOARD: gameStartRequestHandler ] userLocation ===>>> ', userLocation);
 
       // * room 정보 조회
       const roomData = await redis.getRoom(userLocation.room);
-      console.log('[ BOARD: gameStartRequestHandler ] roomData ===>>> ', roomData);
+      logger.info('[ BOARD: gameStartRequestHandler ] roomData ===>>> ', roomData);
 
       // * 방장만 시작 요청 가능
       if (roomData.ownerId === sessionId) {
@@ -48,7 +49,7 @@ class BoardManager {
           state: BOARD_STATE.WAITING,
         };
 
-        console.log(' [ BOARD: createBoard ] IF  board ===>>> ', board);
+        logger.info(' [ BOARD: createBoard ] IF  board ===>>> ', board);
 
         // * redisUtil에서 redisTransaction으로 변경
         await redis.transaction.createBoardGame(board);
@@ -70,15 +71,15 @@ class BoardManager {
           data.users.push(sId);
         }
 
-        console.log('[ data ]  ===>> ', data);
+        logger.info('[ data ]  ===>> ', data);
 
         return { success: true, data: data, failCode: 0 };
       } else {
-        console.error('방장만 게임시작 요청을 할 수 있습니다. : sessionId ==>> ', sessionId);
+        logger.error('방장만 게임시작 요청을 할 수 있습니다. : sessionId ==>> ', sessionId);
         return { success: false, data: null, failCode: FAIL_CODE.INVALID_REQUEST };
       }
     } catch (e) {
-      console.error('[ BOARD : createBoard ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : createBoard ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -108,7 +109,7 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
-      console.error('[ BOARD : rollDice ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : rollDice ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -133,7 +134,7 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
-      console.error('[ BOARD : movePlayerInBoard ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : movePlayerInBoard ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -162,7 +163,7 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
-      console.error('[ BOARD : purchaseTileInBoard ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : purchaseTileInBoard ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -186,7 +187,7 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
-      console.error('[ BOARD : backTotheRoom ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : backTotheRoom ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -204,14 +205,14 @@ class BoardManager {
       // * 해당 플레이어 정보 수정
       const boardId = await this.getUserLocationField(sessionId, 'board');
       const boardPlayerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
-      console.log('[ BOARD: purchaseTrophy ] boardPlayerInfo ===>> ', boardPlayerInfo);
+      logger.info('[ BOARD: purchaseTrophy ] boardPlayerInfo ===>> ', boardPlayerInfo);
 
       // * 보유 골드가 트로피 금액보다 높은지?
       if (boardPlayerInfo.gold >= trophyValue) {
         boardPlayerInfo.gold = boardPlayerInfo.gold - trophyValue;
         boardPlayerInfo.trophy++;
 
-        console.log('[ BOARD: purchaseTrophy ] changed boardPlayerInfo ===>> ', boardPlayerInfo);
+        logger.info('[ BOARD: purchaseTrophy ] changed boardPlayerInfo ===>> ', boardPlayerInfo);
         await redis.updateBoardPlayerInfo(boardId, sessionId, boardPlayerInfo);
 
         // TODO: 새로운 트로피 타일 생성, 보드 플레이어 정보 수정이랑 트랜잭션 묶어서 처리?
@@ -230,7 +231,7 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
-      console.error('[ BOARD : purchaseTrophy ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : purchaseTrophy ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
@@ -265,7 +266,43 @@ class BoardManager {
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
     } catch (e) {
-      console.error('[ BOARD : tilePenalty ] ERRROR ==>> ', e);
+      logger.error('[ BOARD : tilePenalty ] ERRROR ==>> ', e);
+      return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
+    }
+  }
+
+  /**
+   * 보드 - 첫 주사위 순서를 정하는 게임
+   * @param {String} sessionId
+   * @returns
+   */
+  async firstDiceGame(sessionId) {
+    try {
+      const boardId = await this.getUserLocationField(sessionId, 'board');
+      const sessionIds = await this.getBoardPlayers(boardId);
+
+      const result = [];
+
+      // TODO: 테스트용 코드
+      for (let i = 0; i < sessionIds.length; i++) {
+        const diceGameData = {
+          sessionId: sessionIds[i],
+          value: sessionIds.length - i,
+          rank: i + 1,
+        };
+        result.push(diceGameData);
+      }
+
+      return {
+        success: true,
+        data: {
+          sessionIds,
+          result,
+        },
+        failCode: FAIL_CODE.NONE_FAILCODE,
+      };
+    } catch (e) {
+      logger.error('[ BOARD : firstDiceGame ] ERRROR ==>> ', e);
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }

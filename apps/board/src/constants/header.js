@@ -1,4 +1,7 @@
 export const MESSAGE_TYPE = {
+  //종료
+  CLOSE_SOCKET_REQUEST: 9,
+
   // Game start (51-60)
   GAME_START_REQUEST: 51,
   GAME_START_NOTIFICATION: 52,
