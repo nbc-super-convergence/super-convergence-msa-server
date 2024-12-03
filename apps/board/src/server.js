@@ -25,5 +25,5 @@ await server.start();
 
 server.connectToDistributor(SERVER_HOST, 7010, (data) => {
   // Distributor 연결
-  logger.log(' [ BOARD: server ] Distributor Notification', data);
+  logger.info(' [ BOARD: server ] Distributor Notification', data);
 });
