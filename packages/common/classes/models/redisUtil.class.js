@@ -54,6 +54,7 @@ class RedisUtil {
 
     this.channel = {
       BOARD: 'boardChannel',
+      ICE: 'iceGameChannel',
     };
 
     this.transaction = new redisTransaction(this);

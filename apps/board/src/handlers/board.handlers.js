@@ -273,6 +273,14 @@ export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
 export const startMiniGameRequestHandler = async ({ socket, payload }) => {
   // TODO: 이 요청은 누가?? 어떤 타이밍에?
   // TODO: => 턴 마지막 유저가? 이름 바꾸면 좋을듯? [ 미니게임선정 요청 ]
+  const { sessionId } = payload;
+  let sessionIds = [sessionId];
+
+  try {
+    const result = '';
+  } catch (err) {
+    logger.error('[ BOARD: startMiniGameRequestHandler ] ERROR ==>> ', err);
+  }
 };
 
 /**
