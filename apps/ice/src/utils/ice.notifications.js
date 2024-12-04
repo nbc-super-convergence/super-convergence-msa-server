@@ -75,7 +75,7 @@ export const iceGameOverNotification = (users) => {
   });
 
   // ranks와 endTime으로 payload 생성
-  const payload = { ranks, endTime: Date.now() };
+  const payload = { ranks, endTime: Date.now() + 5000 };
 
   return { type, payload };
 };
