@@ -228,13 +228,20 @@ class redisTransaction {
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
       // TODO: 게임 데이터에서 타일 가격 가져와야 함
-      const TILE_PRICE = 5;
+      const TILE_PRICE = 10;
+      let tilePrice = TILE_PRICE;
+
+      // * 남의 땅이면 타일값이 첫 구매값의 2배
+      const tileOwnerId = await multi.hget(mapKey, tile);
+      if (tileOwnerId) {
+        tilePrice *= 2;
+      }
 
       // 구매자 골드 감소
       const playerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
       const playerInfo = await multi.hgetall(playerInfoKey);
       console.log('[ BOARD: redis-transaction ] playerInfo ===>> ', playerInfo);
-      playerInfo.gold -= TILE_PRICE;
+      playerInfo.gold -= tilePrice;
       await multi.hset(playerInfoKey, playerInfo);
 
       multi.hset(mapKey, tile, sessionId);
