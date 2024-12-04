@@ -227,6 +227,16 @@ class redisTransaction {
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
+      // TODO: 게임 데이터에서 타일 가격 가져와야 함
+      const TILE_PRICE = 5;
+
+      // 구매자 골드 감소
+      const playerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+      const playerInfo = await multi.hgetall(playerInfoKey);
+      console.log('[ BOARD: redis-transaction ] playerInfo ===>> ', playerInfo);
+      playerInfo.gold -= TILE_PRICE;
+      await multi.hset(playerInfoKey, playerInfo);
+
       multi.hset(mapKey, tile, sessionId);
       multi.sadd(historyKey, tile);
     });
