@@ -4,16 +4,16 @@ import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import net from 'net';
 import { config } from '@repo/common/config';
 import { redisUtil } from '../src/utils/init/redis.js';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 
 const clientRedisUtil = redisUtil;
 
+const users = JSON.stringify(['rider1', 'rider2', 'rider3', 'rider4']);
 const board = {
   boardId: 'sample',
   roomId: 'sample',
   ownerId: 'rider1',
   state: 'start',
-  users: ['rider1', 'rider2', 'rider3', 'rider4'],
+  users: users,
 };
 
 await clientRedisUtil.transaction.createBoardGame(board);
@@ -34,7 +34,7 @@ const client = net.connect(gateOptions, async () => {
 
   client.buffer = Buffer.alloc(0);
 
-  client.write(gamePacket);
+  //client.write(gamePacket);
 
   client.on('data', (data) => {
     client.buffer = Buffer.concat([client.buffer, data]);

@@ -2,10 +2,11 @@ import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
-import { GAME_STATE } from '../../constants/states.js';
+import { GAME_STATE, USER_STATE } from '../../constants/states.js';
 import iceUser from './ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
 import { logger } from '../../utils/logger.utils.js';
+import { redisUtil } from '../../utils/init/redis.js';
 
 class iceGame extends Game {
   constructor(id) {
@@ -75,15 +76,18 @@ class iceGame extends Game {
   }
 
   getAliveUsers() {
-    return this.users.filter((user) => user.state !== 2);
+    return this.users.filter((user) => user.state !== USER_STATE.DIE);
   }
 
   isOneAlive() {
-    return this.getAliveUsers().length === 1 ? true : false;
+    return this.getAliveUsers().length <= 1 ? true : false;
   }
 
   clearAllPlayers() {
-    this.users.forEach((user) => user.resetInfo());
+    this.users.forEach((user) => {
+      redisUtil.deleteUserLocationField(user.sessionId, 'ice');
+      user.resetInfo();
+    });
   }
 
   setGameState(state) {
@@ -150,7 +154,9 @@ class iceGame extends Game {
           logger.info(`[checkGameOverInterval] ===> 게임 종료`);
           const user = this.getAliveUsers()[0];
 
-          user.rank = 1;
+          if (!user) {
+            user.rank = 1;
+          }
 
           this.handleGameEnd(socket);
         }

@@ -36,6 +36,8 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
 
     // TODO: 마지막 남은 유저가 준비했을 때 굳이 2개를 보내야 할까?
     socket.write(buffer);
+
+    logger.info(`End [iceGameReadyRequestHandler]`);
   } catch (error) {
     logger.error(`[iceGameReadyRequestHandler] ===> `, error);
   }
@@ -65,9 +67,11 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
     user.updateUserInfos(position, rotation, state);
 
     // * icePlayerSyncNotification
-    const buffer = await iceGameManager.icePlayerSyncNoti(user, game, payload);
+    const buffer = await iceGameManager.icePlayerSyncNoti(user, game);
 
     socket.write(buffer);
+
+    logger.info(`End [icePlayerSyncRequestHandler]`);
   } catch (error) {
     logger.error(`[icePlayerSyncRequestHandler] ===> `, error);
   }
@@ -115,6 +119,8 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
     }
 
     socket.write(buffer);
+
+    logger.info(`End [icePlayerDamageRequestHandler]`);
   } catch (error) {
     logger.error(`[icePlayerDamageRequestHandler] ===> `, error);
   }
@@ -146,6 +152,9 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
     if (game.isValidUser(deletedUser)) {
       throw new Error(`유저가 삭제 되지 않음`, iceConfig.FAIL_CODE.DELETED_USER_IN_GAME);
     }
+
+    // ! 나간 유저의 게임 위치 삭제
+    await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'ice');
 
     logger.info(`End [iceCloseSocketRequestHandler]`);
   } catch (error) {

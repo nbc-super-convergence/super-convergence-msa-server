@@ -9,6 +9,7 @@ import {
 } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
 import { GAME_STATE } from '../../constants/states.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class iceGameManager {
   constructor() {
@@ -30,13 +31,10 @@ class iceGameManager {
     // ! 방장 아이디로 새로운 게임 생성
     const game = new iceGame(gameId);
 
-    console.log(`유저입니다`, users);
+    logger.info(`[iceGameManager - users]:`, users);
 
-    // TODO: 현재 여기서 걸려서 유저 생성 후 넘어가야하는데 그러지 않고 바로 넘어감
     await game.addUser(users, gameId);
     this.games.push(game); // 게임 세션에 추가;
-
-    console.log(`현재 게임들`, this.games);
   }
 
   removeGame(id) {
@@ -87,15 +85,13 @@ class iceGameManager {
 
   async iceMiniGameReadyNoti(game) {
     // * 게임 상태 변경
-    console.log(`[iceGameManager - iceMiniGameReadyNoti]`);
+    logger.info(`[iceGameManager - iceMiniGameReadyNoti]`);
 
     game.setGameState(GAME_STATE.START);
 
     // * 게임 시작 Notification
     const sessionIds = game.getAllSessionIds();
 
-    console.log(`게임입니다`, game);
-    console.log(`세션 아이디들`, sessionIds);
     const users = game.getAllUser();
 
     const message = iceMiniGameReadyNotification(users);
@@ -107,7 +103,7 @@ class iceGameManager {
 
   async iceGameReadyNoti(user, game) {
     // * 플레이어 준비
-    console.log(`[iceGameManager - iceGameReadyNoti]`);
+    logger.info(`[iceGameManager - iceGameReadyNoti]`);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -119,7 +115,8 @@ class iceGameManager {
   }
 
   async iceMiniGameStartNoti(socket, game) {
-    console.log(`모든 유저 준비 완료`);
+    // * 미니 게임 시작
+    logger.info(`[iceGameManager - iceMiniGameStartNoti]`);
 
     const sessionIds = game.getAllSessionIds();
 
@@ -128,6 +125,7 @@ class iceGameManager {
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     // * 맵 변경, 게임 종료 타이머, 게임 종료 인터벌
+    // TODO: 가는 시간까지 포함해서 싱크가 정확하지 않을수도 있음
     game.changeMapTimer(socket);
     game.iceGameTimer(socket);
     game.checkGameOverInterval(socket);
@@ -137,7 +135,7 @@ class iceGameManager {
 
   async icePlayerSyncNoti(user, game) {
     //* 유저 위치 정보 업데이트
-    console.log(`[iceGameManager - icePlayerSyncNoti]`);
+    logger.info(`[iceGameManager - icePlayerSyncNoti]`);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -150,7 +148,7 @@ class iceGameManager {
 
   async icePlayerDamageNoti(user, game) {
     // * 플레이어에 데미지
-    console.log(`[iceGameManager - icePlayerDamageNoti]`);
+    logger.info(`[iceGameManager - icePlayerDamageNoti]`);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
@@ -163,8 +161,9 @@ class iceGameManager {
 
   async icePlayerDeathNoti(user, game) {
     // * 플레이어 사망
-    console.log(`[iceGameManager - icePlayerDeathNoti]`);
+    logger.info(`[iceGameManager - icePlayerDeathNoti]`);
 
+    // TODO: 자신에게도 보내줘야하는지 확인하기
     const sessionIds = game.getOtherSessionIds(user.sessionId);
 
     const message = icePlayerDeathNotification(user);
