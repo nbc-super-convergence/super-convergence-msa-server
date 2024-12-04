@@ -157,7 +157,7 @@ class redisTransaction {
         // 골드, 트로피, 플레이어 타일 위치,
         const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${board.boardId}:${sessionId}`;
         multi.hset(boardPlayerInfoKey, {
-          gold: 10, // TODO: 게임 데이터에서 파싱?
+          gold: 20, // TODO: 게임 데이터에서 파싱?
           trophy: 0,
           tileLocation: 0, // TODO: 시작 위치?
         });
@@ -231,6 +231,7 @@ class redisTransaction {
       const TILE_PRICE = 10;
       let tilePrice = TILE_PRICE;
 
+      // TODO: 구매값을 따로 저장해서 해당값 불러와서 2배로 불려야함...
       // * 남의 땅이면 타일값이 첫 구매값의 2배
       const tileOwnerId = await multi.hget(mapKey, tile);
       if (tileOwnerId) {
