@@ -438,3 +438,35 @@ export const closeSocketRequestHandler = async ({ socket, payload }) => {
     logger.error('[ BOARD: closeSocketRequestHandler ] ERROR ==>> ', err);
   }
 };
+
+/**
+ * * 턴 종료 요청
+ * * TURN_END_REQUEST C2S_TurnEndRequest
+ *
+ * * => 알림 [ S2C_TurnEndNotification ]
+ */
+export const turnEndRequestHandler = async ({ socket, payload }) => {
+  const { sessionId } = payload;
+  let sessionIds = [sessionId];
+
+  try {
+    logger.info('[ BOARD: turnEndRequestHandler ] sessionId ==>> ', sessionId);
+
+    // * 턴 종료
+    const result = await boardManager.turnEnd(sessionId);
+
+    // * 나머지 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.TURN_END_NOTIFICATION;
+    const notification = {};
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+  } catch (err) {
+    logger.error('[ BOARD: turnEndRequestHandler ] ERROR ==>> ', err);
+  }
+};
