@@ -186,6 +186,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const notification = {
       sessionId: sessionId,
       tile: result.data.tile,
+      playersInfo: result.data.playersInfo,
     };
 
     const notificationPacket = serializeForGate(
@@ -202,6 +203,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const response = {
       success: result.success,
       tile: result.data.tile,
+      playerInfo: result.data.playerInfo,
       failCode: result.failCode,
     };
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
@@ -277,7 +279,7 @@ export const startMiniGameRequestHandler = async ({ socket, payload }) => {
   let sessionIds = [sessionId];
 
   try {
-    const result = '';
+    const result = await boardManager.startMiniGameRequest(sessionId);
   } catch (err) {
     logger.error('[ BOARD: startMiniGameRequestHandler ] ERROR ==>> ', err);
   }

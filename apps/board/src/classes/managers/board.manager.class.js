@@ -154,11 +154,25 @@ class BoardManager {
       // TODO: 2 - [업적용] 타일 구매이력 저장
       await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
 
+      const playersInfo = [];
+      const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
+
+      const others = sessionIds.filter((sId) => sId !== sessionId);
+      for (let i = 0; i < others.length; i++) {
+        const info = await redis.getBoardPlayerinfo(boardId, others[i]);
+        playersInfo.push(info);
+      }
+
+      logger.info('[ BOARD: purchaseTileInBoard ] playerInfo ===>> ', playerInfo);
+      logger.info('[ BOARD: purchaseTileInBoard ] playersInfo ===>> ', playersInfo);
+
       return {
         success: true,
         data: {
           tile,
           sessionIds,
+          playersInfo, // all
+          playerInfo, // self
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };

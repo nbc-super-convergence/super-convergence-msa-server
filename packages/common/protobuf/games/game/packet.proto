@@ -73,6 +73,9 @@ message GamePacket {
         C2S_DiceGameRequest diceGameRequest = 77;
         S2C_DiceGameResponse diceGameResponse = 78;
         S2C_DiceGameNotification diceGameNotification = 79;
+        C2S_TurnEndRequest turnEndRequest = 80;
+        S2C_TurnEndNotification turnEndNotification = 81;
+
 
         // Post Game (91-100)
         C2S_BackToTheRoomRequest backToTheRoomRequest = 91;
