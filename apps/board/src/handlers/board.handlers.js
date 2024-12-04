@@ -186,7 +186,6 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const notification = {
       sessionId: sessionId,
       tile: result.data.tile,
-      playersInfo: result.data.playersInfo,
     };
 
     const notificationPacket = serializeForGate(
@@ -203,7 +202,6 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const response = {
       success: result.success,
       tile: result.data.tile,
-      playerInfo: result.data.playerInfo,
       failCode: result.failCode,
     };
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
@@ -276,8 +274,10 @@ export const startMiniGameRequestHandler = async ({ socket, payload }) => {
   // TODO: 이 요청은 누가?? 어떤 타이밍에?
   // TODO: => 턴 마지막 유저가? 이름 바꾸면 좋을듯? [ 미니게임선정 요청 ]
   const { sessionId } = payload;
+  let sessionIds = [sessionId];
+
   try {
-    const result = await boardManager.startMiniGameRequest(sessionId);
+    const result = '';
   } catch (err) {
     logger.error('[ BOARD: startMiniGameRequestHandler ] ERROR ==>> ', err);
   }
@@ -313,6 +313,7 @@ export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
       sessionId: sessionId,
       beforeTile: tile,
       nextTile: result.data.nextTile,
+      playersInfo: result.data.playersInfo,
     };
 
     const notificationPacket = serializeForGate(
@@ -328,8 +329,8 @@ export const purchaseTrophyRequestHandler = async ({ socket, payload }) => {
     const responseMessageType = MESSAGE_TYPE.PURCHASE_TROPHY_RESPONSE;
     const response = {
       success: result.success,
-      playerInfo: result.data.boardPlayerInfo,
       nextTile: result.data.nextTile,
+      playerInfo: result.data.boardPlayerInfo,
       failCode: result.failCode,
     };
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);

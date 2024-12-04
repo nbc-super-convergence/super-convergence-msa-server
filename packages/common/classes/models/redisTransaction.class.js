@@ -157,7 +157,7 @@ class redisTransaction {
         // 골드, 트로피, 플레이어 타일 위치,
         const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${board.boardId}:${sessionId}`;
         multi.hset(boardPlayerInfoKey, {
-          gold: 20, // TODO: 게임 데이터에서 파싱?
+          gold: 10, // TODO: 게임 데이터에서 파싱?
           trophy: 0,
           tileLocation: 0, // TODO: 시작 위치?
         });
@@ -227,24 +227,6 @@ class redisTransaction {
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
-      // TODO: 게임 데이터에서 타일 가격 가져와야 함
-      const TILE_PRICE = 10;
-      let tilePrice = TILE_PRICE;
-
-      // TODO: 구매값을 따로 저장해서 해당값 불러와서 2배로 불려야함...
-      // * 남의 땅이면 타일값이 첫 구매값의 2배
-      const tileOwnerId = await multi.hget(mapKey, tile);
-      if (tileOwnerId) {
-        tilePrice *= 2;
-      }
-
-      // 구매자 골드 감소
-      const playerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
-      const playerInfo = await multi.hgetall(playerInfoKey);
-      console.log('[ BOARD: redis-transaction ] playerInfo ===>> ', playerInfo);
-      playerInfo.gold -= tilePrice;
-      await multi.hset(playerInfoKey, playerInfo);
-
       multi.hset(mapKey, tile, sessionId);
       multi.sadd(historyKey, tile);
     });
@@ -284,10 +266,10 @@ class redisTransaction {
 
       // TODO: 페널티 이력 저장?
 
-      // * 페널티가 적용된 플레이어 정보 반환
+      // * 모든 플레이어 정보 반환
       result.playersInfo = [];
       const PlayersInfoKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-      const playerSessionIds = this.client.lrange(PlayersInfoKey, 0, -1);
+      const playerSessionIds = await multi.lrange(PlayersInfoKey, 0, -1);
       playerSessionIds.forEach(async (sId) => {
         const playerInfo = await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`);
         playerInfo.sessionId = sId;
@@ -298,7 +280,31 @@ class redisTransaction {
     return result;
   }
 
-  //
-}
+  /**
+   * sessionId 값으로 소속 보드게임의 플레이어 정보를 모두 조회함
+   * @param {String} sessionId
+   */
+  async getBoardPlayersInfo(sessionId) {
+    //
+    const result = {};
+    await this.execute(async (multi) => {
+      result.playersInfo = [];
+
+      // * boardId 조회
+      const boardKey = `${this.prefix.LOCATION}:${sessionId}`;
+      const boardId = await multi.hget(boardKey, 'board');
+
+      // * sessionIds 돌면서 정보 삽입
+      const boardPlayersKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+      const playerSessionIds = await multi.lrange(boardPlayersKey, 0, -1);
+      playerSessionIds.forEach(async (sId) => {
+        const playerInfo = await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`);
+        playerInfo.sessionId = sId;
+        result.playersInfo.push(playerInfo);
+      });
+    });
+    return result;
+  }
+} //
 
 export default redisTransaction;

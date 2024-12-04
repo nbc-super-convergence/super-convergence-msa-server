@@ -65,24 +65,6 @@ message  S2C_MovePlayerBoardNotification {
 	float rotation = 3;
 }
 
-message  C2S_PurchaseTileRequest {
-	string sessionId = 1;
-	int32 tile = 2;
-}
-
-message  S2C_PurchaseTileResponse {
-  	bool success = 1;
-	int32 tile = 2;
-	BoardPlayerData playerInfo = 3;
-	GlobalFailCode failCode = 4;
-}
-
-message  S2C_PurchaseTileNotification {
-	string sessionId = 1;
-	int32 tile = 2;
-	repeated BoardPlayerData playersInfo = 3;
-}
-
 message S2C_GameEndNotification {
   	repeated Rank rank = 1;
 }
@@ -106,6 +88,24 @@ message C2S_StartMiniGameRequest {
 }
 
 // 
+
+message  C2S_PurchaseTileRequest {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
+message  S2C_PurchaseTileResponse {
+  	bool success = 1;
+	int32 tile = 2;
+	BoardPlayerData playerInfo = 3; 
+	GlobalFailCode failCode = 4;
+}
+
+message  S2C_PurchaseTileNotification {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
 message  C2S_PurchaseTrophyRequest {
 	string sessionId = 1;
 	int32 tile = 2;
@@ -113,8 +113,8 @@ message  C2S_PurchaseTrophyRequest {
 
 message  S2C_PurchaseTrophyResponse {
   	bool success = 1;
-  	BoardPlayerData playerInfo = 2;
-  	int32 nextTile = 3;
+	int32 nextTile = 2;
+  	BoardPlayerData playerInfo = 3; 
 	GlobalFailCode failCode = 4;
 }
 
@@ -122,6 +122,7 @@ message  S2C_PurchaseTrophyNotification {
 	string sessionId = 1;
 	int32 beforeTile = 2;
 	int32 nextTile = 3;
+	repeated BoardPlayerData playersInfo = 4;
 }
 
 message  C2S_TilePenaltyRequest {

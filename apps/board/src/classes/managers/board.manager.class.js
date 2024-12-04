@@ -154,25 +154,11 @@ class BoardManager {
       // TODO: 2 - [업적용] 타일 구매이력 저장
       await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
 
-      const playersInfo = [];
-      const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
-
-      const others = sessionIds.filter((sId) => sId !== sessionId);
-      for (let i = 0; i < others.length; i++) {
-        const info = await redis.getBoardPlayerinfo(boardId, others[i]);
-        playersInfo.push(info);
-      }
-
-      logger.info('[ BOARD: purchaseTileInBoard ] playerInfo ===>> ', playerInfo);
-      logger.info('[ BOARD: purchaseTileInBoard ] playersInfo ===>> ', playersInfo);
-
       return {
         success: true,
         data: {
           tile,
           sessionIds,
-          playersInfo, // all
-          playerInfo, // self
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
@@ -214,12 +200,17 @@ class BoardManager {
   async purchaseTrophy(sessionId, tile) {
     //
     let nextTile = tile;
+    let isSuccess = true;
+    let faileCode = FAIL_CODE.NONE_FAILCODE;
+
     try {
       const trophyValue = 2; // TODO: 임시 트로피 값
       // * 해당 플레이어 정보 수정
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const boardPlayerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
       logger.info('[ BOARD: purchaseTrophy ] boardPlayerInfo ===>> ', boardPlayerInfo);
+
+      let playersInfo = [];
 
       // * 보유 골드가 트로피 금액보다 높은지?
       if (boardPlayerInfo.gold >= trophyValue) {
@@ -231,18 +222,23 @@ class BoardManager {
 
         // TODO: 새로운 트로피 타일 생성, 보드 플레이어 정보 수정이랑 트랜잭션 묶어서 처리?
         nextTile = tile; // TODO: 새로운 타일로 변경 예정
+        playersInfo = await redis.transaction.getBoardPlayersInfo(sessionId);
+      } else {
+        isSuccess = false;
+        faileCode = FAIL_CODE.INVALID_REQUEST; // TODO: 추후 수정 필요
       }
 
       // * 전달할 플레이어 목록
       const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
       return {
-        success: true,
+        success: isSuccess,
         data: {
           sessionIds,
           boardPlayerInfo,
+          playersInfo,
           nextTile,
         },
-        failCode: FAIL_CODE.NONE_FAILCODE,
+        failCode: faileCode,
       };
     } catch (e) {
       logger.error('[ BOARD : purchaseTrophy ] ERRROR ==>> ', e);
