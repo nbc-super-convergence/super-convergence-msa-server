@@ -359,6 +359,25 @@ class BoardManager {
       logger.error('[ BOARD : startMiniGameRequest ] ERRROR ==>> ', e);
     }
   }
+
+  /**
+   * 턴 종료 요청 및 알림
+   * @param {String} sessionId
+   */
+  async turnEnd(sessionId) {
+    try {
+      const boardId = await redis.getUserLocationField(sessionId, 'board');
+      const sessionIds = await redis.getBoardPlayers(boardId);
+      logger.info(`[ BOARD: turnEnd ] boardId: ${boardId} sessionIds ==>> `, sessionIds);
+      return {
+        data: {
+          sessionIds,
+        },
+      };
+    } catch (e) {
+      logger.error('[ BOARD : turnEnd ] ERRROR ==>> ', e);
+    }
+  }
 } //* class end
 
 const boardManagerInstance = BoardManager.getInstance();

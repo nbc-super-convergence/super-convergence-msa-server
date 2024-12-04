@@ -160,9 +160,9 @@ message S2C_DiceGameNotification {
 
 
 message C2S_TurnEndRequest{
-
+	string sessionId = 1;
 }
 
 message S2C_TurnEndNotification{
-	
+
 }

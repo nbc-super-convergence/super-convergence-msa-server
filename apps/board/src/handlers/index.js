@@ -9,6 +9,7 @@ import {
   purchaseTrophyRequestHandler,
   rollDiceRequestHandler,
   tilePenaltyRequestHandler,
+  turnEndRequestHandler,
 } from './board.handlers.js';
 
 //
@@ -22,6 +23,7 @@ const handlers = {
   [MESSAGE_TYPE.PURCHASE_TROPHY_REQUEST]: { handler: purchaseTrophyRequestHandler },
   [MESSAGE_TYPE.TILE_PENALTY_REQUEST]: { handler: tilePenaltyRequestHandler },
   [MESSAGE_TYPE.DICE_GAME_REQUEST]: { handler: firstDiceGameRequestHandler },
+  [MESSAGE_TYPE.TURN_END_REQUEST]: { handler: turnEndRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {
