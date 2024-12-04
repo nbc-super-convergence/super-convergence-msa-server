@@ -22,7 +22,7 @@ export const logoutHandler = async ({ socket, payload }) => {
 
       //종료한 유저 로비에서 제거
       await redis.transaction.leaveLobby(sessionId, userLocation['lobby'], nickname);
-      await redis.deleteUserLocation(sessionId);
+      await redis.deleteUserLocationField(sessionId, 'lobby');
     }
 
     // room 의 세션 [ room ]
@@ -70,6 +70,7 @@ export const logoutHandler = async ({ socket, payload }) => {
           );
         }
       }
+      await redis.deleteUserLocationField(sessionId, 'room');
       notificationTarget = otherRoomUsers;
     }
 
@@ -93,6 +94,8 @@ export const logoutHandler = async ({ socket, payload }) => {
       if (otherUsers.length === 0) {
         await redis.deleteBoardGame(userLocation['board']);
       }
+      await redis.deleteUserLocationField(sessionId, 'board');
+
       notificationTarget = otherUsers;
     }
 
