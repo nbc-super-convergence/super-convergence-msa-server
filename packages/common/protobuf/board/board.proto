@@ -73,12 +73,14 @@ message  C2S_PurchaseTileRequest {
 message  S2C_PurchaseTileResponse {
   	bool success = 1;
 	int32 tile = 2;
-	GlobalFailCode failCode = 3;
+	BoardPlayerData playerInfo = 3;
+	GlobalFailCode failCode = 4;
 }
 
 message  S2C_PurchaseTileNotification {
 	string sessionId = 1;
 	int32 tile = 2;
+	repeated BoardPlayerData playersInfo = 3;
 }
 
 message S2C_GameEndNotification {
@@ -111,9 +113,9 @@ message  C2S_PurchaseTrophyRequest {
 
 message  S2C_PurchaseTrophyResponse {
   	bool success = 1;
-  	BoardPlayerData playerInfo = 2; ///
+  	BoardPlayerData playerInfo = 2;
   	int32 nextTile = 3;
-	  GlobalFailCode failCode = 4;
+	GlobalFailCode failCode = 4;
 }
 
 message  S2C_PurchaseTrophyNotification {

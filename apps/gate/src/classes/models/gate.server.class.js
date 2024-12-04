@@ -79,7 +79,8 @@ class GateServer extends TcpServer {
               );
               if (mapKey) {
                 // TODO: 테스트 후, 주석 풀기
-                delete this._socketMap[mapKey];
+                // TODO: 여기서는 mapKey를 별도로 저장하고 커넥션을 끊을때 지우기
+                // delete this._socketMap[mapKey];
               }
             } catch (err) {
               logger.error('[ GATE: _onData ] 임시 소켓 삭제 시도 실패, ERR ==>> ', err);
