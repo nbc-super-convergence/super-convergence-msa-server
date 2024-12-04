@@ -11,7 +11,6 @@ export const logoutHandler = async ({ socket, payload }) => {
   try {
     //
     const { sessionId } = payload;
-    let location = '';
     let notificationTarget = [];
     const nickname = await redis.getUserToSessionfield(sessionId, 'nickname');
     const userLocation = await redis.getUserLocation(sessionId);
@@ -24,7 +23,6 @@ export const logoutHandler = async ({ socket, payload }) => {
       //종료한 유저 로비에서 제거
       await redis.transaction.leaveLobby(sessionId, userLocation['lobby'], nickname);
       await redis.deleteUserLocation(sessionId);
-      location = 'lobby';
     }
 
     // room 의 세션 [ room ]
@@ -72,7 +70,6 @@ export const logoutHandler = async ({ socket, payload }) => {
           );
         }
       }
-      location = 'room';
       notificationTarget = otherRoomUsers;
     }
 
@@ -96,14 +93,11 @@ export const logoutHandler = async ({ socket, payload }) => {
       if (otherUsers.length === 0) {
         await redis.deleteBoardGame(userLocation['board']);
       }
-
-      location = 'board';
       notificationTarget = otherUsers;
     }
 
     if (notificationTarget.length > 0) {
       const packet = {
-        location: location,
         sessionId: sessionId,
       };
       const closeSocketNotification = serializeForGate(

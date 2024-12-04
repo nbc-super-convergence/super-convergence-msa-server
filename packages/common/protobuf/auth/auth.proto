@@ -34,6 +34,5 @@ message C2S_LoggoutRequest {
 }
 
 message S2C_CloseSocketNotification {
-    string location = 1;
-    string sessionId = 2;
+    string sessionId = 1;
 }
