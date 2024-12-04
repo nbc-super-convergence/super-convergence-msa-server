@@ -150,16 +150,21 @@ class BoardManager {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const sessionIds = await redis.getBoardPlayers(boardId);
 
+      logger.info('[ BOARD: purchaseTileInBoard ] sessionIds ===>> ', sessionIds);
+
       // TODO: 1 - 타일 주인 정보 저장,
       // TODO: 2 - [업적용] 타일 구매이력 저장
       await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
 
       const playersInfo = [];
       const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
+      playerInfo.sessionId = sessionId;
 
       const others = sessionIds.filter((sId) => sId !== sessionId);
+      logger.info('[ BOARD: purchaseTileInBoard ] others ===>> ', others);
       for (let i = 0; i < others.length; i++) {
         const info = await redis.getBoardPlayerinfo(boardId, others[i]);
+        info.sessionId = others[i];
         playersInfo.push(info);
       }
 
