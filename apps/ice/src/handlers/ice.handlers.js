@@ -80,6 +80,11 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
+    if (user.isDead()) {
+      logger.info(`icePlayerDamageRequestHandler 유저 죽어있음`, user.sessionId);
+      return;
+    }
+
     // ! 유저 position 변경
     user.updateUserInfos(position, rotation, state);
 
@@ -118,13 +123,13 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     logger.info(` icePlayerDamageRequestHandler 유저`, user);
 
+    if (!game.isValidUser(user.sessionId)) {
+      throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
+    }
+
     if (user.isDead()) {
       logger.info(`icePlayerDamageRequestHandler 유저 죽어있음`, user.sessionId);
       return;
-    }
-
-    if (!game.isValidUser(user.sessionId)) {
-      throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
     // ! 유저 체력 - 1
