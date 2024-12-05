@@ -1,0 +1,30 @@
+name: develop-CD-pipeline
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest # 실행될 인스턴스 OS와 버전
+
+    steps:
+      - name: excuting remote ssh commands
+        uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
+        with:
+          host: ${{ secrets.EC2_HOST }} # 인스턴스 IP
+          username: ${{ secrets.EC2_USER }} # 우분투 아이디
+          key: ${{ secrets.EC2_PRIVATE_KEY }} # ec2 instance pem key
+          port: ${{ secrets.EC2_SSH_PORT }} # 접속포트
+          script: | # 실행할 스크립트
+            cd test-actions
+            git pull origin develop
+            yarn install
+            yarn build --concurrency=1
+            pm2 kill
+            pm2 start ecosystem.config.cjs
