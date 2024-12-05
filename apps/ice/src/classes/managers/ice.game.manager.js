@@ -33,6 +33,8 @@ class iceGameManager {
 
     logger.info(`[iceGameManager - users]:`, users);
 
+    logger.info(`게임들`, game);
+
     await game.addUser(users, gameId);
     this.games.push(game); // 게임 세션에 추가;
   }

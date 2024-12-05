@@ -30,6 +30,8 @@ class iceGame extends Game {
 
       this.users.push(newUser);
     }
+
+    logger.info(`유저들`, this.users);
   }
 
   getUserBySessionId(sessionId) {
