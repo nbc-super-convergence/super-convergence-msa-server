@@ -356,7 +356,16 @@ class BoardManager {
         case 1:
           break;
       }
-      await redis.client.publish(channel, message);
+      await redis.client.publish(channel, message, (err, reply) => {
+        if (err) {
+          logger.error('[ BOARD: startMiniGameRequest ] startMiniGameRequest ==>> ', err);
+        } else {
+          logger.info(
+            `[ BOARD: startMiniGameRequest ]  Message sent to channel1, ${reply} subscribers received the message`,
+          );
+        }
+      });
+
       console.log(
         `[ BOARD : startMiniGameRequest ] : [${channel}] Channel Notification Sent: [${message}]`,
       );
