@@ -178,15 +178,15 @@ class iceGame extends Game {
     this.intervalManager.addInterval(
       'gameOverInterval',
       () => {
+        const users = this.getAliveUsers();
+
+        for (let key in users) {
+          logger.info(`[checkGameOverInterval - user.rank]`, users[key].rank);
+        }
+
         if (this.isOneAlive()) {
           logger.info(`[checkGameOverInterval] ===> 게임 종료`);
           const user = this.getAliveUsers()[0];
-
-          const users = this.getAliveUsers();
-
-          for (let key in users) {
-            logger.info(`[checkGameOverInterval - user.rank]`, users[key].rank);
-          }
 
           if (user) {
             user.rank = 1;
