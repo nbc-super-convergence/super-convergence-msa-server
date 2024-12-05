@@ -37,7 +37,7 @@ class IceServer extends TcpServer {
         for (let user of game.users) {
           console.log(`[iceChannel - user]`, user);
           console.log(`[iceChannel - sessionId]`, user.sessionId);
-          await redisUtil.createUserLocation(user.sessonId, 'ice', game.id);
+          await redisUtil.createUserLocation(user.sessionId, 'ice', game.id);
         }
 
         const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
