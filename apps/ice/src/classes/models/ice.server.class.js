@@ -30,11 +30,13 @@ class IceServer extends TcpServer {
 
         await iceGameManager.addGame(boardId, JSON.parse(users));
       } else {
+        console.log(`[iceChannel - message]`, message);
         const game = await iceGameManager.getGameBySessionId(message);
         console.log(`[iceChannel - game]`, game);
 
         for (let user of game.users) {
           console.log(`[iceChannel - user]`, user);
+          console.log(`[iceChannel - sessionId]`, user.sessionId);
           await redisUtil.createUserLocation(user.sessonId, 'ice', game.id);
         }
 
