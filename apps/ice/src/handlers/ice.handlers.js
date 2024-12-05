@@ -118,6 +118,11 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     logger.info(` icePlayerDamageRequestHandler 유저`, user);
 
+    if (user.isDead()) {
+      logger.info(`icePlayerDamageRequestHandler 유저 죽어있음`, user.sessionId);
+      return;
+    }
+
     if (!game.isValidUser(user.sessionId)) {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
