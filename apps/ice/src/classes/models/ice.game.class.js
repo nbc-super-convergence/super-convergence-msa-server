@@ -46,8 +46,8 @@ class iceGame extends Game {
     }
   }
 
-  isValidUser(user) {
-    return this.users.includes(user) ? true : false;
+  isValidUser(userId) {
+    return this.users.find((user) => user.sessionId === userId) ? true : false;
   }
 
   // TODO: GlobalFailCode용 로직
