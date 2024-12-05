@@ -180,8 +180,10 @@ class iceGame extends Game {
       () => {
         const users = this.getAliveUsers();
 
-        for (let key in users) {
-          logger.info(`[checkGameOverInterval - user.rank]`, users[key].rank);
+        logger.info(`[checkGameOverInterval - user.length] ===> ` + users.length);
+
+        for (let user of users) {
+          logger.info(`[checkGameOverInterval - user.rank] ===> ` + user.rank);
         }
 
         if (this.isOneAlive()) {
