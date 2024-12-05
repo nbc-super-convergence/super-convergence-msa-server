@@ -1,4 +1,5 @@
 import iceGameManager from '../classes/managers/ice.game.manager.js';
+import { sessionIds } from '../classes/models/ice.game.class.js';
 import { iceConfig } from '../config/config.js';
 import { redisUtil } from '../utils/init/redis.js';
 import { logger } from '../utils/logger.utils.js';
@@ -11,7 +12,7 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`iceGameReadyRequestHandler payload`, payload);
 
-    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = sessionIds.get(sessionId);
 
     logger.info(`게임 아이디`, gameId);
 
@@ -59,7 +60,7 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`icePlayerSyncRequest payload`, payload);
 
-    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = sessionIds.get(sessionId);
 
     logger.info(`게임 아이디`, gameId);
 
@@ -101,7 +102,7 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`icePlayerDamageRequestHandler payload`, payload);
 
-    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = sessionIds.get(sessionId);
 
     logger.info(`게임 아이디`, gameId);
 
@@ -159,7 +160,7 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`iceCloseSocketRequestHandler payload`, payload);
 
-    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = sessionIds.get(sessionId);
 
     logger.info(`게임 아이디`, gameId);
 

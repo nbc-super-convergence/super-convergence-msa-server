@@ -44,7 +44,7 @@ class iceUser extends User {
   }
 
   isDead() {
-    return this.hp < 0 ? true : false;
+    return this.hp <= 0 ? true : false;
   }
 
   Dead() {

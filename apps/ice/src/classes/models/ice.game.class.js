@@ -8,6 +8,8 @@ import { iceConfig } from '../../config/config.js';
 import { logger } from '../../utils/logger.utils.js';
 import { redisUtil } from '../../utils/init/redis.js';
 
+export const sessionIds = new Map();
+
 class iceGame extends Game {
   constructor(id) {
     super(id);
@@ -24,6 +26,10 @@ class iceGame extends Game {
 
       const position = this.startPosition[key].pos;
       const rotation = this.startPosition[key].rot;
+
+      if (!sessionIds.get(userId)) {
+        sessionIds.set(userId, gameId);
+      }
 
       const newUser = new iceUser(gameId, userId, position, rotation);
 
@@ -215,7 +221,6 @@ class iceGame extends Game {
     this.map = iceMap;
     this.setGameState(GAME_STATE.WAIT);
 
-    this.timeoutManager.clearAll();
     this.intervalManager.clearAll();
 
     logger.info(`[game.reset intervals] ===> `, this.intervalManager.intervals);
