@@ -121,11 +121,6 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
-    //* 위치 검증
-    if (!iceGameManager.isValidUserPosition(user, game)) {
-      throw new Error(`데미지를 받을 위치가 아닙니다.`, iceConfig.FAIL_CODE.INVALID_USER_POSITION);
-    }
-
     // ! 유저 체력 - 1
     user.damage();
 

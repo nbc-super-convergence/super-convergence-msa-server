@@ -186,6 +186,8 @@ class iceGame extends Game {
 
     const message = iceGameOverNotification(users);
 
+    logger.info(`[handlerGameEnd - message] ===>`, message);
+
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     socket.write(buffer);
