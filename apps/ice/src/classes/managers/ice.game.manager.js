@@ -139,8 +139,6 @@ class iceGameManager {
     game.iceGameTimer(socket);
     game.checkGameOverInterval(socket);
 
-    logger.info(`[iceMiniGameStartNoti intervals] ===> `, game.intervalManager.intervals);
-
     return buffer;
   }
 
