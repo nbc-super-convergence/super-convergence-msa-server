@@ -28,10 +28,12 @@ class iceUser extends User {
   }
 
   gameReady() {
+    // * 준비
     this.isReady = true;
   }
 
   updateUserInfos(position, rotation, state) {
+    // * sync 업데이트
     this.position.set(position);
     this.rotation = rotation;
     this.state = state;
@@ -50,6 +52,7 @@ class iceUser extends User {
   }
 
   saveStartInfo() {
+    // * 게임 초기 정보
     this.startInfos = {
       hp: this.hp,
       position: this.position,
@@ -58,6 +61,7 @@ class iceUser extends User {
   }
 
   resetInfo() {
+    // * 유저 리셋
     this.hp = this.startInfos.hp;
     this.position = this.startInfos.position;
     this.state = USER_STATE.IDLE;

@@ -65,7 +65,7 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
     user.updateUserInfos(position, rotation, state);
 
     // * icePlayerSyncNotification
-    const buffer = await iceGameManager.icePlayerSyncNoti(user, game, payload);
+    const buffer = await iceGameManager.icePlayerSyncNoti(user, game);
 
     socket.write(buffer);
   } catch (error) {
@@ -111,6 +111,7 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
       // * 사망시 랭킹
       user.rank = game.getAliveUser().length + 1;
 
+      // TODO: 사망시 데미지를 받은 noti를 같이 보내줘야하는지
       buffer = await iceGameManager.icePlayerDeathNoti(user, game);
     }
 
@@ -147,7 +148,8 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
       throw new Error(`유저가 삭제 되지 않음`, iceConfig.FAIL_CODE.DELETED_USER_IN_GAME);
     }
 
-    logger.info(`End [iceCloseSocketRequestHandler]`);
+    // ! 나간 유저의 게임 위치 삭제
+    await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'ice');
   } catch (error) {
     logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
     //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중

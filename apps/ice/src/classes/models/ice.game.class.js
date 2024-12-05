@@ -2,10 +2,11 @@ import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
-import { GAME_STATE } from '../../constants/states.js';
+import { GAME_STATE, USER_STATE } from '../../constants/states.js';
 import iceUser from './ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
 import { logger } from '../../utils/logger.utils.js';
+import { redisUtil } from '../../utils/init/redis.js';
 
 class iceGame extends Game {
   constructor(id) {
@@ -75,15 +76,20 @@ class iceGame extends Game {
   }
 
   getAliveUsers() {
-    return this.users.filter((user) => user.state !== 2);
+    return this.users.filter((user) => user.state !== USER_STATE.DIE);
   }
 
   isOneAlive() {
-    return this.getAliveUsers().length === 1 ? true : false;
+    // * 살아남은 유저 수 확인
+    return this.getAliveUsers().length <= 1 ? true : false;
   }
 
   clearAllPlayers() {
-    this.users.forEach((user) => user.resetInfo());
+    // * 모든 유저 위치 제거 ( 미니 게임 정상 종료시 )
+    this.users.forEach((user) => {
+      redisUtil.deleteUserLocationField(user.sessionId, 'ice');
+      user.resetInfo();
+    });
   }
 
   setGameState(state) {
@@ -150,7 +156,9 @@ class iceGame extends Game {
           logger.info(`[checkGameOverInterval] ===> 게임 종료`);
           const user = this.getAliveUsers()[0];
 
-          user.rank = 1;
+          if (!user) {
+            user.rank = 1;
+          }
 
           this.handleGameEnd(socket);
         }
@@ -161,6 +169,7 @@ class iceGame extends Game {
   }
 
   handleGameEnd(socket) {
+    // * 게임 종료
     logger.info(`[handleGameEnd] ===> 게임 종료`);
     // 전체 유저 조회
     const users = this.getAllUser();
@@ -177,8 +186,8 @@ class iceGame extends Game {
     this.clearAllPlayers();
   }
 
-  // * 게임 내 정보 리셋
   reset() {
+    // * 게임 내 정보 리셋
     this.map = iceMap;
     this.setGameState(GAME_STATE.WAIT);
 
