@@ -19,7 +19,9 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }} # 인스턴스 IP
           username: ${{ secrets.EC2_USER }} # 우분투 아이디
-          key: ${{ secrets.EC2_PRIVATE_KEY }} # ec2 instance pem key
+          # key: ${{ secrets.EC2_PRIVATE_KEY }} # ec2 instance pem key
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }} # 접속포트
           script: | # 실행할 스크립트
             cd test-actions
