@@ -119,6 +119,8 @@ class iceGame extends Game {
 
           const message = iceMapSyncNotification();
 
+          logger.info(`iceMapTimer 메시지`, message);
+
           const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
           socket.write(buffer);
@@ -141,6 +143,8 @@ class iceGame extends Game {
         aliveUsers = aliveUsers.sort((a, b) => b.hp - a.hp);
         aliveUsers.forEach((user, index) => (user.rank = index + 1));
 
+        logger.info(`iceGameTimer`, aliveUsers);
+
         this.handleGameEnd(socket);
       },
       this.gameTimer,
@@ -161,6 +165,8 @@ class iceGame extends Game {
           if (!user) {
             user.rank = 1;
           }
+
+          logger.info(user);
 
           this.handleGameEnd(socket);
         }
