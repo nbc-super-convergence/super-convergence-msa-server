@@ -136,7 +136,7 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
     let buffer = await iceGameManager.icePlayerDamageNoti(user, game);
 
     // * icePlayerDeathNotification
-    if (!user.isDead()) {
+    if (user.isDead()) {
       logger.info(` icePlayerDeathNotification 유저 체력, 상태`, user.hp, user.state);
       user.Dead();
 
