@@ -244,8 +244,8 @@ class redisTransaction {
     const result = {};
     await this.execute(async (multi) => {
       // * Keys
-      const tileOwner = await multi.hget(mapKey, tile);
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
+      const tileOwner = await multi.hget(mapKey, tile);
       const penaltyPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
       const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner}`;
 
