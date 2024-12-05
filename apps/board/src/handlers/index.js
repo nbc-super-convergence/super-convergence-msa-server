@@ -8,6 +8,7 @@ import {
   purchaseTileRequestHandler,
   purchaseTrophyRequestHandler,
   rollDiceRequestHandler,
+  startMiniGameRequestHandler,
   tilePenaltyRequestHandler,
   turnEndRequestHandler,
 } from './board.handlers.js';
@@ -24,6 +25,8 @@ const handlers = {
   [MESSAGE_TYPE.TILE_PENALTY_REQUEST]: { handler: tilePenaltyRequestHandler },
   [MESSAGE_TYPE.DICE_GAME_REQUEST]: { handler: firstDiceGameRequestHandler },
   [MESSAGE_TYPE.TURN_END_REQUEST]: { handler: turnEndRequestHandler },
+
+  [MESSAGE_TYPE.START_MINI_GAME_REQUEST]: { handler: startMiniGameRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {
