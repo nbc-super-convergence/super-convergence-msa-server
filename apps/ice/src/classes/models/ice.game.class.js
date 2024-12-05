@@ -119,14 +119,14 @@ class iceGame extends Game {
 
           const message = iceMapSyncNotification();
 
-          logger.info(`iceMapTimer 메시지`, message);
+          logger.info(`[iceMapTimer 메시지]`, message);
 
           const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
           socket.write(buffer);
         },
         this.map.updateTime[key] * 1000,
-        'changeMap',
+        `changeMap${key}`,
       );
     }
   }
@@ -204,7 +204,8 @@ class iceGame extends Game {
     this.timeoutManager.clearAll();
     this.intervalManager.clearAll();
 
-    logger.info(`[iceGame - reset]`);
+    logger.info(`[game.reset timeouts] ===>`, this.timeoutManager.timeouts);
+    logger.info(`[game.reset intervals] ===> `, this.intervalManager.intervals);
   }
 }
 
