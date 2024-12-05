@@ -1,4 +1,4 @@
-import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
+import { Game, IntervalManager } from '@repo/common/classes';
 import { iceMap } from '../../map/ice.Map.js';
 import { iceGameOverNotification, iceMapSyncNotification } from '../../utils/ice.notifications.js';
 import { serializeForGate } from '@repo/common/utils';
@@ -15,7 +15,6 @@ class iceGame extends Game {
     this.map = iceMap;
     this.gameTimer = iceMap.timer;
     this.intervalManager = new IntervalManager();
-    this.timeoutManager = new TimeoutManager();
     this.startPosition = iceMap.startPosition;
   }
 
@@ -90,6 +89,7 @@ class iceGame extends Game {
     // * 모든 유저 위치 제거 ( 미니 게임 정상 종료시 )
     this.users.forEach(async (user) => {
       await redisUtil.deleteUserLocationField(user.sessionId, 'ice');
+      logger.info(`[clearAllPlayers] ===>`, user.startInfos);
       user.resetInfo();
     });
   }
@@ -103,39 +103,51 @@ class iceGame extends Game {
   }
 
   changeMapTimer(socket) {
-    for (let key in this.map.updateTime) {
-      const mapKey = `map${key}`;
+    // ! timeOut 추가
+    let changeMapCount = 0;
 
-      // ! timeOut 추가
-      this.timeoutManager.addTimeout(
-        'changeMapTimer',
-        () => {
-          logger.info(`[changeMapTimer] ==>, ${mapKey}`);
+    this.intervalManager.addInterval(
+      'changeMapTimer',
+      () => {
+        if (changeMapCount >= 2) {
+          this.intervalManager.removeInterval('changeMapTimer', 'changeMap');
+          return;
+        }
 
-          this.map.sizes.min += 5;
-          this.map.sizes.max -= 5;
+        logger.info(`[changeMapTimer] ===> `);
 
-          const sessionIds = this.getAllSessionIds();
+        this.map.sizes.min += 5;
+        this.map.sizes.max -= 5;
 
-          const message = iceMapSyncNotification();
+        const sessionIds = this.getAllSessionIds();
 
-          logger.info(`[iceMapTimer 메시지]`, message);
+        const message = iceMapSyncNotification();
 
-          const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+        logger.info(`[iceMapTimer - message]`, message);
 
-          socket.write(buffer);
-        },
-        this.map.updateTime[key] * 1000,
-        `changeMap${key}`,
-      );
-    }
+        const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+
+        socket.write(buffer);
+
+        changeMapCount++;
+      },
+      30000,
+      `changeMap`,
+    );
   }
 
   iceGameTimer(socket) {
     // ! timeOut 추가
-    this.timeoutManager.addTimeout(
+    let iceGameTimerCount = 0;
+
+    this.intervalManager.addInterval(
       'iceGameTimer',
       () => {
+        if (iceGameTimerCount >= 1) {
+          this.intervalManager.removeInterval('iceGameTimer', 'iceGameTimer');
+          return;
+        }
+
         logger.info(`[iceGameTimer] ===> 게임 종료`);
         let aliveUsers = this.getAliveUsers();
 
@@ -146,6 +158,8 @@ class iceGame extends Game {
         logger.info(`iceGameTimer`, aliveUsers);
 
         this.handleGameEnd(socket);
+
+        iceGameTimerCount++;
       },
       this.gameTimer,
       'iceGameTimer',
