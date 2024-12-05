@@ -142,7 +142,7 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
       logger.info(` icePlayerDeathNotification 유저 체력, 상태`, user.hp, user.state);
 
       // * 사망시 랭킹
-      user.rank = game.getAliveUser().length + 1;
+      user.rank = game.getAliveUsers().length + 1;
 
       logger.info(` icePlayerDeathNotification 유저 랭킹`, user.rank);
 
