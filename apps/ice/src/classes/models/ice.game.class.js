@@ -162,7 +162,7 @@ class iceGame extends Game {
           logger.info(`[checkGameOverInterval] ===> 게임 종료`);
           const user = this.getAliveUsers()[0];
 
-          if (!user) {
+          if (user) {
             user.rank = 1;
           }
 
