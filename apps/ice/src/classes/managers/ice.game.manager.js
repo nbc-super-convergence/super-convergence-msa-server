@@ -59,9 +59,9 @@ class iceGameManager {
     return this.games;
   }
 
-  isValidGame(game) {
+  isValidGame(gameId) {
     // * 게임 검증
-    return this.games.includes(game) ? true : false;
+    return this.games.find((game) => game.id === gameId) ? true : false;
   }
 
   isValidUserPosition(user, game) {

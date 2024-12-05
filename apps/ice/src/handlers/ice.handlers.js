@@ -13,13 +13,13 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
 
     const game = await iceGameManager.getGameBySessionId(gameId);
 
-    if (!iceGameManager.isValidGame(game)) {
+    if (!iceGameManager.isValidGame(game.id)) {
       throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
-    if (!game.isValidUser(user)) {
+    if (!game.isValidUser(user.sessionId)) {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
@@ -47,17 +47,23 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     const { sessionId, position, rotation, state } = payload;
 
+    console.log(`icePlayerSyncRequest sessionId`, sessionId);
+
     const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+
+    console.log(`게임 아이디`, gameId);
 
     const game = iceGameManager.getGameBySessionId(gameId);
 
-    if (!iceGameManager.isValidGame(game)) {
+    console.log(` icePlayerSyncRequest 게임`, game);
+
+    if (!iceGameManager.isValidGame(game.id)) {
       throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
-    if (!game.isValidUser(user)) {
+    if (!game.isValidUser(user.sessionId)) {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
@@ -79,17 +85,23 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     const { sessionId } = payload;
 
+    console.log(`icePlayerDamageRequestHandler sessionId`, sessionId);
+
     const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+
+    console.log(`게임 아이디`, gameId);
 
     const game = iceGameManager.getGameBySessionId(gameId);
 
-    if (!iceGameManager.isValidGame(game)) {
+    console.log(` icePlayerDamageRequestHandler 게임`, game);
+
+    if (!iceGameManager.isValidGame(game.id)) {
       throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
-    if (!game.isValidUser(user)) {
+    if (!game.isValidUser(user.sessionId)) {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
@@ -127,24 +139,32 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     const { sessionId } = payload;
 
+    console.log(`iceCloseSocketRequestHandler sessionId`, sessionId);
+
     const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+
+    console.log(`게임 아이디`, gameId);
 
     const game = iceGameManager.getGameBySessionId(gameId);
 
-    if (!iceGameManager.isValidGame(game)) {
+    console.log(` iceCloseSocketRequestHandler 게임`, game);
+
+    if (!iceGameManager.isValidGame(game.id)) {
       throw new Error(`게임이 존재하지 않음`, iceConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
-    if (!game.isValidUser(user)) {
+    if (!game.isValidUser(user.sessionId)) {
       throw new Error(`유저가 존재하지 않음`, iceConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
     // ! 삭제된 유저
     const deletedUser = game.removeUser(sessionId);
 
-    if (game.isValidUser(deletedUser)) {
+    console.log(`삭제된 유저들`, deletedUser);
+
+    if (game.isValidUser(deletedUser.sessionId)) {
       throw new Error(`유저가 삭제 되지 않음`, iceConfig.FAIL_CODE.DELETED_USER_IN_GAME);
     }
 
