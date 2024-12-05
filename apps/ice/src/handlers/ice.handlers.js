@@ -59,7 +59,7 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`icePlayerSyncRequest payload`, payload);
 
-    const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
 
     logger.info(`게임 아이디`, gameId);
 
@@ -101,7 +101,7 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`icePlayerDamageRequestHandler payload`, payload);
 
-    const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
 
     logger.info(`게임 아이디`, gameId);
 
@@ -164,7 +164,7 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`iceCloseSocketRequestHandler payload`, payload);
 
-    const gameId = redisUtil.getUserLocationField(sessionId, 'ice');
+    const gameId = await redisUtil.getUserLocationField(sessionId, 'ice');
 
     logger.info(`게임 아이디`, gameId);
 
