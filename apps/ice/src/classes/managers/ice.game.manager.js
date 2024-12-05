@@ -38,6 +38,7 @@ class iceGameManager {
   }
 
   removeGame(id) {
+    // * 게임 삭제
     const index = this.games.findIndex((game) => game.id === id);
 
     if (index !== -1) {
@@ -47,18 +48,22 @@ class iceGameManager {
   }
 
   getGameBySessionId(sessionId) {
+    // * 게임 조회
     return this.games.find((game) => game.id === sessionId);
   }
 
   getAllGames() {
+    // * 모든 게임 조회
     return this.games;
   }
 
   isValidGame(game) {
+    // * 게임 검증
     return this.games.includes(game) ? true : false;
   }
 
   isValidUserPosition(user, game) {
+    // * 위치 검증
     const position = user.getPosition();
 
     const mapSize = game.getMapSize();
@@ -147,7 +152,7 @@ class iceGameManager {
   }
 
   async icePlayerDamageNoti(user, game) {
-    // * 플레이어에 데미지
+    // * 플레이어 데미지
     logger.info(`[iceGameManager - icePlayerDamageNoti]`);
 
     const sessionIds = game.getOtherSessionIds(user.sessionId);
