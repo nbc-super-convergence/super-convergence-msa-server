@@ -218,7 +218,6 @@ class iceGame extends Game {
     this.timeoutManager.clearAll();
     this.intervalManager.clearAll();
 
-    logger.info(`[game.reset timeouts] ===>`, this.timeoutManager.timeouts);
     logger.info(`[game.reset intervals] ===> `, this.intervalManager.intervals);
   }
 }
