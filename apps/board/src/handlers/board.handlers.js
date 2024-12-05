@@ -277,6 +277,7 @@ export const startMiniGameRequestHandler = async ({ socket, payload }) => {
   const { sessionId } = payload;
 
   try {
+    logger.info('[ BOARD: startMiniGameRequestHandler ] sessionId ===>>>  ', sessionId);
     await boardManager.startMiniGameRequest(sessionId);
   } catch (err) {
     logger.error('[ BOARD: startMiniGameRequestHandler ] ERROR ==>> ', err);

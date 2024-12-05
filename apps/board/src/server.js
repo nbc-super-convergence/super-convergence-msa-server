@@ -15,10 +15,13 @@ const gamePlayTypes = Array.from({ length: 30 }, (_, i) => i + 61);
 // Post Game (91-100)
 const postGameTypes = Array.from({ length: 10 }, (_, i) => i + 91);
 
+// Mini Game (101)
+const mingiGameTypes = [101];
+
 const server = new BoardServer(
   SERVER_NAME,
   SERVER_PORT,
-  messageTypes.concat(gameStartTypes, gamePlayTypes, postGameTypes),
+  messageTypes.concat(gameStartTypes, gamePlayTypes, postGameTypes, mingiGameTypes),
 );
 
 await server.start();
