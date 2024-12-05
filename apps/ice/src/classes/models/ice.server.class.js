@@ -13,7 +13,7 @@ class IceServer extends TcpServer {
 
     this.subScriber = subRedisClient;
 
-    this.subScriber.subscribe(iceConfig.REDIS.CHANNEL, (err, count) => {
+    this.subScriber.subscribe(iceConfig.REDIS.CHANNEL, 'iceGameChannel', (err, count) => {
       if (err) {
         logger.error(`[Sbuscribe error] ==> `, err);
         return;
@@ -24,27 +24,25 @@ class IceServer extends TcpServer {
     this.subScriber.on('message', async (channel, message) => {
       logger.info(`[Received ${iceConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
 
-      //* `${boardId}:${users}`
-      const [boardId, users] = message.split(':');
+      if (channel === iceConfig.REDIS.CHANNEL) {
+        //* `${boardId}:${users}`
+        const [boardId, users] = message.split(':');
 
-      await iceGameManager.addGame(boardId, JSON.parse(users));
-    });
+        await iceGameManager.addGame(boardId, JSON.parse(users));
+      } else {
+        const game = await iceGameManager.getGameBySessionId(message);
 
-    this.subScriber.on('iceGameChannel', async (channel, message) => {
-      console.log(`[subScribe - iceGameChannel]`);
+        for (let user of game.users) {
+          await redisUtil.createUserLocation(user.sessonId, 'ice', game.id);
+        }
 
-      const game = await iceGameManager.getGameBySessionId(message);
+        const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
 
-      for (let user of game.users) {
-        await redisUtil.createUserLocation(user.sessonId, 'ice', game.id);
+        // TODO: 나중에 수정하기
+        const seq = '2';
+
+        this._socketMap[seq].socket.write(buffer);
       }
-
-      const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
-
-      // TODO: 나중에 수정하기
-      const seq = '2';
-
-      this._socketMap[seq].socket.write(buffer);
     });
   }
 
