@@ -25,5 +25,6 @@ jobs:
             cd test-actions
             git pull origin develop
             yarn install
+            yarn build --concurrency=1
             pm2 kill
             pm2 start ecosystem.config.cjs
