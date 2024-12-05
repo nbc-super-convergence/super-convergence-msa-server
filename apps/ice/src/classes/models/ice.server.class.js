@@ -31,9 +31,9 @@ class IceServer extends TcpServer {
     });
 
     this.subScriber.on('iceGameChannel', async (channel, message) => {
-      const { boardId } = message;
+      console.log(`[subScribe - iceGameChannel]`);
 
-      const game = await iceGameManager.getGameBySessionId(boardId);
+      const game = await iceGameManager.getGameBySessionId(message);
 
       for (let user of game.users) {
         await redisUtil.createUserLocation(user.sessonId, 'ice', game.id);
