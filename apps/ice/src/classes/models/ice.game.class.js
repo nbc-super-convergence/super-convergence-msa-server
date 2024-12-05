@@ -88,8 +88,8 @@ class iceGame extends Game {
 
   clearAllPlayers() {
     // * 모든 유저 위치 제거 ( 미니 게임 정상 종료시 )
-    this.users.forEach((user) => {
-      redisUtil.deleteUserLocationField(user.sessionId, 'ice');
+    this.users.forEach(async (user) => {
+      await redisUtil.deleteUserLocationField(user.sessionId, 'ice');
       user.resetInfo();
     });
   }
@@ -203,6 +203,8 @@ class iceGame extends Game {
 
     this.timeoutManager.clearAll();
     this.intervalManager.clearAll();
+
+    logger.info(`[iceGame - reset]`);
   }
 }
 

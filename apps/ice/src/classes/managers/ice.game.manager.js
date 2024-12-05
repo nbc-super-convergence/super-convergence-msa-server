@@ -103,6 +103,8 @@ class iceGameManager {
 
     const message = iceMiniGameReadyNotification(users);
 
+    logger.info(`[iceMiniGameReadyNoti] ===>`, message);
+
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;

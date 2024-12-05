@@ -65,7 +65,7 @@ class iceUser extends User {
     this.hp = this.startInfos.hp;
     this.position = this.startInfos.position;
     this.state = USER_STATE.IDLE;
-    this.rotation = this.startInfos.state;
+    this.rotation = this.startInfos.rotation;
     this.rank = undefined;
     this.isReady = false;
   }
