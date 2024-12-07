@@ -1,0 +1,65 @@
+message S2C_DropMiniGameReadyNotification {
+        repeated startPlayers players = 1;
+
+        //TODO : 바깥으로 빼서 다른 곳에서도 공통적으로 사용
+        //(최소 ice & dropper, 아마 폭탄도.)
+        message startPlayers { 
+            string sessionId = 1; 
+            Vector position = 2; 
+            float rotation = 3;
+        } 
+    }
+
+    message C2S_DropGameReadyRequest {
+        string sessionId = 1;
+    }
+
+    message S2C_DropGameReadyNotification {
+        string sessionId = 1;
+    }
+
+    message S2C_DropMiniGameStartNotification {
+        int64 startTime = 1; //NOW + 4 (나중에 연출 들어가면 추가될수도.)
+    }
+
+    message C2S_DropPlayerSyncRequest {
+        string sessionId = 1;
+        int32 slot = 2; //1~9 사이. 2명 이상이 같은 칸에 못들어감 + 구멍 유효성 검사
+        float rotation = 3;
+        State state = 4;
+    }
+
+    //자기 자신도 이걸로 보내줘요. 서버에서 그 칸에 갈 수 있는지 유효성검사 필요
+    message S2C_DropPlayerSyncNotification { 
+        string sessionId = 1;
+        int32 slot = 2;
+        float rotation = 3;
+        State state = 4;
+    }
+
+    message S2C_DropPlayerDeathNotification {
+        string sessionId = 1;
+        //TODO : Sync 슬롯과 구멍뚫은 슬롯 비교해서 Death보내기
+    }
+
+    message S2C_DropLevelStartNotification {
+        //1단계에서는 startTime + 3초 후 보내기
+
+        //약 1초 안에 구멍 뚫을 예정
+    }
+
+    //그 후 10초 동안 플레이어들이 자리를 잡고, 
+
+    //S2C_DropLevelStartNotification 끝나고 10초 후 보내기
+    message S2C_DropLevelEndNotification {
+        //맵 바닥에 구멍 뚫는 로직.
+        repeated int32 holes = 1; //1~9사이 N개의 수
+
+        //최대 9단계, 마지막 단계는 반드시 구멍 1개.
+    }
+    //이거 보내고 다시 약 3초 후 S2C_DropLevelStartNotification보내기.
+
+    message S2C_DropGameOverNotification {
+        repeated Rank ranks = 1; //등수 1등부터 순서대로 담으면 동일 등수 가능할듯?
+        int64 endTime = 2; 
+    }
