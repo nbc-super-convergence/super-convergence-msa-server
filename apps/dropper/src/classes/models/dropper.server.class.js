@@ -13,7 +13,7 @@ class DropperServer extends TcpServer {
 
     this.subScriber = subRedisClient;
 
-    this.subScriber.subscribe(dropConfig.REDIS.CHANNEL, 'iceGameChannel', (err, count) => {
+    this.subScriber.subscribe(dropConfig.REDIS.CHANNEL, dropConfig.REDIS.CHANNEL2, (err, count) => {
       if (err) {
         logger.error(`[Sbuscribe error] ==> `, err);
         return;
@@ -22,7 +22,7 @@ class DropperServer extends TcpServer {
     });
 
     this.subScriber.on('message', async (channel, message) => {
-      logger.info(`[Received ${dropConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
+      logger.info(`[Received ${dropConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
 
       if (channel === dropConfig.REDIS.CHANNEL) {
         //* `${boardId}:${users}`
@@ -30,14 +30,14 @@ class DropperServer extends TcpServer {
 
         await dropperGameManager.addGame(boardId, JSON.parse(users));
       } else {
-        console.log(`[iceChannel - message]`, message);
+        console.log(`[dropperChannel - message]`, message);
         const game = await dropperGameManager.getGameBySessionId(message);
-        console.log(`[iceChannel - game]`, game);
+        console.log(`[dropperChannel - game]`, game);
 
         for (let user of game.users) {
-          console.log(`[iceChannel - user]`, user);
-          console.log(`[iceChannel - sessionId]`, user.sessionId);
-          await redisUtil.createUserLocation(user.sessionId, 'ice', game.id);
+          console.log(`[dropperChannel - user]`, user);
+          console.log(`[dropperChannel - sessionId]`, user.sessionId);
+          await redisUtil.createUserLocation(user.sessionId, 'dropper', game.id);
         }
 
         const buffer = await dropperGameManager.iceMiniGameReadyNoti(game);
