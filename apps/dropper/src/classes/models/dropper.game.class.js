@@ -1,11 +1,16 @@
-import { Game, IntervalManager } from '@repo/common/classes';
+import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { dropperMap } from '../../map/dropper.Map.js';
 import dropperUser from './dropper.user.class.js';
 import { redisUtil } from '../../../utils/redis.js';
 import { logger } from '../../../utils/logger.utils.js';
 import { GAME_STATE, USER_STATE } from '../../constants/state.js';
 import { serializeForGate } from '@repo/common/utils';
-import { dropGameOverNotification } from '../../../utils/dropper.notificaion.js';
+import {
+  dropGameOverNotification,
+  dropLevelEndNotification,
+  dropLevelStartNotification,
+  dropPlayerDeathNotification,
+} from '../../../utils/dropper.notificaion.js';
 
 export const sessionIds = new Map();
 
@@ -16,6 +21,7 @@ class dropperGame extends Game {
     // ! 종료시간이 정해져있는 게임은 아님
     // TODO: 시작 위치에 대해서 다시 확인해보기(0,2,6,8)
     this.intervalManager = new IntervalManager();
+    this.timeoutManager = new TimeoutManager();
     this.startPosition = dropperMap.startPosition;
     this.slots = new Array(9).fill(false);
     this.stage = 0;
@@ -54,7 +60,7 @@ class dropperGame extends Game {
     }
   }
 
-  getAllUser() {
+  getAllUsers() {
     return this.users;
   }
 
@@ -102,8 +108,111 @@ class dropperGame extends Game {
     return this.slots[slot] === true ? true : false;
   }
 
-  userMoveTimer() {}
-  fallenTimer() {}
+  updateSlot(slot) {
+    this.slots[slot] = true;
+  }
+
+  checkUserInFloor(holes) {
+    return this.users.map((user) => holes.includes(user.slot));
+  }
+
+  // ! 유저는 10초 동안 움직일 수 있다.
+  // ! 바닥이 부숴진다.
+  // ! 3초동안 떨어진다.
+  breakFloorInterval(socket) {
+    this.intervalManager.addInterval(
+      'breakFloor',
+      () => {
+        // ! 0 ~ 8 중 8 - 현재 스테이지 수의 랜덤 값 추출
+        const holes = new Array.from({ length: 1 + this.stage }, () =>
+          Math.floor(Math.random() * 8),
+        );
+
+        // * 바닥 부숨
+        const sessionIds = this.getAllSessionIds();
+
+        const message = dropLevelEndNotification(holes);
+
+        logger.info(`[dropLevelEndNotification - message]`, message);
+
+        const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
+
+        socket.write(buffer);
+
+        // * 3초 동안 떨어지고 난 후,
+        this.fallen(socket, holes);
+      },
+      10000,
+      'breakFloor',
+    );
+  }
+
+  fallen(socket, holes) {
+    this.timeoutManager.addTimeout(
+      'fallen',
+      () => {
+        // * 남은 플레이어 사망
+        const users = this.checkUserInFloor(holes);
+
+        // ? 그 층에 있던 모든 유저에게 같은 랭크 부여하기
+        const rank = this.getAliveUsers().length;
+
+        if (users) {
+          for (let key in users) {
+            const user = users[key];
+
+            user.Dead();
+
+            user.rank = rank;
+
+            const sessionIds = this.getAllSessionIds();
+
+            const message = dropPlayerDeathNotification(user);
+
+            logger.info(`[dropPlayerDeathNotification - message]`, message);
+
+            // TODO: 현재 어떤 스테이지인지를 sequence로 보내야하는지? -> this.stage
+            const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
+
+            socket.write(buffer);
+          }
+        }
+
+        if (this.stage === 8) {
+          const aliveUsers = this.getAliveUsers();
+
+          if (aliveUsers) {
+            const rank = 1;
+
+            // ? 혹시나 추후에 게임 구조가 변경될 수도 있으므로 이렇게 처리
+            for (let key in aliveUsers) {
+              const user = aliveUsers[key];
+
+              user.rank = rank;
+            }
+          }
+
+          this.handleGameEnd(socket);
+          return;
+        }
+
+        // TODO: 떨어지면서 기존의 위치를 유지할지
+        this.stage++;
+        this.slots = new Array(9).fill(false);
+
+        // ! 떨어지고 나서 다음 스테이지 시작
+        const sessionIds = this.getAllSessionIds();
+
+        const message = dropLevelStartNotification();
+
+        const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
+
+        socket.write(buffer);
+      },
+      3000,
+      'fallen',
+    );
+  }
 
   handleGameEnd(socket) {
     // * 게임 종료
@@ -132,6 +241,8 @@ class dropperGame extends Game {
     this.setGameState(GAME_STATE.WAIT);
 
     this.intervalManager.clearAll();
+    // TODO: timeout이 실행되고나서 게임이 종료가 되었을 수도 있음
+    this.timeoutManager.clearAll();
   }
 }
 

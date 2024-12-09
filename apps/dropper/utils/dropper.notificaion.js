@@ -55,10 +55,8 @@ export const dropLevelStartNotification = () => {
   return { type, payload };
 };
 
-export const dropLevelEndNotification = (game) => {
+export const dropLevelEndNotification = (holes) => {
   const type = MESSAGE_TYPE.DROP_LEVEL_END_NOTIFICATION;
-
-  const holes = new Array.from({ length: game.stage }, (_, i) => i);
 
   const payload = { holes: holes };
 

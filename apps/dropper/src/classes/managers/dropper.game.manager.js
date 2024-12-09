@@ -5,7 +5,7 @@ import { GAME_STATE } from '../../constants/state.js';
 import {
   dropGameReadyNotification,
   dropMiniGameStartNotification,
-  dropperMiniGameReadyNotification,
+  dropMiniGameReadyNotification,
   dropPlayerDeathNotification,
   dropPlayerSyncNotification,
 } from '../../../utils/dropper.notificaion.js';
@@ -63,7 +63,7 @@ class dropperGameManager {
 
     const users = game.getAllUser();
 
-    const message = dropperMiniGameReadyNotification(users);
+    const message = dropMiniGameReadyNotification(users);
 
     logger.info(`[dropMiniGameReadyNoti - message] ===>`, message);
 
@@ -95,7 +95,7 @@ class dropperGameManager {
 
     const message = dropMiniGameStartNotification();
 
-    //logger.info(`[dropMiniGameStartNoti - message] ===>`, message);
+    logger.info(`[dropMiniGameStartNoti - message] ===>`, message);
 
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 

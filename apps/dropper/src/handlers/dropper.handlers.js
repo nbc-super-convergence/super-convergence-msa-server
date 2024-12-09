@@ -20,7 +20,18 @@ export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
       throw new Error(`[dropGameReadyRequestHandler - ValiUser Error]`);
     }
 
-    const buffer = dropGameManager.dropGameReadyNoti(user, game);
+    // * 유저 게임 준비
+    user.gameReady();
+
+    let buffer = dropGameManager.dropGameReadyNoti(user, game);
+
+    // * 모든 유저 준비 완료
+    if (game.isAllReady()) {
+      buffer = dropGameManager.dropMiniGameStartNoti(socket, game);
+
+      //* 인터벌 시작
+      game.breakFloorInterval(socket);
+    }
 
     socket.write(buffer);
   } catch (error) {
@@ -59,6 +70,10 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
       return;
     }
 
+    // * 게임에 slot 업데이트
+    game.updateSlot(slot);
+
+    // * 유저 위치 정보 업데이트
     user.updateUserInfos(slot, rotation, state);
 
     const buffer = dropGameManager.dropPlayerSyncNoti(user, game);
