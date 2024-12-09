@@ -112,8 +112,12 @@ class dropperGame extends Game {
     this.slots[slot] = true;
   }
 
+  removeSlot(slot) {
+    this.slots[slot] = false;
+  }
+
   checkUserInFloor(holes) {
-    return this.users.map((user) => holes.includes(user.slot));
+    return this.users.filter((user) => !holes.includes(user.slot));
   }
 
   // ! 유저는 10초 동안 움직일 수 있다.
@@ -165,6 +169,14 @@ class dropperGame extends Game {
 
             user.rank = rank;
 
+            // * 사용중인 slot 삭제
+            if (user.slot) {
+              user.slot = undefined;
+
+              // ? 죽은 유저의 slot 삭제
+              this.removeSlot(user.slot);
+            }
+
             const sessionIds = this.getAllSessionIds();
 
             const message = dropPlayerDeathNotification(user);
@@ -196,14 +208,17 @@ class dropperGame extends Game {
           return;
         }
 
-        // TODO: 떨어지면서 기존의 위치를 유지할지
+        // TODO: 떨어지면서 기존의 위치를 유지를 해야함
         this.stage++;
-        this.slots = new Array(9).fill(false);
+        // TODO: 기존 위치를 유지하기 위해서 전부다 지우지는 않음, 추후에 새롭게 변경해야할 수도 있음.
+        //this.slots = new Array(9).fill(false);
 
         // ! 떨어지고 나서 다음 스테이지 시작
         const sessionIds = this.getAllSessionIds();
 
         const message = dropLevelStartNotification();
+
+        logger.info(`[dropPlayerDeathNotification - message]`, message);
 
         const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
 
