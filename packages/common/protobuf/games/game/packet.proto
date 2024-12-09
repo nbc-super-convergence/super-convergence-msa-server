@@ -9,6 +9,7 @@ import '../../lobby/lobby.proto';
 import '../../room/room.proto';
 import '../../board/board.proto';
 import '../../gate/gate.proto';
+import '../dance/dance.proto';
 
 message GamePacket {
     oneof payload {
@@ -98,5 +99,18 @@ message GamePacket {
         S2C_IcePlayerDeathNotification icePlayerDeathNotification = 209;
         S2C_IceGameOverNotification iceGameOverNotification = 210;
         S2C_IceMapSyncNotification iceMapSyncNotification = 211;
+
+        // dance (401)
+        S2C_DanceMiniGameReadyNotification danceMiniGameReadyNotification = 401;
+        C2S_DanceReadyRequest danceReadyRequest = 402;
+        S2C_DanceReadyNotification danceReadyNotification = 403;
+        S2C_DanceStartNotification danceStartNotification = 404;
+        C2S_DanceTableCreateRequest danceTableCreateRequest = 405;
+        S2C_DanceTableNotification danceTableNotification = 406;
+        C2S_DanceKeyPressRequest danceKeyPressRequest = 407;
+        C2S_DanceKeyPressResponse danceKeyPressResponse = 408;
+        S2C_DanceKeyPressNotification danceKeyPressNotification = 409;
+        S2C_DanceGameOverNotification danceGameOverNotification = 410;
+        S2C_DanceCloseSocketNotification danceCloseSocketNotification = 411;
     }
 }
