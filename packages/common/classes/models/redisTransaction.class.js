@@ -142,6 +142,7 @@ class redisTransaction {
         roomId: board.roomId,
         ownerId: board.ownerId,
         state: board.state,
+        turn: board.turn,
       });
       multi.expire(boardKey, this.expire);
 
@@ -302,6 +303,65 @@ class redisTransaction {
         playerInfo.sessionId = sId;
         result.playersInfo.push(playerInfo);
       });
+    });
+    return result;
+  }
+
+  /**
+   * 미니 순서게임 (다트)
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {Object} dartData
+   * @returns
+   */
+  async boardDartCount(boardId, sessionId, dartData) {
+    const result = {};
+    result.isOk = false;
+    result.diceGameDatas = [];
+    await this.execute(async (multi) => {
+      // BOARD_DART_HISTORY
+      const dartHistKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}`;
+      const histCount = await multi.zRange(dartHistKey, 0, -1).length;
+
+      // BOARD_PLAYERS
+      const boardPlayerKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+      const boardPlayerCount = await multi.sCard(boardPlayerKey);
+      // TODO:
+      if (histCount < boardPlayerCount) {
+        await multi.zAdd(dartHistKey, {
+          score: dartData.distance,
+          value: sessionId,
+        });
+
+        const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${sessionId}`;
+        const dartInfoData = {
+          distance: dartData.distance,
+          angle: JSON.stringify(dartData.angle),
+          location: JSON.stringify(dartData.location),
+          power: dartData.power,
+        };
+        await multi.hset(dartInfoKey, dartInfoData);
+      } else {
+        const boardPlayers = await multi.sMembers(boardPlayerKey);
+        console.log('[ boardPlayers ] ====>> ', boardPlayers);
+
+        result.isOk = true;
+        for (let i = 0; i < boardPlayers.length; i++) {
+          //
+          const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${boardPlayers[i]}`;
+          const dartInfoData = await multi.hgetall(dartInfoKey);
+
+          result.diceGameDatas.push({
+            sessionId: boardPlayers[i],
+            value: 0,
+            rank: await multi.zRem(dartHistKey, boardPlayers[i]),
+            distance: dartInfoData.distance,
+            angle: JSON.parse(dartInfoData.angle),
+            location: JSON.parse(dartInfoData.location),
+            power: dartInfoData.power,
+          });
+        }
+      }
     });
     return result;
   }

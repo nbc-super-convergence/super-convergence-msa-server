@@ -19,7 +19,7 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
    * 3. 게임 세션 생성 및 방 유저 추가 작업[ redis pub ]
    * 4. 생성된 게임 세션 유저 모두에게 게임 시작 알림
    */
-  const { sessionId } = payload;
+  const { sessionId, turn } = payload;
   //
   logger.info(' [ BOARD: gameStartRequestHandler ] sessionId ===>> ', sessionId);
 
@@ -27,7 +27,7 @@ export const gameStartRequestHandler = async ({ socket, payload }) => {
 
   try {
     // * 보드 게임 방, 플레이어 리스트 생성 및 보드 채널 published
-    const result = await boardManager.createBoard(sessionId);
+    const result = await boardManager.createBoard(sessionId, turn);
     sessionIds = result.data.users;
 
     // * 게임 인원 전체에게 Noti
@@ -399,8 +399,8 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
 };
 
 /**
- * * 첫 주사위 순서 게임 결과 요청
- * * DICE_GAME_REQUEST
+ * * 첫 주사위 순서 게임 결과 요청 ( 다트 게임 )
+ * * DICE_GAME_REQUEST , C2S_DiceGameRequest
  *
  * * => 응답 [ DICE_GAME_RESPONSE ]
  * * => 알림 [ DICE_GAME_NOTIFICATION ]
@@ -412,15 +412,48 @@ export const firstDiceGameRequestHandler = async ({ socket, payload }) => {
    * 3. 게임 결과 응답
    * 4. 게임 결과 알림
    */
-
-  const { sessionId } = payload;
+  const { sessionId, distance, angle, location, power } = payload;
   let sessionIds = [sessionId];
-
   try {
+    const dartData = {
+      distance,
+      angle,
+      location,
+      power,
+    };
+
     // TODO: 주사위 순서 게임은 어떤 게임인가...?
-    const result = await boardManager.firstDiceGame(sessionId);
+    const result = await boardManager.firstDiceGame(sessionId, dartData);
 
     logger.info('[ BOARD: diceGameRequestHandler ] result ===>>> ', result);
+
+    // response는 무조건
+
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.TILE_PENALTY_RESPONSE;
+    const response = {
+      success: result.success,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
+    socket.write(responsePacket);
+
+    if (result.data.isOk) {
+      // * 전체 NOTIFICATION
+      sessionIds = result.data.sessionIds;
+      const notificationMessageType = MESSAGE_TYPE.TILE_PENALTY_NOTIFICATION;
+      const notification = {
+        result: result.data.result,
+      };
+      const notificationPacket = serializeForGate(
+        notificationMessageType,
+        notification,
+        0,
+        sessionIds,
+      );
+      socket.write(notificationPacket);
+    }
   } catch (err) {
     logger.error('[ BOARD: diceGameRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.DICE_GAME_RESPONSE, sessionIds, err);

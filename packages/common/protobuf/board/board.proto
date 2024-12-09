@@ -161,8 +161,7 @@ message C2S_DiceGameRequest{
 
 message S2C_DiceGameResponse{
     bool success = 1;
-	repeated DiceGameData result = 2;
-  	GlobalFailCode failCode = 3;
+  	GlobalFailCode failCode = 2;
 }
 
 message S2C_DiceGameNotification {
