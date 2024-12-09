@@ -8,7 +8,7 @@ import {
   serialize,
   serializeForClient,
 } from '@repo/common/utils';
-import { SERVER_HOST } from '../../constants/env.js';
+import { SERVER_HOST, DISTRIBUTOR_HOST } from '../../constants/env.js';
 import { makeCloseSocketRequest } from '../../utils/request/message.utils.js';
 import { logger } from '../../utils/logger.utils.js';
 
@@ -284,7 +284,7 @@ class GateServer extends TcpServer {
       this._isConnectedDistributor = false;
 
       this._clientDistributor = new TcpClient(
-        'distributor', //SERVER_HOST,
+        DISTRIBUTOR_HOST, //SERVER_HOST,
         7010,
         (options) => {
           logger.info(' onCreate ==>> ');
