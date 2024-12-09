@@ -431,7 +431,7 @@ export const firstDiceGameRequestHandler = async ({ socket, payload }) => {
 
     // * RESPONSE
     sessionIds = [sessionId];
-    const responseMessageType = MESSAGE_TYPE.TILE_PENALTY_RESPONSE;
+    const responseMessageType = MESSAGE_TYPE.DICE_GAME_RESPONSE;
     const response = {
       success: result.success,
       failCode: result.failCode,
@@ -442,7 +442,7 @@ export const firstDiceGameRequestHandler = async ({ socket, payload }) => {
     if (result.data.isOk) {
       // * 전체 NOTIFICATION
       sessionIds = result.data.sessionIds;
-      const notificationMessageType = MESSAGE_TYPE.TILE_PENALTY_NOTIFICATION;
+      const notificationMessageType = MESSAGE_TYPE.DICE_GAME_NOTIFICATION;
       const notification = {
         result: result.data.result,
       };
