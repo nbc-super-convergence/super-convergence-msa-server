@@ -98,4 +98,17 @@ export const FIELD_NAME = {
   209: 'icePlayerDeathNotification',
   210: 'iceGameOverNotification',
   211: 'iceMapSyncNotification',
+
+  // dance (401 ~ 500)
+  401: 'danceMiniGameReadyNotification',
+  402: 'danceReadyRequest',
+  403: 'danceReadyNotification',
+  404: 'danceStartNotification',
+  405: 'danceTableCreateRequest',
+  406: 'danceTableNotification',
+  407: 'danceKeyPressRequest',
+  408: 'danceKeyPressResponse',
+  409: 'danceKeyPressNotification',
+  410: 'danceGameOverNotification',
+  411: 'danceCloseSocketNotification',
 };
