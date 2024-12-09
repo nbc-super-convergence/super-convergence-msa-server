@@ -9,4 +9,4 @@ RUN yarn install --frozen-lockfile --production=false && \
     yarn cache clean
 
 EXPOSE 7012
-CMD ["node", "apps/gate/src/server.js"]
+CMD ["node", "apps/auth/src/server.js"]
