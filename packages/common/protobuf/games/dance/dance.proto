@@ -19,7 +19,7 @@ message DanceCommand {
 
 message PlayerInfo {
     string sessionId = 1; 
-    int32 teamNumber = 2;                 // A팀 B팀
+    int32 teamNumber = 2;                 // 개인전: 각 유저에게 부여, 팀전: 팀별로 부여
 }
 
 message TeamResult {
@@ -69,7 +69,7 @@ message C2S_DanceKeyPressRequest {
     Direction pressKey = 2;               // 눌린 키
 }
 
-message C2S_DanceKeyPressResponse {
+message S2C_DanceKeyPressResponse {
     bool success = 1;                     // 올바른 입력이었는지
     State state = 2;                      // 애니메이션
     GlobalFailCode failCode = 3;
@@ -92,3 +92,7 @@ message S2C_DanceCloseSocketNotification {
     string replacementSessionId = 2;      // 대신 입력할 유저
 }
 
+message C2S_DanceTableCompleteRequest {
+    string sessionId = 1;                 // 테이블을 완료한 유저의 세션 ID
+    int64 endTime = 2;                    // 테이블을 완료한 시간
+}

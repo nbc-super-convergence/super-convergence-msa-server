@@ -108,7 +108,7 @@ message GamePacket {
         C2S_DanceTableCreateRequest danceTableCreateRequest = 405;
         S2C_DanceTableNotification danceTableNotification = 406;
         C2S_DanceKeyPressRequest danceKeyPressRequest = 407;
-        C2S_DanceKeyPressResponse danceKeyPressResponse = 408;
+        S2C_DanceKeyPressResponse danceKeyPressResponse = 408;
         S2C_DanceKeyPressNotification danceKeyPressNotification = 409;
         S2C_DanceGameOverNotification danceGameOverNotification = 410;
         S2C_DanceCloseSocketNotification danceCloseSocketNotification = 411;
