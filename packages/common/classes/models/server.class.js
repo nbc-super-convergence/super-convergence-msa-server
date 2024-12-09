@@ -84,7 +84,7 @@ class TcpServer {
         {
           name: this.context.name,
           number: 1,
-          host: host,
+          host: this.context.name, //host,
           port: this.context.port + '',
           types: this.context.types,
         },

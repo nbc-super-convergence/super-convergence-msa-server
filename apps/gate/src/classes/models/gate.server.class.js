@@ -263,7 +263,7 @@ class GateServer extends TcpServer {
   start = async () => {
     await this.initialize();
 
-    this.server.listen(this.context.port, () => {
+    this.server.listen(this.context.port, '0.0.0.0', () => {
       logger.info(`${this.context.name} server listening on port ${this.context.port}`);
 
       const packet = createServerInfoNotification(
@@ -284,7 +284,7 @@ class GateServer extends TcpServer {
       this._isConnectedDistributor = false;
 
       this._clientDistributor = new TcpClient(
-        SERVER_HOST,
+        'distributor', //SERVER_HOST,
         7010,
         (options) => {
           logger.info(' onCreate ==>> ');
