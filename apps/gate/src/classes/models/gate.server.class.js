@@ -20,7 +20,7 @@ class GateServer extends TcpServer {
   _clientBuffer = Buffer.alloc(0);
 
   constructor(name, port) {
-    super(name, port, []);
+    super(name, SERVER_HOST, port, []);
   }
 
   /**

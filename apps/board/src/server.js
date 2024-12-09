@@ -1,5 +1,5 @@
 import BoardServer from './classes/models/board.server.class.js';
-import { SERVER_HOST } from './constants/env.js';
+import { SERVER_HOST, DISTRIBUTOR_HOST } from './constants/env.js';
 import { logger } from './utils/logger.utils.js';
 
 const SERVER_NAME = 'board';
@@ -20,13 +20,14 @@ const mingiGameTypes = [101];
 
 const server = new BoardServer(
   SERVER_NAME,
+  SERVER_HOST,
   SERVER_PORT,
   messageTypes.concat(gameStartTypes, gamePlayTypes, postGameTypes, mingiGameTypes),
 );
 
 await server.start();
 
-server.connectToDistributor(SERVER_HOST, 7010, (data) => {
+server.connectToDistributor(DISTRIBUTOR_HOST, 7010, (data) => {
   // Distributor 연결
   logger.info(' [ BOARD: server ] Distributor Notification', data);
 });
