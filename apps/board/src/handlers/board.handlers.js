@@ -487,17 +487,32 @@ export const turnEndRequestHandler = async ({ socket, payload }) => {
     // * 턴 종료
     const result = await boardManager.turnEnd(sessionId);
 
-    // * 나머지 NOTIFICATION
-    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
-    const notificationMessageType = MESSAGE_TYPE.TURN_END_NOTIFICATION;
-    const notification = {};
-    const notificationPacket = serializeForGate(
-      notificationMessageType,
-      notification,
-      0,
-      sessionIds,
-    );
-    socket.write(notificationPacket);
+    if (result.data.isGameOver) {
+      // * 전체 NOTI [ 게임종료 ]
+      // * 나머지 NOTIFICATION [ 턴 종료 ]
+      sessionIds = result.data.sessionIds;
+      const notificationMessageType = MESSAGE_TYPE.GAME_END_NOTIFICATION;
+      const notification = {};
+      const notificationPacket = serializeForGate(
+        notificationMessageType,
+        notification,
+        0,
+        sessionIds,
+      );
+      socket.write(notificationPacket);
+    } else {
+      // * 나머지 NOTIFICATION [ 턴 종료 ]
+      sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+      const notificationMessageType = MESSAGE_TYPE.TURN_END_NOTIFICATION;
+      const notification = {};
+      const notificationPacket = serializeForGate(
+        notificationMessageType,
+        notification,
+        0,
+        sessionIds,
+      );
+      socket.write(notificationPacket);
+    }
   } catch (err) {
     logger.error('[ BOARD: turnEndRequestHandler ] ERROR ==>> ', err);
   }

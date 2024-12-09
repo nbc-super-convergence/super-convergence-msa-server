@@ -142,7 +142,8 @@ class redisTransaction {
         roomId: board.roomId,
         ownerId: board.ownerId,
         state: board.state,
-        turn: board.turn,
+        maxTurn: board.turn,
+        nowTurn: 1,
       });
       multi.expire(boardKey, this.expire);
 

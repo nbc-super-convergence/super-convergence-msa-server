@@ -62,6 +62,11 @@ message  S2C_MovePlayerBoardNotification {
 
 message S2C_GameEndNotification {
   	repeated Rank rank = 1;
+	
+	message Rank {
+        string sessionId = 1;
+        int32 rank = 2; 
+    }
 }
 
 message C2S_BackToTheRoomRequest {
