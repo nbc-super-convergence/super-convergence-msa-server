@@ -8,7 +8,7 @@ message S2C_DropMiniGameReadyNotification {
 
         message startPlayers { 
             string sessionId = 1; 
-            Vector position = 2; 
+            int32 slot = 2; 
             float rotation = 3;
         } 
     }

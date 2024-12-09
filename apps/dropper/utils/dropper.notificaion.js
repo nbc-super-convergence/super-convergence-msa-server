@@ -6,7 +6,7 @@ export const dropMiniGameReadyNotification = (users) => {
   const payload = {
     players: users.map((user) => ({
       sessionId: user.sessionId,
-      position: user.position,
+      slot: user.slot,
       rotation: user.rotation,
     })),
   };

@@ -17,7 +17,7 @@ class dropperGame extends Game {
     // TODO: 시작 위치에 대해서 다시 확인해보기(0,2,6,8)
     this.intervalManager = new IntervalManager();
     this.startPosition = dropperMap.startPosition;
-    this.slot = new Array(9).fill(false);
+    this.slots = new Array(9).fill(false);
     this.stage = 0;
     //! timeOut? interval?
     this.moveTimer;
@@ -29,14 +29,14 @@ class dropperGame extends Game {
     for (let key in users) {
       const userId = users[key];
 
-      const position = this.startPosition[key].pos;
+      const slot = this.startPosition[key].pos;
       const rotation = this.startPosition[key].rot;
 
       if (!sessionIds.get(userId)) {
         sessionIds.set(userId, gameId);
       }
 
-      const newUser = new dropperUser(gameId, userId, position, rotation);
+      const newUser = new dropperUser(gameId, userId, slot, rotation);
 
       this.users.push(newUser);
     }
@@ -76,6 +76,10 @@ class dropperGame extends Game {
     return this.users.filter((user) => user.state !== USER_STATE.DIE);
   }
 
+  isValidUser(sessionId) {
+    return this.users.find((user) => user.sessionId === sessionId) ? true : false;
+  }
+
   isOneAlive() {
     // * 살아남은 유저 수 확인
     return this.getAliveUsers().length <= 1 ? true : false;
@@ -92,6 +96,10 @@ class dropperGame extends Game {
 
   setGameState(state) {
     this.state = state;
+  }
+
+  checkUserInSlot(slot) {
+    return this.slots[slot] === true ? true : false;
   }
 
   userMoveTimer() {}
@@ -120,7 +128,7 @@ class dropperGame extends Game {
   reset() {
     // * 게임 내 정보 리셋
     this.stage = 0;
-    this.slot = new Array(9).fill(false);
+    this.slots = new Array(9).fill(false);
     this.setGameState(GAME_STATE.WAIT);
 
     this.intervalManager.clearAll();

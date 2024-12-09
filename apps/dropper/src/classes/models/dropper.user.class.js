@@ -28,9 +28,9 @@ class dropperUser extends User {
     this.isReady = true;
   }
 
-  updateUserInfos(position, rotation, state) {
+  updateUserInfos(slot, rotation, state) {
     // * sync 업데이트
-    this.position = position;
+    this.slot = slot;
     this.rotation = rotation;
     this.state = state;
   }
@@ -38,7 +38,7 @@ class dropperUser extends User {
   saveStartInfos() {
     // * 게임 초기 정보
     this.startInfos = {
-      position: this.position,
+      slot: this.slot,
       rotation: this.rotation,
     };
   }
@@ -53,15 +53,15 @@ class dropperUser extends User {
 
   resetInfo() {
     // * 유저 리셋
-    this.position = this.startInfos.position;
+    this.slot = this.startInfos.slot;
     this.state = USER_STATE.IDLE;
     this.rotation = this.startInfos.rotation;
     this.rank = undefined;
     this.isReady = false;
   }
 
-  getPosition() {
-    return this.position;
+  getSlot() {
+    return this.slot;
   }
 }
 
