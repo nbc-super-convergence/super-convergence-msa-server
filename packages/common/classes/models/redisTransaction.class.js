@@ -367,7 +367,7 @@ class redisTransaction {
 
       // BOARD_PLAYERS
       const boardPlayerKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-      const boardPlayerCount = await multi.sCard(boardPlayerKey);
+      const boardPlayerCount = await multi.scard(boardPlayerKey);
       // TODO:
       if (histCount < boardPlayerCount) {
         await multi.zAdd(dartHistKey, {
@@ -384,7 +384,7 @@ class redisTransaction {
         };
         await multi.hset(dartInfoKey, dartInfoData);
       } else {
-        const boardPlayers = await multi.sMembers(boardPlayerKey);
+        const boardPlayers = await multi.smembers(boardPlayerKey);
         console.log('[ boardPlayers ] ====>> ', boardPlayers);
 
         result.isOk = true;
@@ -430,14 +430,14 @@ class redisTransaction {
       if (maxTurn >= nowTurn) {
         result.isGameOver = true;
         // TODO: 영수증 ㄱㄱ
-        const boardPlayers = await multi.sMembers(boardKey);
+        const boardPlayers = await multi.smembers(boardKey);
 
         for (let i = 0; i < boardPlayers.length; i++) {
           const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${boardPlayers[i]}`;
           const boardPlayerInfo = await multi.hgetall(boardPlayerInfoKey);
 
           const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
-          const tileCount = await multi.sCard(tileHistoryKey);
+          const tileCount = await multi.scard(tileHistoryKey);
 
           const gold = boardPlayerInfo.gold + tileCount * 50;
 
