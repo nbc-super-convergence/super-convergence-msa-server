@@ -23,7 +23,7 @@ class BombUser extends User {
   }
 
   isDead() {
-    return (this.state = USER_STATE.DIE ? true : false);
+    return this.state === USER_STATE.DIE ? true : false;
   }
 
   boom() {
@@ -32,9 +32,11 @@ class BombUser extends User {
 
   updateUserInfos(position, rotation, state) {
     // * sync 업데이트
-    this.position.set(position);
-    this.rotation = rotation;
-    this.state = state;
+    if (this.state !== USER_STATE.DIE) {
+      this.position.set(position);
+      this.rotation = rotation;
+      this.state = state;
+    }
   }
 
   ranking(rank) {
