@@ -8,14 +8,21 @@ export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
 
     const gameId = sessionIds.get(sessionId);
 
+    // * 게임 아이디 검증
+    if (!gameId) {
+      throw new Error(`[dropGameReadyRequestHandler - don't exist GameId]`);
+    }
+
     const game = dropGameManager.getGameBySessionId(gameId);
 
+    // * 게임 검증
     if (!dropGameManager.isValidGame(game.id)) {
       throw new Error(`[dropGameReadyRequestHandler - ValiGame Error]`);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
+    // * 유저 검증
     if (!game.isValidUser(user.sessionId)) {
       throw new Error(`[dropGameReadyRequestHandler - ValiUser Error]`);
     }
@@ -46,31 +53,39 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
     // ! 1. 유저, 게임 검증
     const gameId = sessionIds.get(sessionId);
 
+    // * 게임 아이디 검증
+    if (!gameId) {
+      throw new Error(`[dropGameReadyRequestHandler - don't exist GameId]`);
+    }
+
     const game = dropGameManager.getGameBySessionId(gameId);
 
+    // * 게임 검증
     if (!dropGameManager.isValidGame(game.id)) {
       throw new Error(`[dropPlayerSyncRequestHandler - ValiGame Error]`);
     }
 
     const user = game.getUserBySessionId(sessionId);
 
+    // * 유저 검증
     if (!game.isValidUser(user.sessionId)) {
       throw new Error(`[dropPlayerSyncRequestHandler - ValiUser Error]`);
     }
 
-    // ! 2. 유저가 사망했는지 검증
+    // ! 유저가 사망 검증
     if (user.isDead()) {
       logger.info(`[dropPlayerSyncRequestHandler - User is DIE]`);
       return;
     }
 
-    // ! 3. slot에 다른 유저 있는지 검증
+    // !  slot에 다른 유저 존재 유무 검증
     if (game.checkUserInSlot(slot)) {
       logger.info(`[dropPlayerSyncRequestHandler - User is already exists in slot]`);
       return;
     }
 
     // * 게임에 slot 업데이트
+    // ! 혹시나 다른 유저가 침범하지 못하도록 선 업데이트
     game.updateSlot(slot);
 
     // * 유저 위치 정보 업데이트

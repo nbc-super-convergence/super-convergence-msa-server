@@ -22,25 +22,24 @@ class DropperServer extends TcpServer {
     });
 
     this.subScriber.on('message', async (channel, message) => {
-      logger.info(`[Received ${dropConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
-
       if (channel === dropConfig.REDIS.CHANNEL) {
+        logger.info(`[Received ${dropConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
         //* `${boardId}:${users}`
         const [boardId, users] = message.split(':');
 
         await dropperGameManager.addGame(boardId, JSON.parse(users));
       } else {
-        console.log(`[dropperChannel - message]`, message);
+        logger.info(`[Received ${dropConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
+
         const game = await dropperGameManager.getGameBySessionId(message);
         console.log(`[dropperChannel - game]`, game);
 
         for (let user of game.users) {
-          console.log(`[dropperChannel - user]`, user);
           console.log(`[dropperChannel - sessionId]`, user.sessionId);
           await redisUtil.createUserLocation(user.sessionId, 'dropper', game.id);
         }
 
-        const buffer = await dropperGameManager.iceMiniGameReadyNoti(game);
+        const buffer = await dropperGameManager.dropMiniGameReadyNoti(game);
 
         // TODO: 나중에 수정하기
         const seq = '2';
@@ -72,9 +71,9 @@ class DropperServer extends TcpServer {
 
           await handler({ socket, payload });
 
-          console.log(' [ IceServer _onData ] payload ====>> ', payload);
+          console.log(' [ Dropper_onData ] payload ====>> ', payload);
         } catch (error) {
-          logger.error('[ Ice: _onData ] ERROR ====>> ', error);
+          logger.error('[ Dropper: _onData ] ERROR ====>> ', error);
         }
       } else {
         break;

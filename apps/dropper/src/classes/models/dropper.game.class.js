@@ -128,16 +128,21 @@ class dropperGame extends Game {
       'breakFloor',
       () => {
         // ! 0 ~ 8 중 8 - 현재 스테이지 수의 랜덤 값 추출
-        const holes = new Array.from({ length: 1 + this.stage }, () =>
-          Math.floor(Math.random() * 8),
-        );
+        const holes = [];
+        // * 랜덤 숫자 생성 ( 중복 방지 )
+        while (holes.length < 1 + this.stage) {
+          const randomNumber = Math.floor(Math.random() * 9);
+          if (!holes.includes(randomNumber)) {
+            holes.push(randomNumber);
+          }
+        }
 
         // * 바닥 부숨
         const sessionIds = this.getAllSessionIds();
 
         const message = dropLevelEndNotification(holes);
 
-        logger.info(`[dropLevelEndNotification - message]`, message);
+        logger.info(`[dropLevelEndNotification - message] : `, message);
 
         const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
 
@@ -160,6 +165,8 @@ class dropperGame extends Game {
 
         // ? 그 층에 있던 모든 유저에게 같은 랭크 부여하기
         const rank = this.getAliveUsers().length;
+
+        logger.info(`[fallen - rank] : ` + rank);
 
         if (users) {
           for (let key in users) {
@@ -190,10 +197,13 @@ class dropperGame extends Game {
           }
         }
 
-        if (this.stage === 8) {
+        if (this.stage === 7) {
           const aliveUsers = this.getAliveUsers();
 
+          logger.info(`[fallen - aliveUsers]`, aliveUsers);
+
           if (aliveUsers) {
+            // ? 마지막 살아남은 모든 유저가 1등
             const rank = 1;
 
             // ? 혹시나 추후에 게임 구조가 변경될 수도 있으므로 이렇게 처리

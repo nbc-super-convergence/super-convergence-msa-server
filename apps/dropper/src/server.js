@@ -5,7 +5,7 @@ import { SERVER_HOST } from './constants/env.js';
 const SERVER_NAME = 'dropper';
 const SERVER_PORT = 7017;
 
-const messageTypes = Object.values(MESSAGE_TYPE).filter((value) => value >= 201 && value <= 211);
+const messageTypes = Object.values(MESSAGE_TYPE).filter((value) => value >= 301 && value <= 310);
 
 const server = new DropperServer(SERVER_NAME, SERVER_PORT, messageTypes);
 
