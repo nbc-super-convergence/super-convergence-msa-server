@@ -45,7 +45,6 @@ export const iceGameReadyRequestHandler = async ({ socket, payload }) => {
       buffer = await iceGameManager.iceMiniGameStartNoti(socket, game);
     }
 
-    // TODO: 마지막 남은 유저가 준비했을 때 굳이 2개를 보내야 할까?
     socket.write(buffer);
   } catch (error) {
     logger.error(`[iceGameReadyRequestHandler] ===> `, error);

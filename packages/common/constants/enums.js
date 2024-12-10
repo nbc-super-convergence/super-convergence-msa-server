@@ -98,4 +98,16 @@ export const FIELD_NAME = {
   209: 'icePlayerDeathNotification',
   210: 'iceGameOverNotification',
   211: 'iceMapSyncNotification',
+
+  // bomb  (501~)
+  501: 'bombMiniGameReadyNotification',
+  502: 'bombGameReadyRequest',
+  503: 'bombGameReadyNotification',
+  504: 'bombMiniGameStartNotification',
+  505: 'bombPlayerSyncRequest',
+  506: 'bombPlayerSyncNotification',
+  507: 'bombPlayerDeathNotification',
+  508: 'bombMoveRequest',
+  509: 'bombMoveNotification',
+  510: 'bombGameOverNotification',
 };

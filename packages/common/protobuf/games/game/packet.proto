@@ -9,6 +9,7 @@ import '../../lobby/lobby.proto';
 import '../../room/room.proto';
 import '../../board/board.proto';
 import '../../gate/gate.proto';
+import '../bomb/bomb.proto';
 
 message GamePacket {
     oneof payload {
@@ -110,5 +111,18 @@ message GamePacket {
         S2C_DropLevelStartNotification dropLevelStartNotification = 308;
         S2C_DropLevelEndNotification dropLevelEndNotification = 309;
         S2C_DropGameOverNotification dropGameOverNotification = 310;
+        
+        // bomb (501~)
+        S2C_BombMiniGameReadyNotification bombMiniGameReadyNotification = 501;
+        C2S_BombGameReadyRequest bombGameReadyRequest = 502;
+        S2C_BombGameReadyNotification bombGameReadyNotification = 503;
+        S2C_BombMiniGameStartNotification bombMiniGameStartNotification = 504;
+        C2S_BombPlayerSyncRequest bombPlayerSyncRequest = 505;
+        S2C_BombPlayerSyncNotification bombPlayerSyncNotification = 506;
+        S2C_BombPlayerDeathNotification bombPlayerDeathNotification = 507;
+        C2S_BombMoveRequest bombMoveRequest = 508;
+        S2C_BombMoveNotification bombMoveNotification = 509;
+        S2C_BombGameOverNotification bombGameOverNotification = 510;
+
     }
 }
