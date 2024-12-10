@@ -1,4 +1,4 @@
-import { FIELD_NAME, ROOM_STATE } from '../constants/enums.js';
+import { FIELD_NAME, ROOM_STATE, STATE } from '../constants/enums.js';
 import { FAIL_CODE } from '../constants/failcodes.js';
 import {
   MESSAGE_TYPE_LENGTH,
@@ -24,4 +24,5 @@ export const config = {
   MESSAGE_TYPE,
   ROOM_STATE,
   FIELD_NAME,
+  STATE,
 };

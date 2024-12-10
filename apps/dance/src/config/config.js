@@ -1,3 +1,4 @@
+import { DIRECTION, GAME_STATE, MESSAGE_TYPE, REASON } from '../utils/constants.js';
 import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from './env.js';
 
 export const danceConfig = {
@@ -13,4 +14,8 @@ export const danceConfig = {
   BOARD: {
     PLAYERS: 'players',
   },
+  MESSAGE_TYPE,
+  GAME_STATE,
+  REASON,
+  DIRECTION,
 };
