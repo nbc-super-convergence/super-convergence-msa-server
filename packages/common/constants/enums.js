@@ -2,6 +2,12 @@ export const STATE = {
   IDLE: 0,
   MOVE: 1,
   DIE: 2,
+  DANCE_UP: 3,
+  DANCE_DOWN: 4,
+  DANCE_LEFT: 5,
+  DANCE_RIGHT: 6,
+  DANCE_FAIL: 7,
+  DANCE_WAIT: 8,
 };
 
 export const ROOM_STATE = {
