@@ -8,7 +8,7 @@ class DistributorServer extends TcpServer {
   _map = {};
 
   constructor() {
-    super('distributor', 7010, []);
+    super('distributor', SERVER_HOST, 7010, []);
   }
 
   _onCreate = (socket) => {

@@ -22,3 +22,4 @@ export const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
 // SERVER
 export const SERVER_HOST = process.env.SERVER_HOST || 'localhost';
+export const DISTRIBUTOR_HOST = process.env.DISTRIBUTOR_HOST || 'localhost';

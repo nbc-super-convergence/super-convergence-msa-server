@@ -10,11 +10,12 @@ class TcpServer {
   _socketSeq = 1;
   _socketMap = {};
 
-  constructor(name, port, types = []) {
+  constructor(name, host, port, types = []) {
     // 서버 상태 정보
     this.context = {
       port: port,
       name: name,
+      host: host,
       number: 1,
       types: types,
     };
@@ -84,7 +85,7 @@ class TcpServer {
         {
           name: this.context.name,
           number: 1,
-          host: host,
+          host: this.context.host,
           port: this.context.port + '',
           types: this.context.types,
         },

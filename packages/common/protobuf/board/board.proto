@@ -11,15 +11,9 @@ message BoardPlayerData {
 	int32 tileLocation = 4;
 }
 
-message DiceGameData {
-	string sessionId = 1;
-	int32 value = 2;
-	int32 rank = 3; 
-	float distance = 4;
-}
-
 message C2S_GameStartRequest {
     string sessionId = 1;
+	int32 turn = 2;
 }
 
 message S2C_GameStartNotification {
@@ -143,9 +137,26 @@ message  S2C_TilePenaltyNotification {
 	repeated BoardPlayerData playersInfo = 3;
 }
 
+
+
+
+
+message DiceGameData {
+	string sessionId = 1;
+	int32 value = 2;
+	int32 rank = 3; 
+	float distance = 4;
+	Vector angle = 5;
+	Vector location = 6;
+	float power = 7;
+}
+
 message C2S_DiceGameRequest{
     string sessionId = 1;
 	float distance = 2;
+	Vector angle = 3;
+	Vector location = 4;
+	float power = 5;
 }
 
 message S2C_DiceGameResponse{
