@@ -57,7 +57,6 @@ class BombGameManager {
     // 여기서 첫 폭탄유저 선정
     const bombUser = game.bombUserSelect();
     game.bombUserChange(bombUser);
-    console.log('폭탄 유저 선정', bombUser);
     const message = bombMiniGameReadyNotification(users, bombUser);
 
     logger.info(`[bombMiniGameReadyNoti] ===>`, message);
@@ -120,11 +119,6 @@ class BombGameManager {
     const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
     return buffer;
-  }
-
-  async resetGame(gameId) {
-    const game = this.games.filter((game) => game.id !== gameId);
-    this.games = game;
   }
 }
 

@@ -9,7 +9,6 @@ import {
 } from '../../utils/bomb.notifications.js';
 import { USER_STATE } from '../../constants/user.js';
 import { serializeForGate } from '@repo/common/utils';
-import bombGameManagerInstance from '../managers/bomb.game.manager.js';
 
 export const sessionIds = new Map();
 
@@ -87,11 +86,7 @@ class BombGame extends Game {
 
   bombTimerStart(socket) {
     const randomTime = Math.floor(Math.random() * (15000 - 10000 + 1)) + 10000;
-
     this.timeoutManager.addTimeout(this.id, () => this.bombTimeout(socket), randomTime, 'bomb');
-    // setTimeout(() => {
-    //   this.bombTimeout();
-    // }, randomTime);
     logger.info(`${this.id} 게임의 폭탄 시작, ${randomTime}ms 후 폭발`);
   }
 
@@ -111,15 +106,21 @@ class BombGame extends Game {
 
     if (survivor.length <= 1) {
       // 생존자 1명
-      // 바로 보낼 시, 너무 빨리 끝남
       survivor[0].ranking(1);
       const users = this.getAllUser();
       const message = bombGameOverNotification(users);
       const sessionIds = this.getAllSessionIds();
       const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
-      socket.write(buffer);
-      this.resetGame(users);
+      this.timeoutManager.addTimeout(
+        this.id,
+        () => {
+          socket.write(buffer);
+          this.resetGame(users);
+        },
+        3000,
+        'end',
+      );
     } else {
       this.bombTimerStart(socket);
     }
