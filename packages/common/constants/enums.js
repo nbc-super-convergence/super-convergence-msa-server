@@ -117,4 +117,5 @@ export const FIELD_NAME = {
   409: 'danceKeyPressNotification',
   410: 'danceGameOverNotification',
   411: 'danceCloseSocketNotification',
+  412: 'danceTableCompleteRequest',
 };
