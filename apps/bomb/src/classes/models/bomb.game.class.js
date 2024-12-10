@@ -88,7 +88,7 @@ class BombGame extends Game {
   bombTimerStart(socket) {
     const randomTime = Math.floor(Math.random() * (15000 - 10000 + 1)) + 10000;
 
-    this.timeoutManager.addTimeout(this.id, () => this.bombTimeout(socket), randomTime / 5, 'bomb');
+    this.timeoutManager.addTimeout(this.id, () => this.bombTimeout(socket), randomTime, 'bomb');
     // setTimeout(() => {
     //   this.bombTimeout();
     // }, randomTime);
