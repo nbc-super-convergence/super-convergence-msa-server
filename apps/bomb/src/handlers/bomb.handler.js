@@ -44,7 +44,7 @@ export const bombPlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`게임 아이디`, gameId);
 
-    const game = BombGameManager.getGameBySessionId(gameId);
+    const game = await BombGameManager.getGameBySessionId(gameId);
 
     logger.info(` bombPlayerSyncRequest 게임`, game);
 
@@ -52,7 +52,7 @@ export const bombPlayerSyncRequestHandler = async ({ socket, payload }) => {
       throw new Error(`게임이 존재하지 않음`, bombConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
-    const user = game.getUserBySessionId(sessionId);
+    const user = game.getUserToSessionId(sessionId);
 
     logger.info(`icePlayerSyncRequest 유저`, user);
 
@@ -91,7 +91,7 @@ export const bombMoveRequestHandler = async ({ socket, payload }) => {
 
     logger.info(`게임 아이디`, gameId);
 
-    const game = BombGameManager.getGameBySessionId(gameId);
+    const game = await BombGameManager.getGameBySessionId(gameId);
 
     logger.info(` bombMoveRequestHandler 게임`, game);
 
@@ -99,7 +99,7 @@ export const bombMoveRequestHandler = async ({ socket, payload }) => {
       throw new Error(`게임이 존재하지 않음`, bombConfig.FAIL_CODE.GAME_NOT_FOUND);
     }
 
-    const user = game.getUserBySessionId(sessionId);
+    const user = game.getUserToSessionId(sessionId);
 
     if (!user) {
       throw new Error(`유저가 존재하지 않음`, bombConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
