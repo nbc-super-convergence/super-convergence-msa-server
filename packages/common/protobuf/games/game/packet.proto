@@ -98,5 +98,17 @@ message GamePacket {
         S2C_IcePlayerDeathNotification icePlayerDeathNotification = 209;
         S2C_IceGameOverNotification iceGameOverNotification = 210;
         S2C_IceMapSyncNotification iceMapSyncNotification = 211;
+
+        // drop (301)
+        S2C_DropMiniGameReadyNotification dropMiniGameReadyNotification = 301;
+        C2S_DropGameReadyRequest dropGameReadyRequest = 302;
+        S2C_DropGameReadyNotification dropGameReadyNotification = 303;
+        S2C_DropMiniGameStartNotification dropMiniGameStartNotification = 304;
+        C2S_DropPlayerSyncRequest dropPlayerSyncRequest = 305;
+        S2C_DropPlayerSyncNotification dropPlayerSyncNotification = 306;
+        S2C_DropPlayerDeathNotification dropPlayerDeathNotification = 307;
+        S2C_DropLevelStartNotification dropLevelStartNotification = 308;
+        S2C_DropLevelEndNotification dropLevelEndNotification = 309;
+        S2C_DropGameOverNotification dropGameOverNotification = 310;
     }
 }
