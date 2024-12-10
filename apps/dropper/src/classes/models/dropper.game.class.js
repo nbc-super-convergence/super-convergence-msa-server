@@ -157,65 +157,49 @@ class dropperGame extends Game {
   }
 
   fallen(socket, holes) {
-    this.timeoutManager.addTimeout(
-      'fallen',
-      () => {
-        // * 남은 플레이어 사망
-        const users = this.checkUserInFloor(holes);
+    // * 남은 플레이어 사망
+    const users = this.checkUserInFloor(holes);
 
-        // ? 그 층에 있던 모든 유저에게 같은 랭크 부여하기
-        const rank = this.getAliveUsers().length;
+    logger.info(`[fallen - 남은 유저들]` + users);
 
-        logger.info(`[fallen - rank] : ` + rank);
+    // ? 그 층에 있던 모든 유저에게 같은 랭크 부여하기
+    const rank = this.getAliveUsers().length;
 
-        if (users) {
-          for (let key in users) {
-            const user = users[key];
+    logger.info(`[fallen - rank] : ` + rank);
 
-            user.Dead();
+    if (users) {
+      for (let key in users) {
+        const user = users[key];
 
-            user.rank = rank;
+        user.Dead();
 
-            // * 사용중인 slot 삭제
-            if (user.slot) {
-              user.slot = undefined;
+        user.rank = rank;
 
-              // ? 죽은 유저의 slot 삭제
-              this.removeSlot(user.slot);
-            }
+        // * 사용중인 slot 삭제
+        if (user.slot) {
+          user.slot = undefined;
 
-            const sessionIds = this.getAllSessionIds();
-
-            const message = dropPlayerDeathNotification(user);
-
-            logger.info(`[dropPlayerDeathNotification - message]`, message);
-
-            // TODO: 현재 어떤 스테이지인지를 sequence로 보내야하는지? -> this.stage
-            const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
-
-            socket.write(buffer);
-          }
+          // ? 죽은 유저의 slot 삭제
+          this.removeSlot(user.slot);
         }
 
-        // TODO: 떨어지면서 기존의 위치를 유지를 해야함
-        this.stage++;
-        // TODO: 기존 위치를 유지하기 위해서 전부다 지우지는 않음, 추후에 새롭게 변경해야할 수도 있음.
-        //this.slots = new Array(9).fill(false);
-
-        // ! 떨어지고 나서 다음 스테이지 시작
         const sessionIds = this.getAllSessionIds();
 
-        const message = dropLevelStartNotification();
+        const message = dropPlayerDeathNotification(user);
 
         logger.info(`[dropPlayerDeathNotification - message]`, message);
 
-        const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
+        // TODO: 현재 어떤 스테이지인지를 sequence로 보내야하는지? -> this.stage
+        const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
         socket.write(buffer);
-      },
-      3000,
-      'fallen',
-    );
+      }
+    }
+
+    // TODO: 떨어지면서 기존의 위치를 유지를 해야함
+    this.stage++;
+    // TODO: 기존 위치를 유지하기 위해서 전부다 지우지는 않음, 추후에 새롭게 변경해야할 수도 있음.
+    //this.slots = new Array(9).fill(false);
   }
 
   checkGameOverInterval(socket) {

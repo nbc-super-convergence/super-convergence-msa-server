@@ -7,7 +7,7 @@ const SERVER_PORT = 7019;
 
 const bombMessages = Object.values(MESSAGE_TYPE).filter((value) => value >= 501 && value <= 520);
 
-const server = new BombServer(SERVER_NAME, SERVER_PORT, bombMessages);
+const server = new BombServer(SERVER_NAME, SERVER_HOST, SERVER_PORT, bombMessages);
 
 await server.start();
 

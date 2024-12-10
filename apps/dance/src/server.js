@@ -5,7 +5,7 @@ import { logger } from './utils/logger.utils.js';
 
 const SERVER_NAME = 'dance';
 const SERVER_PORT = 7018;
-const server = new DanceServer(SERVER_NAME, SERVER_PORT, Object.values(MESSAGE_TYPE));
+const server = new DanceServer(SERVER_NAME, SERVER_HOST, SERVER_PORT, Object.values(MESSAGE_TYPE));
 
 await server.start();
 server.connectToDistributor(SERVER_HOST, 7010, (data) => {

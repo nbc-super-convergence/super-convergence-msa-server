@@ -7,7 +7,7 @@ const SERVER_PORT = 7017;
 
 const messageTypes = Object.values(MESSAGE_TYPE).filter((value) => value >= 301 && value <= 310);
 
-const server = new DropperServer(SERVER_NAME, SERVER_PORT, messageTypes);
+const server = new DropperServer(SERVER_NAME, SERVER_HOST, SERVER_PORT, messageTypes);
 
 await server.start();
 
