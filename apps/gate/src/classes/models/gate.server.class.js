@@ -65,7 +65,7 @@ class GateServer extends TcpServer {
           socket.buffer = socket.buffer.subarray(length);
         } else {
           // * 로비 입장 시 sessionId로 socket 저장 [ LOBBY_JOIN_REQUEST: 11, ]
-          if (messageType === config.MESSAGE_TYPE.LOBBY_JOIN_REQUEST || messageType === 502) {
+          if (messageType === config.MESSAGE_TYPE.LOBBY_JOIN_REQUEST) {
             //
             const packet = socket.buffer.subarray(offset, length);
             const payload = packetParser(messageType, packet);
