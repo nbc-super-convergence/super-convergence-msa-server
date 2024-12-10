@@ -1,10 +1,15 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
-import { dropGameReadyRequestHandler, dropPlayerSyncRequestHandler } from './dropper.handlers.js';
+import {
+  dropCloseSocketRequestHandler,
+  dropGameReadyRequestHandler,
+  dropPlayerSyncRequestHandler,
+} from './dropper.handlers.js';
 
 const handlers = {
   // * REQUEST
   [MESSAGE_TYPE.DROP_GAME_READY_REQUEST]: { handler: dropGameReadyRequestHandler },
   [MESSAGE_TYPE.DROP_PLAYER_SYNC_REQUEST]: { handler: dropPlayerSyncRequestHandler },
+  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: dropCloseSocketRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {

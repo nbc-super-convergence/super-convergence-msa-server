@@ -1,6 +1,8 @@
 import { sessionIds } from '../classes/models/dropper.game.class.js';
 import dropGameManager from '../classes/managers/dropper.game.manager.js';
 import { logger } from '../../utils/logger.utils.js';
+import { dropConfig } from '../config/config.js';
+import { redisUtil } from '../../utils/redis.js';
 
 export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
@@ -97,5 +99,50 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
     socket.write(buffer);
   } catch (error) {
     logger.info(error);
+  }
+};
+
+export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
+  try {
+    logger.info(`Start [dropCloseSocketRequestHandler]`);
+
+    const { sessionId } = payload;
+
+    logger.info(`[dropCloseSocketRequestHandler - payload]`, payload);
+
+    const gameId = sessionIds.get(sessionId);
+
+    logger.info(`게임 아이디`, gameId);
+
+    const game = dropGameManager.getGameBySessionId(gameId);
+
+    logger.info(` [iceCloseSocketRequestHandler - game] `, game);
+
+    if (!dropGameManager.isValidGame(game.id)) {
+      throw new Error(`게임이 존재하지 않음`, dropConfig.FAIL_CODE.GAME_NOT_FOUND);
+    }
+
+    const user = game.getUserBySessionId(sessionId);
+
+    logger.info(` [iceCloseSocketRequestHandler - user]`, user);
+
+    if (!game.isValidUser(user.sessionId)) {
+      throw new Error(`유저가 존재하지 않음`, dropConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
+    }
+
+    // ! 삭제된 유저
+    const deletedUser = game.removeUser(sessionId);
+
+    logger.info(`[dropCloseSocketRequestHandler - deletedUser]`, deletedUser);
+
+    if (game.isValidUser(deletedUser.sessionId)) {
+      throw new Error(`유저가 삭제 되지 않음`, dropConfig.FAIL_CODE.DELETED_USER_IN_GAME);
+    }
+
+    // ! 나간 유저의 게임 위치 삭제
+    await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'dropper');
+  } catch (error) {
+    logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
+    //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중
   }
 };

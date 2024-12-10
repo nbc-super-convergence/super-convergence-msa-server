@@ -124,7 +124,7 @@ class dropperGameManager {
     logger.info(`[dropGameManager - dropPlayerDeathNoti]`);
 
     // TODO: 자신에게도 보내줘야하는지 확인하기
-    const sessionIds = game.getOtherSessionIds(user.sessionId);
+    const sessionIds = game.getAllSessionIds(user.sessionId);
 
     const message = dropPlayerDeathNotification(user);
 
