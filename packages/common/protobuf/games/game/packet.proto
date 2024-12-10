@@ -11,6 +11,7 @@ import '../../board/board.proto';
 import '../../gate/gate.proto';
 import '../dance/dance.proto';
 import '../bomb/bomb.proto';
+import '../dropper/dropper.proto';
 
 message GamePacket {
     oneof payload {

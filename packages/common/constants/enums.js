@@ -105,6 +105,17 @@ export const FIELD_NAME = {
   210: 'iceGameOverNotification',
   211: 'iceMapSyncNotification',
 
+  // dropper (301 ~ 310)
+  301: 'dropMiniGameReadyNotification',
+  302: 'dropGameReadyRequest',
+  303: 'dropGameReadyNotification',
+  304: 'dropMiniGameStartNotification',
+  305: 'dropPlayerSyncRequest',
+  306: 'dropPlayerSyncNotification',
+  307: 'dropPlayerDeathNotification',
+  308: 'dropLevelStartNotification',
+  309: 'dropLevelEndNotification',
+  310: 'dropGameOverNotification',
 
   // dance (401 ~ 500)
   401: 'danceMiniGameReadyNotification',
@@ -131,5 +142,4 @@ export const FIELD_NAME = {
   508: 'bombMoveRequest',
   509: 'bombMoveNotification',
   510: 'bombGameOverNotification',
-
 };
