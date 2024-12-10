@@ -24,7 +24,7 @@ class dropperGame extends Game {
     this.timeoutManager = new TimeoutManager();
     this.startPosition = dropperMap.startPosition;
     this.slots = new Array(9).fill(false);
-    this.stage = 0;
+    this.stage = 1;
     //! timeOut? interval?
     this.moveTimer;
     this.fallTimer;
@@ -130,7 +130,7 @@ class dropperGame extends Game {
         // ! 0 ~ 8 중 8 - 현재 스테이지 수의 랜덤 값 추출
         const holes = [];
         // * 랜덤 숫자 생성 ( 중복 방지 )
-        while (holes.length < 1 + this.stage) {
+        while (holes.length < 9 - this.stage) {
           const randomNumber = Math.floor(Math.random() * 9);
           if (!holes.includes(randomNumber)) {
             holes.push(randomNumber);
@@ -144,7 +144,7 @@ class dropperGame extends Game {
 
         logger.info(`[dropLevelEndNotification - message] : `, message);
 
-        const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
+        const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
         socket.write(buffer);
 
@@ -191,31 +191,10 @@ class dropperGame extends Game {
             logger.info(`[dropPlayerDeathNotification - message]`, message);
 
             // TODO: 현재 어떤 스테이지인지를 sequence로 보내야하는지? -> this.stage
-            const buffer = serializeForGate(message.type, message.payload, this.stage, sessionIds);
+            const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
             socket.write(buffer);
           }
-        }
-
-        if (this.stage === 7) {
-          const aliveUsers = this.getAliveUsers();
-
-          logger.info(`[fallen - aliveUsers]`, aliveUsers);
-
-          if (aliveUsers) {
-            // ? 마지막 살아남은 모든 유저가 1등
-            const rank = 1;
-
-            // ? 혹시나 추후에 게임 구조가 변경될 수도 있으므로 이렇게 처리
-            for (let key in aliveUsers) {
-              const user = aliveUsers[key];
-
-              user.rank = rank;
-            }
-          }
-
-          this.handleGameEnd(socket);
-          return;
         }
 
         // TODO: 떨어지면서 기존의 위치를 유지를 해야함
@@ -236,6 +215,35 @@ class dropperGame extends Game {
       },
       3000,
       'fallen',
+    );
+  }
+
+  checkGameOverInterval(socket) {
+    this.intervalManager.addInterval(
+      'checkGameOver',
+      () => {
+        if (this.stage === 9) {
+          const aliveUsers = this.getAliveUsers();
+
+          logger.info(`[fallen - aliveUsers]`, aliveUsers);
+
+          if (aliveUsers) {
+            // ? 마지막 살아남은 모든 유저가 1등
+            const rank = 1;
+
+            // ? 혹시나 추후에 게임 구조가 변경될 수도 있으므로 이렇게 처리
+            for (let key in aliveUsers) {
+              const user = aliveUsers[key];
+
+              user.rank = rank;
+            }
+          }
+
+          this.handleGameEnd(socket);
+        }
+      },
+      1000,
+      'checkGameOver',
     );
   }
 
@@ -261,7 +269,7 @@ class dropperGame extends Game {
 
   reset() {
     // * 게임 내 정보 리셋
-    this.stage = 0;
+    this.stage = 1;
     this.slots = new Array(9).fill(false);
     this.setGameState(GAME_STATE.WAIT);
 

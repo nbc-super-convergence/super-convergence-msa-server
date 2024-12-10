@@ -38,6 +38,7 @@ export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
 
       //* 인터벌 시작
       game.breakFloorInterval(socket);
+      game.checkGameOverInterval(socket);
     }
 
     socket.write(buffer);
