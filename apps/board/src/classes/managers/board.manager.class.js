@@ -329,8 +329,8 @@ class BoardManager {
 
   /**
    * 미니게임 시작 요청, 미니게임 정해서 해당 미니게임 채널에 publish
-   * Channel : iceGameChannel
-   * Message : {boardId}
+   * channels [ iceGameChannel, danceGameChannel, dropperGameChannel, bombGameChannel ]
+   * Message    : {boardId}
    * @param {String} sessionId 방장 sessionId
    */
   async startMiniGameRequest(sessionId) {
@@ -338,15 +338,17 @@ class BoardManager {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const message = boardId;
 
-      // TODO: iceGameChannel 임시 고정
-      let channel = redis.channel.ICE;
-      const gameType = 1;
+      const channels = [];
+      channels.push(redis.channel.ICE);
+      channels.push(redis.channel.DANCE);
+      channels.push(redis.channel.BOMB);
+      channels.push(redis.channel.DROPPER);
 
-      // TODO: switch? messageType? 처럼?
-      switch (gameType) {
-        case 1:
-          break;
-      }
+      // * random
+      const randomVal = Math.floor(Math.random() * channels.length);
+
+      const channel = channels[randomVal];
+
       await redis.client.publish(channel, message, (err, reply) => {
         if (err) {
           logger.error('[ BOARD: startMiniGameRequest ] startMiniGameRequest ==>> ', err);
@@ -357,7 +359,7 @@ class BoardManager {
         }
       });
 
-      console.log(
+      logger.info(
         `[ BOARD : startMiniGameRequest ] : [${channel}] Channel Notification Sent: [${message}]`,
       );
     } catch (e) {
