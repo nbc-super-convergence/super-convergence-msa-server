@@ -379,21 +379,13 @@ class BoardManager {
       const sessionIds = await redis.getBoardPlayers(boardId);
       logger.info(`[ BOARD: turnEnd ] boardId: ${boardId} sessionIds ==>> `, sessionIds);
 
-      let isGameOver = false;
-
-      const maxTurn = await redis.getBoardGameField(boardId, 'maxTurn');
-      const nowTurn = await redis.getBoardGameField(boardId, 'nowTurn');
-
-      if (maxTurn >= nowTurn) {
-        isGameOver = true;
-      } else {
-        await redis.updateBoardGameField(boardId, 'nowTurn', nowTurn + 1);
-      }
+      const result = await redis.transaction.turnEnd(sessionId, boardId);
 
       return {
         data: {
           sessionIds,
-          isGameOver,
+          isGameOver: result.isGameOver,
+          rank: result.rank,
         },
       };
     } catch (e) {

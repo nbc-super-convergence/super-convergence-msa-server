@@ -444,7 +444,7 @@ export const firstDiceGameRequestHandler = async ({ socket, payload }) => {
       sessionIds = result.data.sessionIds;
       const notificationMessageType = MESSAGE_TYPE.DICE_GAME_NOTIFICATION;
       const notification = {
-        result: result.data.result,
+        result: result.data.rank,
       };
       const notificationPacket = serializeForGate(
         notificationMessageType,

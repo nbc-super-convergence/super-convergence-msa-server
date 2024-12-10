@@ -366,6 +366,62 @@ class redisTransaction {
     });
     return result;
   }
+
+  /**
+   * * 턴 종료 & 보드게임 종료
+   * @param {String} sessionId
+   * @param {String} boardId
+   * @returns
+   */
+  async turnEnd(sessionId, boardId) {
+    //
+    const result = {};
+    result.isGameOver = false;
+    result.rank = [];
+    await this.execute(async (multi) => {
+      // TODO: manager에 있는거 옮기고, 영수증 처리 ㄱㄱ
+
+      const boardKey = `${this.prefix.BOARD}:${boardId}`;
+
+      const maxTurn = await multi.hget(boardKey, `maxTurn`);
+      const nowTurn = await multi.hget(boardKey, `nowTurn`);
+
+      if (maxTurn >= nowTurn) {
+        result.isGameOver = true;
+        // TODO: 영수증 ㄱㄱ
+        const boardPlayers = await multi.sMembers(boardKey);
+
+        for (let i = 0; i < boardPlayers.length; i++) {
+          const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${boardPlayers[i]}`;
+          const boardPlayerInfo = await multi.hgetall(boardPlayerInfoKey);
+
+          const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
+          const tileCount = await multi.sCard(tileHistoryKey);
+
+          const gold = boardPlayerInfo.gold + tileCount * 50;
+
+          result.rank.push({
+            sessionId: boardPlayers[i],
+            rank: 0,
+            tileCount,
+            gold,
+          });
+        }
+
+        // 정렬
+        result.rank = result.rank.sort((a, b) => {
+          return a.gold - b.gold;
+        });
+
+        // 순위 저장
+        result.rank.forEach((e, i) => (e.rank = i + 1));
+      } else {
+        // * 턴 + 1
+        await multi.hset(boardKey, 'nowTurn', nowTurn + 1);
+      }
+    });
+    return result;
+  }
 } //
 
 export default redisTransaction;
