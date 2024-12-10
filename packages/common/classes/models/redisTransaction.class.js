@@ -229,8 +229,31 @@ class redisTransaction {
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
-      multi.hset(mapKey, tile, sessionId);
-      multi.sadd(historyKey, tile);
+      // * 타일 주인 있는지 확인
+      const tileOwner = await multi.hget(mapKey, tile);
+      if (!tileOwner) {
+        // * 타일주인이 없음 : 10G
+        await multi.hset(
+          mapKey,
+          tile,
+          JSON.stringify({
+            sessionId,
+            gold: 10,
+          }),
+        );
+      } else {
+        // * 타일주인이 있음 : 구매가 * 1.5
+        const purchasingPrice = JSON.parse(tileOwner).gold;
+        await multi.hset(
+          mapKey,
+          tile,
+          JSON.stringify({
+            sessionId,
+            gold: Math.floor(purchasingPrice * 1.5),
+          }),
+        );
+      }
+      await multi.sadd(historyKey, tile);
     });
   }
 
@@ -239,17 +262,28 @@ class redisTransaction {
    * @param {String} boardId
    * @param {String} sessionId
    * @param {Number} tile
-   * @param {Number} penalty
    */
-  async tilePenalty(boardId, sessionId, tile, penalty) {
-    //
+  async tilePenalty(boardId, sessionId, tile) {
+    /*
+     * 기본 구매가 : 10 골드 [v]
+     * 벌금 : 구매가 1/2
+     * 매수 : 구매가 * 1.5
+     * 골드의 소수점은 모두 내림 처리
+     *
+     * 벌금 적용 : 0까지만, 대신 타일 주인도 깎인 만큼만 증가 시켜줄 것 [v]
+     */
     const result = {};
     await this.execute(async (multi) => {
       // * Keys
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
-      const tileOwner = await multi.hget(mapKey, tile);
+      const tileOwnerStr = await multi.hget(mapKey, tile);
+      const tileOwner = JSON.parse(tileOwnerStr);
       const penaltyPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
-      const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner}`;
+      const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner.sessionId}`;
+
+      // TODO: 벌금, 구매가를 가져오는 방식으로 수정해야함
+      // TODO: 테스트 예정 : 24.12.10
+      let penalty = Math.floor(tileOwner.gold / 2); // 10 / 2;
 
       //
       let pennaltyPlayerGold = await multi.hget(penaltyPlayerInfoKey, 'gold');
@@ -260,11 +294,18 @@ class redisTransaction {
       let ownerPlayerGold = await multi.hget(ownerPlayerInfoKey, 'gold');
       console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
-      pennaltyPlayerGold = pennaltyPlayerGold - penalty;
-      ownerPlayerGold = ownerPlayerGold + penalty;
+      // * 소지 골드는 0이하로 떨어지지 않는다
+      if (pennaltyPlayerGold > 0) {
+        if (penalty > pennaltyPlayerGold) {
+          penalty = pennaltyPlayerGold;
+        }
 
-      await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
-      await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+        pennaltyPlayerGold = pennaltyPlayerGold - penalty;
+        ownerPlayerGold = ownerPlayerGold + penalty;
+
+        await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
+        await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+      }
 
       // TODO: 페널티 이력 저장?
 

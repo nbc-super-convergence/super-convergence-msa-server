@@ -215,6 +215,7 @@ class BoardManager {
 
   /**
    * 트로피 구매
+   * TODO: [ 불필요 ] 삭제 예정 24.12.10
    * @param {String} sessionId
    * @param {Number} tile
    */
@@ -278,14 +279,9 @@ class BoardManager {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const sessionIds = await redis.getBoardPlayers(boardId);
 
-      // TODO: 벌급 정해야 함, Game Data에서??
-      const penalty = 10;
+      const result = await redis.transaction.tilePenalty(boardId, sessionId, tile);
 
-      /**
-       * 1. 벌금 적용
-       * 2. 상대방 유저 금액 상승
-       */
-      const result = await redis.transaction.tilePenalty(boardId, sessionId, tile, penalty);
+      logger.info('[ BOARD: tilePenalty ] result ===>>> ', result);
 
       return {
         success: true,
