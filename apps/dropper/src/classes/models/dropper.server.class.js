@@ -27,7 +27,8 @@ class DropperServer extends TcpServer {
         //* `${boardId}:${users}`
         const [boardId, users] = message.split(':');
 
-        await dropperGameManager.addGame(boardId, JSON.parse(users));
+        // TODO: 서버가 자꾸 죽어서 임시 주석 처리 했습니다.
+        // await dropperGameManager.addGame(boardId, JSON.parse(users));
       } else {
         logger.info(`[Received ${dropConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
 
