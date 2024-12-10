@@ -9,6 +9,7 @@ import '../../lobby/lobby.proto';
 import '../../room/room.proto';
 import '../../board/board.proto';
 import '../../gate/gate.proto';
+import '../dance/dance.proto';
 import '../bomb/bomb.proto';
 
 message GamePacket {
@@ -111,6 +112,20 @@ message GamePacket {
         S2C_DropLevelStartNotification dropLevelStartNotification = 308;
         S2C_DropLevelEndNotification dropLevelEndNotification = 309;
         S2C_DropGameOverNotification dropGameOverNotification = 310;
+        
+        // dance (401)
+        S2C_DanceMiniGameReadyNotification danceMiniGameReadyNotification = 401;
+        C2S_DanceReadyRequest danceReadyRequest = 402;
+        S2C_DanceReadyNotification danceReadyNotification = 403;
+        S2C_DanceStartNotification danceStartNotification = 404;
+        C2S_DanceTableCreateRequest danceTableCreateRequest = 405;
+        S2C_DanceTableNotification danceTableNotification = 406;
+        C2S_DanceKeyPressRequest danceKeyPressRequest = 407;
+        S2C_DanceKeyPressResponse danceKeyPressResponse = 408;
+        S2C_DanceKeyPressNotification danceKeyPressNotification = 409;
+        S2C_DanceGameOverNotification danceGameOverNotification = 410;
+        S2C_DanceCloseSocketNotification danceCloseSocketNotification = 411;
+        C2S_DanceTableCompleteRequest danceTableCompleteRequest = 412;
         
         // bomb (501~)
         S2C_BombMiniGameReadyNotification bombMiniGameReadyNotification = 501;

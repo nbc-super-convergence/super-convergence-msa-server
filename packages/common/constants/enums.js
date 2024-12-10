@@ -2,6 +2,12 @@ export const STATE = {
   IDLE: 0,
   MOVE: 1,
   DIE: 2,
+  DANCE_UP: 3,
+  DANCE_DOWN: 4,
+  DANCE_LEFT: 5,
+  DANCE_RIGHT: 6,
+  DANCE_FAIL: 7,
+  DANCE_WAIT: 8,
 };
 
 export const ROOM_STATE = {
@@ -99,6 +105,21 @@ export const FIELD_NAME = {
   210: 'iceGameOverNotification',
   211: 'iceMapSyncNotification',
 
+
+  // dance (401 ~ 500)
+  401: 'danceMiniGameReadyNotification',
+  402: 'danceReadyRequest',
+  403: 'danceReadyNotification',
+  404: 'danceStartNotification',
+  405: 'danceTableCreateRequest',
+  406: 'danceTableNotification',
+  407: 'danceKeyPressRequest',
+  408: 'danceKeyPressResponse',
+  409: 'danceKeyPressNotification',
+  410: 'danceGameOverNotification',
+  411: 'danceCloseSocketNotification',
+  412: 'danceTableCompleteRequest',
+
   // bomb  (501~)
   501: 'bombMiniGameReadyNotification',
   502: 'bombGameReadyRequest',
@@ -110,4 +131,5 @@ export const FIELD_NAME = {
   508: 'bombMoveRequest',
   509: 'bombMoveNotification',
   510: 'bombGameOverNotification',
+
 };
