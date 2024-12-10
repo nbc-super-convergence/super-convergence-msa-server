@@ -274,14 +274,15 @@ class DanceGame extends Game {
   }
 
   getGameResults() {
+    //* teamResults를 배열로 변환하고 정렬
+    const sortedResults = Array.from(this.teamResults.entries()).sort(([, a], [, b]) => {
+      if (a.score !== b.score) return b.score - a.score;
+      return a.endTime - b.endTime;
+    });
+
     return {
-      TeamRank: Array.from(this.teamResults.entries())
-        .sort(([, a], [, b]) => {
-          if (a.score !== b.score) return b.score - a.score;
-          return a.endTime - b.endTime;
-        })
-        .map(([teamNumber]) => teamNumber),
-      result: Array.from(this.teamResults.values()),
+      TeamRank: sortedResults.map(([teamNumber]) => teamNumber),
+      result: sortedResults.map(([, result]) => result),
       reason: this.reason,
     };
   }
