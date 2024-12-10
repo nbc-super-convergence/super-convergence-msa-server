@@ -57,11 +57,11 @@ message S2C_DanceStartNotification {
 
 message C2S_DanceTableCreateRequest {
     string sessionId = 1;                 // 방장 세션 ID
-    repeated DancePool dancePool = 2;     // 생성된 춤표들
+    repeated DancePool dancePools = 2;     // 생성된 춤표들
 }
 
 message S2C_DanceTableNotification {
-    repeated DancePool dancePool = 1;     // 새로운 테이블
+    repeated DancePool dancePools = 1;     // 새로운 테이블
 }
 
 message C2S_DanceKeyPressRequest {
@@ -70,14 +70,15 @@ message C2S_DanceKeyPressRequest {
 }
 
 message S2C_DanceKeyPressResponse {
-    bool success = 1;                     // 올바른 입력이었는지
-    State state = 2;                      // 애니메이션
-    GlobalFailCode failCode = 3;
+    bool success = 1;                     // 요청 성공 여부
+    bool correct = 2;                     // 올바른 입력이었는지
+    State state = 3;                      // 애니메이션
+    GlobalFailCode failCode = 4;
 }
 
 message S2C_DanceKeyPressNotification {
     string sessionId = 1;                 // 입력한 플레이어
-    bool success = 2;                     // 올바른 입력이었는지
+    bool correct = 2;                     // 올바른 입력이었는지
     State state = 3;                      // 애니메이션
 }
 
