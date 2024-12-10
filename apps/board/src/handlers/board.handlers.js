@@ -487,6 +487,8 @@ export const turnEndRequestHandler = async ({ socket, payload }) => {
     // * 턴 종료
     const result = await boardManager.turnEnd(sessionId);
 
+    logger.info('[ BOARD: turnEndRequestHandler ] result ==>> ', result);
+
     if (result.data.isGameOver) {
       // * 전체 NOTI [ 게임종료 ]
       // * 나머지 NOTIFICATION [ 턴 종료 ]
