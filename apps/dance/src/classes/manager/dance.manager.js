@@ -135,7 +135,9 @@ class DanceGameManager {
     //* 게임 시작
     game.startGame();
 
-    return createNotification({}, MESSAGE_TYPE.DANCE_START_NOTIFICATION, sessionIds);
+    const startTime = Date.now();
+
+    return createNotification(startTime, MESSAGE_TYPE.DANCE_START_NOTIFICATION, sessionIds);
   }
 
   danceTableNoti(dancePools, game) {

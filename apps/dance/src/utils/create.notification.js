@@ -22,7 +22,9 @@ export const createNotification = (data, messageType, sessionIds) => {
       break;
 
     case MESSAGE_TYPE.DANCE_START_NOTIFICATION:
-      notification = {};
+      notification = {
+        startTime: data,
+      };
       break;
 
     case MESSAGE_TYPE.DANCE_TABLE_NOTIFICATION:
