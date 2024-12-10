@@ -8,8 +8,8 @@ import { redisUtil, subRedisClient } from '../../utils/init/redis.js';
 import { logger } from '../../utils/logger.utils.js';
 
 class IceServer extends TcpServer {
-  constructor(name, port, types = []) {
-    super(name, port, types);
+  constructor(name, host, port, types = []) {
+    super(name, host, port, types);
 
     this.subScriber = subRedisClient;
 

@@ -95,7 +95,8 @@ export const serializeForGate = (messageType, data, sequence, sessionIds) => {
   const gameMessage = protoMessages.game.GamePacket;
 
   const field = FIELD_NAME[messageType];
-  console.log('field name:', field);
+  console.log('  [ serializeForGate ] field name ===>>>', field);
+  console.log('  [ serializeForGate ] data ===>>>:', data);
 
   const payload = gameMessage.encode({ [field]: data }).finish();
 

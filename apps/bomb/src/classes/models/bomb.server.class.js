@@ -8,8 +8,8 @@ import { bombConfig } from '../../config/config.js';
 import BombGameManager from '../managers/bomb.game.manager.js';
 
 class BombServer extends TcpServer {
-  constructor(name, port, types = []) {
-    super(name, port, types);
+  constructor(name, host, port, types = []) {
+    super(name, host, port, types);
 
     this.subScriber = subRedisClient;
 

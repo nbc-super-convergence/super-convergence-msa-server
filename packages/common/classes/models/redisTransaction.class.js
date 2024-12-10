@@ -1,4 +1,5 @@
 import { config } from '../../config/config.js';
+import { logger } from '../../config/index.js';
 
 class redisTransaction {
   constructor(redisUtil) {
@@ -425,26 +426,35 @@ class redisTransaction {
 
       const boardKey = `${this.prefix.BOARD}:${boardId}`;
 
-      const maxTurn = await multi.hget(boardKey, 'maxTurn');
-      const nowTurn = await multi.hget(boardKey, 'nowTurn');
+      logger.info('  [ BOARD: turnEnd  ] boardKey => ', boardKey);
+      const boardObj = await multi.hgetall(boardKey);
+      const maxTurn = boardObj.maxTurn;
+      const nowTurn = boardObj.nowTurn;
 
-      console.log(maxTurn, ' ??? ', nowTurn);
+      logger.info('  [ BOARD: turnEnd  ] maxTurn => ', maxTurn);
+      logger.info('  [ BOARD: turnEnd  ] nowTurn => ', nowTurn);
 
       if (maxTurn >= nowTurn) {
         result.isGameOver = true;
         // TODO: 영수증 ㄱㄱ
         const boardPlayers = await multi.smembers(boardKey);
 
+        logger.info('  [ BOARD: turnEnd  ] boardPlayers => ', boardPlayers);
+
         for (let i = 0; i < boardPlayers.length; i++) {
           const playerSessionId = boardPlayers[i];
+          logger.info(' playerSessionId => ', playerSessionId);
+
           const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${playerSessionId}`;
-          console.log(' boardPlayerInfoKey => ', boardPlayerInfoKey);
+          logger.info(' boardPlayerInfoKey => ', boardPlayerInfoKey);
+
           const boardPlayerInfo = await multi.hgetall(boardPlayerInfoKey);
-          console.log(' boardPlayerInfo => ', boardPlayerInfo);
+          logger.info(' boardPlayerInfo => ', boardPlayerInfo);
 
           const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${playerSessionId}`;
-          console.log(' tileHistoryKey => ', tileHistoryKey);
+          logger.info(' tileHistoryKey => ', tileHistoryKey);
           const tileCount = await multi.scard(tileHistoryKey);
+          logger.info(' tileCount => ', tileCount);
 
           const gold = boardPlayerInfo.gold + tileCount * 50;
 
@@ -456,21 +466,21 @@ class redisTransaction {
           });
         }
 
-        console.log(' result rank1111 ===>> ', result.rank);
+        logger.info(' result rank1111 ===>> ', result.rank);
 
         // 정렬
         result.rank = result.rank.sort((a, b) => {
           return a.gold - b.gold;
         });
 
-        console.log(' result rank2222 ===>> ', result.rank);
+        logger.info(' result rank2222 ===>> ', result.rank);
         // 순위 저장
         result.rank.forEach((e, i) => (e.rank = i + 1));
-        console.log(' result rank3333 ===>> ', result.rank);
+        logger.info(' result rank3333 ===>> ', result.rank);
       } else {
         // * 턴 + 1
         await multi.hset(boardKey, 'nowTurn', nowTurn + 1);
-        console.log(' result rank ELSSS ===>> ', result.rank);
+        logger.info(' result rank ELSSS ===>> ', result.rank);
       }
     });
 

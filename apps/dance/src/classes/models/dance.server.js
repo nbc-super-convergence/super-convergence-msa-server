@@ -8,8 +8,8 @@ import { redis, subRedisClient } from '../../init/redis.js';
 import danceGameManager from '../manager/dance.manager.js';
 
 class DanceServer extends TcpServer {
-  constructor(name, port, types = []) {
-    super(name, port, types);
+  constructor(name, host, port, types = []) {
+    super(name, host, port, types);
 
     this.subScriber = subRedisClient;
 
