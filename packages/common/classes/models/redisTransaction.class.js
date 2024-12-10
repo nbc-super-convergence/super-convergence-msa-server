@@ -419,13 +419,16 @@ class redisTransaction {
     const result = {};
     result.isGameOver = false;
     result.rank = [];
+
     await this.execute(async (multi) => {
       // TODO: manager에 있는거 옮기고, 영수증 처리 ㄱㄱ
 
       const boardKey = `${this.prefix.BOARD}:${boardId}`;
 
-      const maxTurn = await multi.hget(boardKey, `maxTurn`);
-      const nowTurn = await multi.hget(boardKey, `nowTurn`);
+      const maxTurn = await multi.hget(boardKey, 'maxTurn');
+      const nowTurn = await multi.hget(boardKey, 'nowTurn');
+
+      console.log(maxTurn, ' ??? ', nowTurn);
 
       if (maxTurn >= nowTurn) {
         result.isGameOver = true;
@@ -433,34 +436,44 @@ class redisTransaction {
         const boardPlayers = await multi.smembers(boardKey);
 
         for (let i = 0; i < boardPlayers.length; i++) {
-          const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${boardPlayers[i]}`;
+          const playerSessionId = boardPlayers[i];
+          const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${playerSessionId}`;
+          console.log(' boardPlayerInfoKey => ', boardPlayerInfoKey);
           const boardPlayerInfo = await multi.hgetall(boardPlayerInfoKey);
+          console.log(' boardPlayerInfo => ', boardPlayerInfo);
 
-          const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
+          const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${playerSessionId}`;
+          console.log(' tileHistoryKey => ', tileHistoryKey);
           const tileCount = await multi.scard(tileHistoryKey);
 
           const gold = boardPlayerInfo.gold + tileCount * 50;
 
           result.rank.push({
-            sessionId: boardPlayers[i],
+            sessionId: playerSessionId,
             rank: 0,
             tileCount,
             gold,
           });
         }
 
+        console.log(' result rank1111 ===>> ', result.rank);
+
         // 정렬
         result.rank = result.rank.sort((a, b) => {
           return a.gold - b.gold;
         });
 
+        console.log(' result rank2222 ===>> ', result.rank);
         // 순위 저장
         result.rank.forEach((e, i) => (e.rank = i + 1));
+        console.log(' result rank3333 ===>> ', result.rank);
       } else {
         // * 턴 + 1
         await multi.hset(boardKey, 'nowTurn', nowTurn + 1);
+        console.log(' result rank ELSSS ===>> ', result.rank);
       }
     });
+
     return result;
   }
 } //

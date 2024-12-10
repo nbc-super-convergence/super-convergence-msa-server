@@ -379,6 +379,8 @@ class BoardManager {
 
       const result = await redis.transaction.turnEnd(sessionId, boardId);
 
+      logger.info('[ BOARD: turnEnd ] result ==>> ', result);
+
       return {
         data: {
           sessionIds,
