@@ -8,7 +8,7 @@ import {
   serialize,
   serializeForClient,
 } from '@repo/common/utils';
-import { SERVER_HOST } from '../../constants/env.js';
+import { SERVER_HOST, DISTRIBUTOR_HOST } from '../../constants/env.js';
 import { makeCloseSocketRequest } from '../../utils/request/message.utils.js';
 import { logger } from '../../utils/logger.utils.js';
 
@@ -20,7 +20,7 @@ class GateServer extends TcpServer {
   _clientBuffer = Buffer.alloc(0);
 
   constructor(name, port) {
-    super(name, port, []);
+    super(name, SERVER_HOST, port, []);
   }
 
   /**
@@ -263,7 +263,7 @@ class GateServer extends TcpServer {
   start = async () => {
     await this.initialize();
 
-    this.server.listen(this.context.port, () => {
+    this.server.listen(this.context.port, '0.0.0.0', () => {
       logger.info(`${this.context.name} server listening on port ${this.context.port}`);
 
       const packet = createServerInfoNotification(
@@ -284,7 +284,7 @@ class GateServer extends TcpServer {
       this._isConnectedDistributor = false;
 
       this._clientDistributor = new TcpClient(
-        SERVER_HOST,
+        DISTRIBUTOR_HOST, //SERVER_HOST,
         7010,
         (options) => {
           logger.info(' onCreate ==>> ');

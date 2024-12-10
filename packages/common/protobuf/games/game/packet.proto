@@ -10,6 +10,7 @@ import '../../room/room.proto';
 import '../../board/board.proto';
 import '../../gate/gate.proto';
 import '../dance/dance.proto';
+import '../bomb/bomb.proto';
 
 message GamePacket {
     oneof payload {
@@ -100,6 +101,18 @@ message GamePacket {
         S2C_IceGameOverNotification iceGameOverNotification = 210;
         S2C_IceMapSyncNotification iceMapSyncNotification = 211;
 
+        // drop (301)
+        S2C_DropMiniGameReadyNotification dropMiniGameReadyNotification = 301;
+        C2S_DropGameReadyRequest dropGameReadyRequest = 302;
+        S2C_DropGameReadyNotification dropGameReadyNotification = 303;
+        S2C_DropMiniGameStartNotification dropMiniGameStartNotification = 304;
+        C2S_DropPlayerSyncRequest dropPlayerSyncRequest = 305;
+        S2C_DropPlayerSyncNotification dropPlayerSyncNotification = 306;
+        S2C_DropPlayerDeathNotification dropPlayerDeathNotification = 307;
+        S2C_DropLevelStartNotification dropLevelStartNotification = 308;
+        S2C_DropLevelEndNotification dropLevelEndNotification = 309;
+        S2C_DropGameOverNotification dropGameOverNotification = 310;
+        
         // dance (401)
         S2C_DanceMiniGameReadyNotification danceMiniGameReadyNotification = 401;
         C2S_DanceReadyRequest danceReadyRequest = 402;
@@ -113,5 +126,18 @@ message GamePacket {
         S2C_DanceGameOverNotification danceGameOverNotification = 410;
         S2C_DanceCloseSocketNotification danceCloseSocketNotification = 411;
         C2S_DanceTableCompleteRequest danceTableCompleteRequest = 412;
+        
+        // bomb (501~)
+        S2C_BombMiniGameReadyNotification bombMiniGameReadyNotification = 501;
+        C2S_BombGameReadyRequest bombGameReadyRequest = 502;
+        S2C_BombGameReadyNotification bombGameReadyNotification = 503;
+        S2C_BombMiniGameStartNotification bombMiniGameStartNotification = 504;
+        C2S_BombPlayerSyncRequest bombPlayerSyncRequest = 505;
+        S2C_BombPlayerSyncNotification bombPlayerSyncNotification = 506;
+        S2C_BombPlayerDeathNotification bombPlayerDeathNotification = 507;
+        C2S_BombMoveRequest bombMoveRequest = 508;
+        S2C_BombMoveNotification bombMoveNotification = 509;
+        S2C_BombGameOverNotification bombGameOverNotification = 510;
+
     }
 }

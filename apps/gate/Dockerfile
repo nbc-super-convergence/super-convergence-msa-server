@@ -1,14 +1,12 @@
-FROM node:20-alpine
+FROM node:20-alpine 
 WORKDIR /app
 
-COPY turbo.json ./
-COPY package.json yarn.lock ./
-COPY apps/gate/package.json ./apps/gate/package.json
-COPY packages ./packages
+# Copy only necessary files for build
+COPY . .
 
-RUN yarn
+# Install dependencies with --production=false
+RUN yarn install --frozen-lockfile --production=false && \
+    yarn cache clean
 
-COPY apps/gate/dist ./apps/gate/dist
-EXPOSE 7011
-
-CMD ["node", "apps/gate/dist/server.js"]
+EXPOSE 7012
+CMD ["node", "apps/gate/src/server.js"]

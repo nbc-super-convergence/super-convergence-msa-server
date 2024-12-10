@@ -1,0 +1,141 @@
+services:
+  distributor:
+    build:
+      context: .
+      dockerfile: apps/distributor/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+      - USER_DB1_HOST=shd1495.store
+      - USER_DB1_PORT=3306
+      - USER_DB1_NAME=holy_poly_moly_user
+      - USER_DB1_USER=root
+      - USER_DB1_PASSWORD=qwerty7897
+    ports:
+      - '7010:7010'
+    networks:
+      - super-convergence
+
+  gate:
+    build:
+      context: .
+      dockerfile: apps/gate/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+    ports:
+      - '7011:7011'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+    ports:
+      - '7012:7012'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  lobby:
+    build:
+      context: .
+      dockerfile: apps/lobby/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+    ports:
+      - '7013:7013'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  room:
+    build:
+      context: .
+      dockerfile: apps/room/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+    ports:
+      - '7014:7014'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  board:
+    build:
+      context: .
+      dockerfile: apps/board/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+    ports:
+      - '7015:7015'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  ice:
+    build:
+      context: .
+      dockerfile: apps/ice/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=myredispass
+      - SERVER_HOST=distributor
+    ports:
+      - '7016:7016'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  redis:
+    hostname: redis
+    container_name: redis
+    image: redis:latest
+    command: redis-server --requirepass myredispass
+    ports: # 바인딩할 포트:내부 포트
+      - '6379:6379'
+    networks:
+      - super-convergence
+
+networks:
+  super-convergence:
+    driver: bridge

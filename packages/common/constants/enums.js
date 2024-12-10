@@ -105,6 +105,7 @@ export const FIELD_NAME = {
   210: 'iceGameOverNotification',
   211: 'iceMapSyncNotification',
 
+
   // dance (401 ~ 500)
   401: 'danceMiniGameReadyNotification',
   402: 'danceReadyRequest',
@@ -118,4 +119,17 @@ export const FIELD_NAME = {
   410: 'danceGameOverNotification',
   411: 'danceCloseSocketNotification',
   412: 'danceTableCompleteRequest',
+
+  // bomb  (501~)
+  501: 'bombMiniGameReadyNotification',
+  502: 'bombGameReadyRequest',
+  503: 'bombGameReadyNotification',
+  504: 'bombMiniGameStartNotification',
+  505: 'bombPlayerSyncRequest',
+  506: 'bombPlayerSyncNotification',
+  507: 'bombPlayerDeathNotification',
+  508: 'bombMoveRequest',
+  509: 'bombMoveNotification',
+  510: 'bombGameOverNotification',
+
 };
