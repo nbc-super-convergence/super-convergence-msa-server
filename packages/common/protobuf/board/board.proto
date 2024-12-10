@@ -62,6 +62,13 @@ message  S2C_MovePlayerBoardNotification {
 
 message S2C_GameEndNotification {
   	repeated Rank rank = 1;
+	
+	message Rank {
+        string sessionId = 1;
+        int32 rank = 2; 
+		int32 tileCount = 3;
+		int32 gold = 4;
+    }
 }
 
 message C2S_BackToTheRoomRequest {
@@ -161,8 +168,7 @@ message C2S_DiceGameRequest{
 
 message S2C_DiceGameResponse{
     bool success = 1;
-	repeated DiceGameData result = 2;
-  	GlobalFailCode failCode = 3;
+  	GlobalFailCode failCode = 2;
 }
 
 message S2C_DiceGameNotification {

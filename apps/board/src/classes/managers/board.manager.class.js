@@ -22,9 +22,10 @@ class BoardManager {
 
   /**
    * 새 보드게임 생성
-   * @param {*} sessionId - 방장 세션 ID
+   * @param {String} sessionId - 방장 세션 ID
+   * @param {Number} turn - 방장 세션 ID
    */
-  async createBoard(sessionId) {
+  async createBoard(sessionId, turn) {
     try {
       // * redis에서 유저 정보 조회 [ getUserToSession ]
       const userData = await redis.getUserToSession(sessionId);
@@ -45,6 +46,7 @@ class BoardManager {
           boardId: uuidv4(),
           roomId: userLocation.room,
           ownerId: sessionId,
+          turn: turn,
           users: roomData.users,
           state: BOARD_STATE.WAITING,
         };
@@ -213,6 +215,7 @@ class BoardManager {
 
   /**
    * 트로피 구매
+   * TODO: [ 불필요 ] 삭제 예정 24.12.10
    * @param {String} sessionId
    * @param {Number} tile
    */
@@ -276,14 +279,9 @@ class BoardManager {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const sessionIds = await redis.getBoardPlayers(boardId);
 
-      // TODO: 벌급 정해야 함, Game Data에서??
-      const penalty = 10;
+      const result = await redis.transaction.tilePenalty(boardId, sessionId, tile);
 
-      /**
-       * 1. 벌금 적용
-       * 2. 상대방 유저 금액 상승
-       */
-      const result = await redis.transaction.tilePenalty(boardId, sessionId, tile, penalty);
+      logger.info('[ BOARD: tilePenalty ] result ===>>> ', result);
 
       return {
         success: true,
@@ -303,30 +301,23 @@ class BoardManager {
   /**
    * 보드 - 첫 주사위 순서를 정하는 게임
    * @param {String} sessionId
+   * @param {String} dartData
    * @returns
    */
-  async firstDiceGame(sessionId) {
+  async firstDiceGame(sessionId, dartData) {
     try {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const sessionIds = await redis.getBoardPlayers(boardId);
 
-      const result = [];
-
-      // TODO: 테스트용 코드
-      for (let i = 0; i < sessionIds.length; i++) {
-        const diceGameData = {
-          sessionId: sessionIds[i],
-          value: sessionIds.length - i,
-          rank: i + 1,
-        };
-        result.push(diceGameData);
-      }
+      // 요청 카운트
+      const result = await redis.transaction.boardDartCount(boardId, sessionId, dartData);
 
       return {
         success: true,
         data: {
           sessionIds,
-          result,
+          isOk: result.isOk,
+          result: result.diceGameDatas,
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
@@ -383,9 +374,14 @@ class BoardManager {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const sessionIds = await redis.getBoardPlayers(boardId);
       logger.info(`[ BOARD: turnEnd ] boardId: ${boardId} sessionIds ==>> `, sessionIds);
+
+      const result = await redis.transaction.turnEnd(sessionId, boardId);
+
       return {
         data: {
           sessionIds,
+          isGameOver: result.isGameOver,
+          rank: result.rank,
         },
       };
     } catch (e) {

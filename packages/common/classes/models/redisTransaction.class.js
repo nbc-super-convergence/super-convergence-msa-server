@@ -142,6 +142,8 @@ class redisTransaction {
         roomId: board.roomId,
         ownerId: board.ownerId,
         state: board.state,
+        maxTurn: board.turn,
+        nowTurn: 1,
       });
       multi.expire(boardKey, this.expire);
 
@@ -227,8 +229,31 @@ class redisTransaction {
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
-      multi.hset(mapKey, tile, sessionId);
-      multi.sadd(historyKey, tile);
+      // * 타일 주인 있는지 확인
+      const tileOwner = await multi.hget(mapKey, tile);
+      if (!tileOwner) {
+        // * 타일주인이 없음 : 10G
+        await multi.hset(
+          mapKey,
+          tile,
+          JSON.stringify({
+            sessionId,
+            gold: 10,
+          }),
+        );
+      } else {
+        // * 타일주인이 있음 : 구매가 * 1.5
+        const purchasingPrice = JSON.parse(tileOwner).gold;
+        await multi.hset(
+          mapKey,
+          tile,
+          JSON.stringify({
+            sessionId,
+            gold: Math.floor(purchasingPrice * 1.5),
+          }),
+        );
+      }
+      await multi.sadd(historyKey, tile);
     });
   }
 
@@ -237,17 +262,28 @@ class redisTransaction {
    * @param {String} boardId
    * @param {String} sessionId
    * @param {Number} tile
-   * @param {Number} penalty
    */
-  async tilePenalty(boardId, sessionId, tile, penalty) {
-    //
+  async tilePenalty(boardId, sessionId, tile) {
+    /*
+     * 기본 구매가 : 10 골드 [v]
+     * 벌금 : 구매가 1/2
+     * 매수 : 구매가 * 1.5
+     * 골드의 소수점은 모두 내림 처리
+     *
+     * 벌금 적용 : 0까지만, 대신 타일 주인도 깎인 만큼만 증가 시켜줄 것 [v]
+     */
     const result = {};
     await this.execute(async (multi) => {
       // * Keys
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
-      const tileOwner = await multi.hget(mapKey, tile);
+      const tileOwnerStr = await multi.hget(mapKey, tile);
+      const tileOwner = JSON.parse(tileOwnerStr);
       const penaltyPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
-      const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner}`;
+      const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner.sessionId}`;
+
+      // TODO: 벌금, 구매가를 가져오는 방식으로 수정해야함
+      // TODO: 테스트 예정 : 24.12.10
+      let penalty = Math.floor(tileOwner.gold / 2); // 10 / 2;
 
       //
       let pennaltyPlayerGold = await multi.hget(penaltyPlayerInfoKey, 'gold');
@@ -258,11 +294,18 @@ class redisTransaction {
       let ownerPlayerGold = await multi.hget(ownerPlayerInfoKey, 'gold');
       console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
-      pennaltyPlayerGold = pennaltyPlayerGold - penalty;
-      ownerPlayerGold = ownerPlayerGold + penalty;
+      // * 소지 골드는 0이하로 떨어지지 않는다
+      if (pennaltyPlayerGold > 0) {
+        if (penalty > pennaltyPlayerGold) {
+          penalty = pennaltyPlayerGold;
+        }
 
-      await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
-      await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+        pennaltyPlayerGold = pennaltyPlayerGold - penalty;
+        ownerPlayerGold = ownerPlayerGold + penalty;
+
+        await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
+        await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+      }
 
       // TODO: 페널티 이력 저장?
 
@@ -302,6 +345,121 @@ class redisTransaction {
         playerInfo.sessionId = sId;
         result.playersInfo.push(playerInfo);
       });
+    });
+    return result;
+  }
+
+  /**
+   * 미니 순서게임 (다트)
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {Object} dartData
+   * @returns
+   */
+  async boardDartCount(boardId, sessionId, dartData) {
+    const result = {};
+    result.isOk = false;
+    result.diceGameDatas = [];
+    await this.execute(async (multi) => {
+      // BOARD_DART_HISTORY
+      const dartHistKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}`;
+      const histCount = await multi.zRange(dartHistKey, 0, -1).length;
+
+      // BOARD_PLAYERS
+      const boardPlayerKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+      const boardPlayerCount = await multi.sCard(boardPlayerKey);
+      // TODO:
+      if (histCount < boardPlayerCount) {
+        await multi.zAdd(dartHistKey, {
+          score: dartData.distance,
+          value: sessionId,
+        });
+
+        const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${sessionId}`;
+        const dartInfoData = {
+          distance: dartData.distance,
+          angle: JSON.stringify(dartData.angle),
+          location: JSON.stringify(dartData.location),
+          power: dartData.power,
+        };
+        await multi.hset(dartInfoKey, dartInfoData);
+      } else {
+        const boardPlayers = await multi.sMembers(boardPlayerKey);
+        console.log('[ boardPlayers ] ====>> ', boardPlayers);
+
+        result.isOk = true;
+        for (let i = 0; i < boardPlayers.length; i++) {
+          //
+          const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${boardPlayers[i]}`;
+          const dartInfoData = await multi.hgetall(dartInfoKey);
+
+          result.diceGameDatas.push({
+            sessionId: boardPlayers[i],
+            value: 0,
+            rank: await multi.zRem(dartHistKey, boardPlayers[i]),
+            distance: dartInfoData.distance,
+            angle: JSON.parse(dartInfoData.angle),
+            location: JSON.parse(dartInfoData.location),
+            power: dartInfoData.power,
+          });
+        }
+      }
+    });
+    return result;
+  }
+
+  /**
+   * * 턴 종료 & 보드게임 종료
+   * @param {String} sessionId
+   * @param {String} boardId
+   * @returns
+   */
+  async turnEnd(sessionId, boardId) {
+    //
+    const result = {};
+    result.isGameOver = false;
+    result.rank = [];
+    await this.execute(async (multi) => {
+      // TODO: manager에 있는거 옮기고, 영수증 처리 ㄱㄱ
+
+      const boardKey = `${this.prefix.BOARD}:${boardId}`;
+
+      const maxTurn = await multi.hget(boardKey, `maxTurn`);
+      const nowTurn = await multi.hget(boardKey, `nowTurn`);
+
+      if (maxTurn >= nowTurn) {
+        result.isGameOver = true;
+        // TODO: 영수증 ㄱㄱ
+        const boardPlayers = await multi.sMembers(boardKey);
+
+        for (let i = 0; i < boardPlayers.length; i++) {
+          const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${boardPlayers[i]}`;
+          const boardPlayerInfo = await multi.hgetall(boardPlayerInfoKey);
+
+          const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
+          const tileCount = await multi.sCard(tileHistoryKey);
+
+          const gold = boardPlayerInfo.gold + tileCount * 50;
+
+          result.rank.push({
+            sessionId: boardPlayers[i],
+            rank: 0,
+            tileCount,
+            gold,
+          });
+        }
+
+        // 정렬
+        result.rank = result.rank.sort((a, b) => {
+          return a.gold - b.gold;
+        });
+
+        // 순위 저장
+        result.rank.forEach((e, i) => (e.rank = i + 1));
+      } else {
+        // * 턴 + 1
+        await multi.hset(boardKey, 'nowTurn', nowTurn + 1);
+      }
     });
     return result;
   }
