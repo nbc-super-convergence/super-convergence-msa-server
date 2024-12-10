@@ -4,7 +4,8 @@ import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType } from '../../handlers/index.js';
 import { logger } from '../../utils/logger.utils.js';
 import { danceConfig } from '../../config/config.js';
-import { subRedisClient } from '../../init/redis.js';
+import { redis, subRedisClient } from '../../init/redis.js';
+import danceGameManager from '../manager/dance.manager.js';
 
 class DanceServer extends TcpServer {
   constructor(name, port, types = []) {
@@ -14,33 +15,40 @@ class DanceServer extends TcpServer {
 
     this.subScriber.subscribe(danceConfig.REDIS.CHANNEL, 'danceGameChannel', (err, count) => {
       if (err) {
-        logger.error(`[Subscribe error] ==> `, err);
+        logger.error(`[DanceServer Subscribe error] ==> `, err);
         return;
       }
-      logger.info(`[Subscribed to ${count} channel(s).]`);
+      logger.info(`[DanceServer Subscribed to ${count} channel(s).]`);
     });
 
-    // this.subScriber.on('message', async (channel, message) => {
-    // logger.info(`[Received ${danceConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
-    // if (channel === danceConfig.REDIS.CHANNEL) {
-    //   //* `${boardId}:${users}`
-    //   const [boardId, users] = message.split(':');
-    //   await iceGameManager.addGame(boardId, JSON.parse(users));
-    // } else {
-    //   console.log(`[iceChannel - message]`, message);
-    //   const game = await iceGameManager.getGameBySessionId(message);
-    //   console.log(`[iceChannel - game]`, game);
-    //   for (let user of game.users) {
-    //     console.log(`[iceChannel - user]`, user);
-    //     console.log(`[iceChannel - sessionId]`, user.sessionId);
-    //     await redisUtil.createUserLocation(user.sessionId, 'ice', game.id);
-    //   }
-    //   const buffer = await iceGameManager.iceMiniGameReadyNoti(game);
-    //   // TODO: 나중에 수정하기
-    //   const seq = '2';
-    //   this._socketMap[seq].socket.write(buffer);
-    // }
-    // });
+    this.subScriber.on('message', async (channel, message) => {
+      logger.info(`[Received ${danceConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
+
+      if (channel === danceConfig.REDIS.CHANNEL) {
+        //* `${boardId}:${users}`
+        const [boardId, users] = message.split(':');
+
+        await danceGameManager.createGame(boardId, JSON.parse(users));
+      } else {
+        logger.info(`[DanceChannel - message]`, message);
+
+        const game = danceGameManager.getGameBySessionId(message);
+
+        logger.info(`[DanceChannel - game]`, game);
+
+        for (const user of Array.from(game.users.keys())) {
+          logger.info(`[DanceChannel - sessionId]`, user);
+          await redis.createUserLocation(user, 'dance', game.id);
+        }
+
+        const buffer = danceGameManager.miniGameReadyNoti(game);
+
+        // TODO: 나중에 수정하기
+        const seq = '2';
+
+        this._socketMap[seq].socket.write(buffer);
+      }
+    });
   }
 
   _onData = (socket) => async (data) => {
