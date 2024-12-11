@@ -22,7 +22,7 @@ export const dropGameReadyNotification = (sessionId) => {
 
 export const dropMiniGameStartNotification = () => {
   const type = MESSAGE_TYPE.DROP_MINI_GAME_START_NOTIFICATION;
-  const payload = {};
+  const payload = { startTime: Date.now() + 4000 };
 
   return { type, payload };
 };

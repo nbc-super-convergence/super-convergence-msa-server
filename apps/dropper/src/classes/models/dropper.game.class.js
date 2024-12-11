@@ -117,7 +117,7 @@ class dropperGame extends Game {
   }
 
   checkUserInFloor(holes) {
-    return this.users.filter((user) => !holes.includes(user.slot));
+    return this.users.filter((user) => !holes.includes(user.slot) && !user.isDead());
   }
 
   // ! 유저는 10초 동안 움직일 수 있다.
@@ -160,7 +160,9 @@ class dropperGame extends Game {
     // * 남은 플레이어 사망
     const users = this.checkUserInFloor(holes);
 
-    logger.info(`[fallen - 남은 유저들]` + users);
+    for (let key in users) {
+      logger.info(`[fallen - 남아있는 유저id]:` + users[key].sessionId + ' ' + users[key].slot);
+    }
 
     // ? 그 층에 있던 모든 유저에게 같은 랭크 부여하기
     const rank = this.getAliveUsers().length;
@@ -206,10 +208,10 @@ class dropperGame extends Game {
     this.intervalManager.addInterval(
       'checkGameOver',
       () => {
-        if (this.stage === 9) {
+        if (this.stage === 9 || this.isOneAlive()) {
           const aliveUsers = this.getAliveUsers();
 
-          logger.info(`[fallen - aliveUsers]`, aliveUsers);
+          logger.info(`[checkGameOverInterval - aliveUsers]`, aliveUsers);
 
           if (aliveUsers) {
             // ? 마지막 살아남은 모든 유저가 1등
@@ -235,7 +237,7 @@ class dropperGame extends Game {
     // * 게임 종료
     logger.info(`[handleGameEnd] ===> 게임 종료`);
     // 전체 유저 조회
-    const users = this.getAllUser();
+    const users = this.getAllUsers();
 
     const sessionIds = this.getAllSessionIds();
 
