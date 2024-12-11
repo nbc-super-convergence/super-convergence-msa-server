@@ -100,13 +100,15 @@ message  S2C_PurchaseTileResponse {
   	bool success = 1;
 	int32 tile = 2;
 	BoardPlayerData playerInfo = 3; 
-	GlobalFailCode failCode = 4;
+	int32 purchaseGold = 4;
+	GlobalFailCode failCode = 5;
 }
 
 message  S2C_PurchaseTileNotification {
 	string sessionId = 1;
 	int32 tile = 2;
 	BoardPlayerData playerInfo = 3; 
+	int32 purchaseGold = 4;
 }
 
 message  C2S_PurchaseTrophyRequest {

@@ -157,7 +157,9 @@ class BoardManager {
 
       // TODO: 1 - 타일 주인 정보 저장,
       // TODO: 2 - [업적용] 타일 구매이력 저장
-      await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
+      const purchaseGold = await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
+
+      logger.info('[ BOARD: ] purchaseGold ===>> ', purchaseGold);
 
       const playersInfo = [];
       const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
@@ -181,6 +183,7 @@ class BoardManager {
           sessionIds,
           playersInfo, // all
           playerInfo, // self
+          purchaseGold,
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };

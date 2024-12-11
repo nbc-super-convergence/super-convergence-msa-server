@@ -187,6 +187,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
       sessionId: sessionId,
       tile: result.data.tile,
       playersInfo: result.data.playersInfo,
+      purchaseGold: result.data.purchaseGold,
     };
 
     const notificationPacket = serializeForGate(
@@ -204,6 +205,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
       success: result.success,
       tile: result.data.tile,
       playerInfo: result.data.playerInfo,
+      purchaseGold: result.data.purchaseGold,
       failCode: result.failCode,
     };
     const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
