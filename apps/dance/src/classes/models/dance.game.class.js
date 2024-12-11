@@ -284,6 +284,7 @@ class DanceGame extends Game {
       TeamRank: sortedResults.map(([teamNumber]) => teamNumber),
       result: sortedResults.map(([, result]) => result),
       reason: this.reason,
+      endTime: Date.now(),
     };
   }
 

@@ -46,6 +46,7 @@ export const createNotification = (data, messageType, sessionIds) => {
         TeamRank: data.TeamRank,
         result: data.result,
         reason: data.reason,
+        endTime: data.endTime,
       };
       break;
 
