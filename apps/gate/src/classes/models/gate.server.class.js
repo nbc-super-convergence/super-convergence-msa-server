@@ -190,6 +190,7 @@ class GateServer extends TcpServer {
           // * gate & distributor 제외
           if (param.name !== 'gate' && param.name !== 'distributor') {
             // * 정보받은 서버랑 연결
+            logger.info('[ GATE: connect Service Server ] param ====>>> ', param);
             client.connect();
           }
         }
