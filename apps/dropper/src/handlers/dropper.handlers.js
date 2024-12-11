@@ -1,8 +1,8 @@
 import { sessionIds } from '../classes/models/dropper.game.class.js';
 import dropGameManager from '../classes/managers/dropper.game.manager.js';
-import { logger } from '../../utils/logger.utils.js';
+import { logger } from '../utils/logger.utils.js';
 import { dropConfig } from '../config/config.js';
-import { redisUtil } from '../../utils/redis.js';
+import { redisUtil } from '../utils/redis.js';
 
 export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
   try {

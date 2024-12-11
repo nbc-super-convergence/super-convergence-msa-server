@@ -1,8 +1,8 @@
 import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { dropperMap } from '../../map/dropper.Map.js';
 import dropperUser from './dropper.user.class.js';
-import { redisUtil } from '../../../utils/redis.js';
-import { logger } from '../../../utils/logger.utils.js';
+import { redisUtil } from '../../utils/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 import { GAME_STATE, USER_STATE } from '../../constants/state.js';
 import { serializeForGate } from '@repo/common/utils';
 import {
@@ -10,7 +10,7 @@ import {
   dropLevelEndNotification,
   dropLevelStartNotification,
   dropPlayerDeathNotification,
-} from '../../../utils/dropper.notificaion.js';
+} from '../../utils/dropper.notificaion.js';
 
 export const sessionIds = new Map();
 
@@ -259,9 +259,13 @@ class dropperGame extends Game {
     this.slots = new Array(9).fill(false);
     this.setGameState(GAME_STATE.WAIT);
 
+    logger.info(`[reset - stage]`, this.stage);
+    logger.info(`[reset - slots]`, this.slots);
+    logger.info(`[reset - state]`, this.state);
+
     this.intervalManager.clearAll();
     // TODO: timeout이 실행되고나서 게임이 종료가 되었을 수도 있음
-    this.timeoutManager.clearAll();
+    //this.timeoutManager.clearAll();
   }
 }
 
