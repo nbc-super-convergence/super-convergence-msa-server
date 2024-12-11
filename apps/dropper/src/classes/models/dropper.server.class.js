@@ -22,30 +22,34 @@ class DropperServer extends TcpServer {
     });
 
     this.subScriber.on('message', async (channel, message) => {
-      if (channel === dropConfig.REDIS.CHANNEL) {
-        logger.info(`[Received ${dropConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
-        //* `${boardId}:${users}`
-        const [boardId, users] = message.split(':');
+      try {
+        if (channel === dropConfig.REDIS.CHANNEL) {
+          logger.info(`[Received ${dropConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
 
-        // TODO: 서버가 자꾸 죽어서 임시 주석 처리 했습니다.
-        // await dropperGameManager.addGame(boardId, JSON.parse(users));
-      } else {
-        logger.info(`[Received ${dropConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
+          //* `${boardId}:${users}`
+          const [boardId, users] = message.split(':');
 
-        const game = await dropperGameManager.getGameBySessionId(message);
-        console.log(`[dropperChannel - game]`, game);
+          await dropperGameManager.addGame(boardId, JSON.parse(users));
+        } else {
+          logger.info(`[Received ${dropConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
 
-        for (let user of game.users) {
-          console.log(`[dropperChannel - sessionId]`, user.sessionId);
-          await redisUtil.createUserLocation(user.sessionId, 'dropper', game.id);
+          const game = await dropperGameManager.getGameBySessionId(message);
+          logger.info(`[dropperChannel - game]`, game);
+
+          for (let user of game.users) {
+            logger.info(`[dropperChannel - sessionId]`, user.sessionId);
+            await redisUtil.createUserLocation(user.sessionId, 'dropper', game.id);
+          }
+
+          const buffer = await dropperGameManager.dropMiniGameReadyNoti(game);
+
+          // TODO: 나중에 수정하기
+          const seq = '2';
+
+          this._socketMap[seq].socket.write(buffer);
         }
-
-        const buffer = await dropperGameManager.dropMiniGameReadyNoti(game);
-
-        // TODO: 나중에 수정하기
-        const seq = '2';
-
-        this._socketMap[seq].socket.write(buffer);
+      } catch (error) {
+        logger.info(`[subScribe - error] channel:` + channel);
       }
     });
   }
