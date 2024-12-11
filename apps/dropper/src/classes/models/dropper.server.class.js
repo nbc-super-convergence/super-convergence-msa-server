@@ -49,7 +49,7 @@ class DropperServer extends TcpServer {
           this._socketMap[seq].socket.write(buffer);
         }
       } catch (error) {
-        logger.info(`[subScribe - error] channel:` + channel);
+        logger.error(`[subScribe - error] channel:` + channel);
       }
     });
   }
