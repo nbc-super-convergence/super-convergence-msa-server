@@ -71,14 +71,36 @@ class DanceGameManager {
     }
   }
 
-  getGameBySessionId(sessionId) {
-    const gameId = this.sessionIds.get(sessionId);
+  getGameByGameId(gameId) {
     if (!gameId) {
-      logger.error('[ getGameBySessionId ] ====> gameId not found', { sessionId });
+      logger.error('[ getGameByGameId ] ====> gameId is undefined', { gameId });
       return null;
     }
 
-    return this.games.get(gameId);
+    const game = this.games.get(gameId);
+    if (!game) {
+      logger.error('[ getGameByGameId ] ====> game not found', { gameId });
+      return null;
+    }
+
+    return game;
+  }
+
+  getGameIdBySessionId(sessionId) {
+    const gameId = this.sessionIds.get(sessionId);
+    if (!gameId) {
+      logger.error('[ getGameIdBySessionId ] ====> gameId not found', { gameId });
+      return null;
+    }
+
+    return gameId;
+  }
+
+  getGameBySessionId(sessionId) {
+    const gameId = this.getGameIdBySessionId(sessionId);
+    const game = this.getGameByGameId(gameId);
+
+    return game;
   }
 
   danceKeyPressResponse(result, sessionId) {
