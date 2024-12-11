@@ -98,8 +98,11 @@ class dropperGame extends Game {
     // * 모든 유저 위치 제거 ( 미니 게임 정상 종료시 )
     this.users.forEach(async (user) => {
       await redisUtil.deleteUserLocationField(user.sessionId, 'dropper');
-      logger.info(`[clearAllPlayers] ===>`, user.startInfos);
       user.resetInfo();
+      logger.info(`[user - startInfos] ===>`, user.startInfos);
+      logger.info(`[user - slot]`, user.slot);
+      logger.info(`[user - rank]`, user.rank);
+      logger.info(`[user - isReady]`, user.isReady);
     });
   }
 
@@ -261,7 +264,6 @@ class dropperGame extends Game {
   reset() {
     // * 게임 내 정보 리셋
     this.stage = 1;
-    const positions = this.startPosition.map((start) => start.pos);
 
     this.slots = new Array(9).fill(false);
 

@@ -1,5 +1,5 @@
 import { User } from '@repo/common/classes';
-import { USER_STATE } from '../../../../ice/src/constants/states.js';
+import { USER_STATE } from '../../constants/state.js';
 
 class dropperUser extends User {
   constructor(gameId, sessionId, slot, rotation) {
