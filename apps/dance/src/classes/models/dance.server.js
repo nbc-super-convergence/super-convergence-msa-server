@@ -30,23 +30,28 @@ class DanceServer extends TcpServer {
 
         await danceGameManager.createGame(boardId, JSON.parse(users));
       } else {
-        logger.info(`[DanceChannel - message]`, message);
+        try {
+          logger.info(`[DanceChannel - message]`, message);
 
-        const game = danceGameManager.getGameBySessionId(message);
+          //* message가 아마 boardId?
+          const game = danceGameManager.getGameByGameId(message);
 
-        logger.info(`[DanceChannel - game]`, game);
+          logger.info(`[DanceChannel - game]`, game);
 
-        for (const user of Array.from(game.users.keys())) {
-          logger.info(`[DanceChannel - sessionId]`, user);
-          await redis.createUserLocation(user, 'dance', game.id);
+          for (const user of Array.from(game.users.keys())) {
+            logger.info(`[DanceChannel - sessionId]`, user);
+            await redis.createUserLocation(user, 'dance', game.id);
+          }
+
+          const buffer = danceGameManager.miniGameReadyNoti(game);
+
+          // TODO: 나중에 수정하기
+          const seq = '2';
+
+          this._socketMap[seq].socket.write(buffer);
+        } catch (error) {
+          logger.error(`[DanceChannel] ====> error`, error);
         }
-
-        const buffer = danceGameManager.miniGameReadyNoti(game);
-
-        // TODO: 나중에 수정하기
-        const seq = '2';
-
-        this._socketMap[seq].socket.write(buffer);
       }
     });
   }
