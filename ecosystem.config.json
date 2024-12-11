@@ -41,6 +41,24 @@
       "script": "./apps/ice/dist/server.js",
       "instances": 1,
       "exec_mode": "fork"
+    },
+    {
+      "name": "dropper",
+      "script": "./apps/dropper/dist/server.js",
+      "instances": 1,
+      "exec_mode": "fork"
+    },
+    {
+      "name": "dance",
+      "script": "./apps/dance/dist/server.js",
+      "instances": 1,
+      "exec_mode": "fork"
+    },
+    {
+      "name": "bomb",
+      "script": "./apps/bomb/dist/server.js",
+      "instances": 1,
+      "exec_mode": "fork"
     }
   ]
 }
