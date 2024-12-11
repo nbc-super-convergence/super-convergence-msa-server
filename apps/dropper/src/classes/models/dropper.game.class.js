@@ -235,7 +235,7 @@ class dropperGame extends Game {
     // * 게임 종료
     logger.info(`[handleGameEnd] ===> 게임 종료`);
     // 전체 유저 조회
-    const users = this.getAllUser();
+    const users = this.getAllUsers();
 
     const sessionIds = this.getAllSessionIds();
 

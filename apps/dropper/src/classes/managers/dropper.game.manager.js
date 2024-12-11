@@ -61,7 +61,7 @@ class dropperGameManager {
     // * 게임 시작 Notification
     const sessionIds = game.getAllSessionIds();
 
-    const users = game.getAllUser();
+    const users = game.getAllUsers();
 
     const message = dropMiniGameReadyNotification(users);
 

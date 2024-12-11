@@ -32,11 +32,11 @@ export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
     // * 유저 게임 준비
     user.gameReady();
 
-    let buffer = dropGameManager.dropGameReadyNoti(user, game);
+    let buffer = await dropGameManager.dropGameReadyNoti(user, game);
 
     // * 모든 유저 준비 완료
     if (game.isAllReady()) {
-      buffer = dropGameManager.dropMiniGameStartNoti(socket, game);
+      buffer = await dropGameManager.dropMiniGameStartNoti(socket, game);
 
       //* 인터벌 시작
       game.breakFloorInterval(socket);
@@ -94,7 +94,7 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
     // * 유저 위치 정보 업데이트
     user.updateUserInfos(slot, rotation, state);
 
-    const buffer = dropGameManager.dropPlayerSyncNoti(user, game);
+    const buffer = await dropGameManager.dropPlayerSyncNoti(user, game);
 
     socket.write(buffer);
   } catch (error) {
