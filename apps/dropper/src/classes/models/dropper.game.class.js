@@ -187,10 +187,11 @@ class dropperGame extends Game {
 
         // * 사용중인 slot 삭제
         if (user.slot) {
-          user.slot = undefined;
-
           // ? 죽은 유저의 slot 삭제
           this.removeSlot(user.slot);
+
+          // * 임시로 -1로 처리
+          user.slot = -1;
         }
 
         const sessionIds = this.getAllSessionIds();
