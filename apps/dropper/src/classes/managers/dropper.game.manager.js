@@ -26,7 +26,7 @@ class dropperGameManager {
     return dropperGameManager.instance;
   }
 
-  async addUser(gameId, users) {
+  async addGame(gameId, users) {
     const game = new dropperGame(gameId);
 
     logger.info(`[dropperGameManager - users]:`, users);
