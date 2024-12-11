@@ -348,8 +348,9 @@ class BoardManager {
       // TODO: [ TEST ] env 값에 따라 선택되게끔 수정 : 24.12.11(수)
       if (SELECT_MINI_GAME !== 'ALL') {
         channels = [redis.channel[SELECT_MINI_GAME]];
-        logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
       }
+      logger.info('[ BOARD: SELECT_MINI_GAME ] SELECT_MINI_GAME ===>> ', SELECT_MINI_GAME);
+      logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
 
       // * random
       const randomVal = Math.floor(Math.random() * channels.length);
