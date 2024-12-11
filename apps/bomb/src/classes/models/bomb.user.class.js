@@ -1,5 +1,6 @@
 import { User, Vector } from '@repo/common/classes';
 import { USER_STATE } from '../../constants/user.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class BombUser extends User {
   constructor(gameId, sessionId, position, rotation) {
@@ -7,15 +8,16 @@ class BombUser extends User {
     this.gameId = gameId;
     this.sessionId = sessionId;
 
+    this.initialPos = new Vector(position);
+    this.initialRot = rotation;
+
     this.position = new Vector(position);
     this.rotation = rotation;
+
     this.state = USER_STATE.IDLE;
     this.rank = null;
 
     this.isReady = false;
-    this.startInfos;
-
-    this.saveStartInfo();
   }
 
   gameReady() {
@@ -32,7 +34,7 @@ class BombUser extends User {
 
   updateUserInfos(position, rotation, state) {
     // * sync 업데이트
-    if (this.state !== USER_STATE.DIE) {
+    if (this.isReady === true && this.state !== USER_STATE.DIE) {
       this.position.set(position);
       this.rotation = rotation;
       this.state = state;
@@ -43,18 +45,17 @@ class BombUser extends User {
     this.rank = rank;
   }
 
-  saveStartInfo() {
-    // * 게임 초기 정보
-    this.startInfos = {
-      position: this.position,
-      rotation: this.rotation,
-    };
-  }
-
   reset() {
+    logger.info(
+      `[bombGame - User.class] - reset`,
+      `Position =${this.position} InitialPosition = ${this.initialPos}`,
+    );
+
     this.rank = null;
     this.isReady = false;
     this.state = USER_STATE.IDLE;
+    this.position.set(this.initialPos);
+    this.rotation = this.initialRot;
   }
 }
 
