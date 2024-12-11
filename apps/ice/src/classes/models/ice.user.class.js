@@ -63,7 +63,7 @@ class iceUser extends User {
   resetInfo() {
     // * 유저 리셋
     this.hp = this.startInfos.hp;
-    this.position = this.startInfos.position;
+    this.position.set(this.startInfos.position);
     this.state = USER_STATE.IDLE;
     this.rotation = this.startInfos.rotation;
     this.rank = undefined;

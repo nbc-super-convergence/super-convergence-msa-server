@@ -108,7 +108,7 @@ class dropperGameManager {
     //* 유저 위치 정보 업데이트
     logger.info(`[dropGameManager - dropPlayerSyncNoti]`);
 
-    const sessionIds = game.getOtherSessionIds(user.sessionId);
+    const sessionIds = game.getAllSessionIds(user.sessionId);
 
     const message = dropPlayerSyncNotification(user);
 

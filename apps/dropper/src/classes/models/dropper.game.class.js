@@ -233,7 +233,9 @@ class dropperGame extends Game {
             }
           }
 
-          this.handleGameEnd(socket);
+          setTimeout(() => {
+            this.handleGameEnd(socket);
+          }, 4000);
         }
       },
       1000,
