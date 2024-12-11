@@ -55,7 +55,7 @@ class iceUser extends User {
     // * 게임 초기 정보
     this.startInfos = {
       hp: this.hp,
-      position: this.position,
+      position: this.position.get(),
       rotation: this.rotation,
     };
   }
