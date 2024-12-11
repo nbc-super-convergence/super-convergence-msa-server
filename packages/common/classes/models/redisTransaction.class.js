@@ -234,7 +234,7 @@ class redisTransaction {
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
       // * 타일 주인 있는지 확인
-      const tileOwner = await multi.hget(mapKey, tile);
+      const tileOwner = await this.client.hget(mapKey, tile);
       if (!tileOwner) {
         // * 타일주인이 없음 : 10G
         await multi.hset(
@@ -283,7 +283,7 @@ class redisTransaction {
     await this.execute(async (multi) => {
       // * Keys
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
-      const tileOwnerStr = await multi.hget(mapKey, tile);
+      const tileOwnerStr = await this.client.hget(mapKey, tile);
       const tileOwner = JSON.parse(tileOwnerStr);
       const penaltyPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
       const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${tileOwner.sessionId}`;
@@ -293,12 +293,12 @@ class redisTransaction {
       let penalty = Math.floor(tileOwner.gold / 2); // 10 / 2;
 
       //
-      let pennaltyPlayerGold = await multi.hget(penaltyPlayerInfoKey, 'gold');
+      let pennaltyPlayerGold = await this.client.hget(penaltyPlayerInfoKey, 'gold');
       console.log(
         '[ redisTransaction - tilePenalty ] pennaltyPlayerGold ==>> ',
         pennaltyPlayerGold,
       );
-      let ownerPlayerGold = await multi.hget(ownerPlayerInfoKey, 'gold');
+      let ownerPlayerGold = await this.client.hget(ownerPlayerInfoKey, 'gold');
       console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
       // * 소지 골드는 0이하로 떨어지지 않는다
@@ -307,8 +307,8 @@ class redisTransaction {
           penalty = pennaltyPlayerGold;
         }
 
-        pennaltyPlayerGold = pennaltyPlayerGold - penalty;
-        ownerPlayerGold = ownerPlayerGold + penalty;
+        pennaltyPlayerGold = Number(pennaltyPlayerGold) - penalty;
+        ownerPlayerGold = Number(ownerPlayerGold) + penalty;
 
         await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
         await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
@@ -319,9 +319,11 @@ class redisTransaction {
       // * 모든 플레이어 정보 반환
       result.playersInfo = [];
       const PlayersInfoKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-      const playerSessionIds = await multi.lrange(PlayersInfoKey, 0, -1);
+      const playerSessionIds = await this.client.lrange(PlayersInfoKey, 0, -1);
       playerSessionIds.forEach(async (sId) => {
-        const playerInfo = await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`);
+        const playerInfo = await this.client.hget(
+          `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`,
+        );
         playerInfo.sessionId = sId;
         result.playersInfo.push(playerInfo);
       });
@@ -342,13 +344,15 @@ class redisTransaction {
 
       // * boardId 조회
       const boardKey = `${this.prefix.LOCATION}:${sessionId}`;
-      const boardId = await multi.hget(boardKey, 'board');
+      const boardId = await this.client.hget(boardKey, 'board');
 
       // * sessionIds 돌면서 정보 삽입
       const boardPlayersKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-      const playerSessionIds = await multi.lrange(boardPlayersKey, 0, -1);
+      const playerSessionIds = await this.client.lrange(boardPlayersKey, 0, -1);
       playerSessionIds.forEach(async (sId) => {
-        const playerInfo = await multi.hget(`${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`);
+        const playerInfo = await this.client.hget(
+          `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`,
+        );
         playerInfo.sessionId = sId;
         result.playersInfo.push(playerInfo);
       });
@@ -370,14 +374,14 @@ class redisTransaction {
     await this.execute(async (multi) => {
       // BOARD_DART_HISTORY
       const dartHistKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}`;
-      const histCount = await multi.zRange(dartHistKey, 0, -1).length;
+      const histCount = await this.client.zRange(dartHistKey, 0, -1).length;
 
       // BOARD_PLAYERS
       const boardPlayerKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-      const boardPlayerCount = await multi.scard(boardPlayerKey);
+      const boardPlayerCount = await this.client.scard(boardPlayerKey);
       // TODO:
       if (histCount < boardPlayerCount) {
-        await multi.zAdd(dartHistKey, {
+        await multi.zadd(dartHistKey, {
           score: dartData.distance,
           value: sessionId,
         });
@@ -391,19 +395,19 @@ class redisTransaction {
         };
         await multi.hset(dartInfoKey, dartInfoData);
       } else {
-        const boardPlayers = await multi.smembers(boardPlayerKey);
+        const boardPlayers = await this.client.smembers(boardPlayerKey);
         console.log('[ boardPlayers ] ====>> ', boardPlayers);
 
         result.isOk = true;
         for (let i = 0; i < boardPlayers.length; i++) {
           //
           const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${boardPlayers[i]}`;
-          const dartInfoData = await multi.hgetall(dartInfoKey);
+          const dartInfoData = await this.client.hgetall(dartInfoKey);
 
           result.diceGameDatas.push({
             sessionId: boardPlayers[i],
             value: 0,
-            rank: await multi.zRem(dartHistKey, boardPlayers[i]),
+            rank: await this.client.zrem(dartHistKey, boardPlayers[i]),
             distance: dartInfoData.distance,
             angle: JSON.parse(dartInfoData.angle),
             location: JSON.parse(dartInfoData.location),
@@ -433,17 +437,19 @@ class redisTransaction {
       const boardKey = `${this.prefix.BOARD}:${boardId}`;
 
       logger.info('  [ BOARD: turnEnd  ] boardKey => ', boardKey);
-      const boardObj = await multi.hgetall(boardKey);
-      const maxTurn = boardObj.maxTurn;
-      const nowTurn = boardObj.nowTurn;
+      const boardObj = await this.client.hgetall(boardKey);
+      const maxTurn = Number(boardObj.maxTurn);
+      const nowTurn = Number(boardObj.nowTurn);
 
+      logger.info('  [ BOARD: turnEnd  ] boardObj => ', boardObj);
       logger.info('  [ BOARD: turnEnd  ] maxTurn => ', maxTurn);
       logger.info('  [ BOARD: turnEnd  ] nowTurn => ', nowTurn);
 
-      if (maxTurn >= nowTurn) {
+      if (nowTurn >= maxTurn) {
         result.isGameOver = true;
         // TODO: 영수증 ㄱㄱ
-        const boardPlayers = await multi.smembers(boardKey);
+        const boardPlayersKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+        const boardPlayers = await this.client.smembers(boardPlayersKey);
 
         logger.info('  [ BOARD: turnEnd  ] boardPlayers => ', boardPlayers);
 
@@ -454,12 +460,12 @@ class redisTransaction {
           const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${playerSessionId}`;
           logger.info(' boardPlayerInfoKey => ', boardPlayerInfoKey);
 
-          const boardPlayerInfo = await multi.hgetall(boardPlayerInfoKey);
+          const boardPlayerInfo = await this.client.hgetall(boardPlayerInfoKey);
           logger.info(' boardPlayerInfo => ', boardPlayerInfo);
 
           const tileHistoryKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${playerSessionId}`;
           logger.info(' tileHistoryKey => ', tileHistoryKey);
-          const tileCount = await multi.scard(tileHistoryKey);
+          const tileCount = await this.client.scard(tileHistoryKey);
           logger.info(' tileCount => ', tileCount);
 
           const gold = boardPlayerInfo.gold + tileCount * 50;
@@ -485,7 +491,8 @@ class redisTransaction {
         logger.info(' result rank3333 ===>> ', result.rank);
       } else {
         // * 턴 + 1
-        await multi.hset(boardKey, 'nowTurn', nowTurn + 1);
+        logger.info('[ turnEnd ] nowTurn type ===>> ', typeof nowTurn);
+        await multi.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
         logger.info(' result rank ELSSS ===>> ', result.rank);
       }
     });
