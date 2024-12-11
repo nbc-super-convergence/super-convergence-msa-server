@@ -45,7 +45,7 @@ export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
 
     socket.write(buffer);
   } catch (error) {
-    logger.info(error);
+    logger.error(error);
   }
 };
 
@@ -98,7 +98,7 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     socket.write(buffer);
   } catch (error) {
-    logger.info(error);
+    logger.error(error);
   }
 };
 
@@ -142,7 +142,7 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
     // ! 나간 유저의 게임 위치 삭제
     await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'dropper');
   } catch (error) {
-    logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
+    logger.error(`[dropCloseSocketRequestHandler] ===> `, error);
     //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중
   }
 };
