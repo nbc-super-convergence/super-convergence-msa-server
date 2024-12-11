@@ -44,6 +44,9 @@ class dropperGame extends Game {
 
       const newUser = new dropperUser(gameId, userId, slot, rotation);
 
+      // * 유저가 있는 슬롯은 true로 초기화
+      this.slots[slot] = true;
+
       this.users.push(newUser);
     }
   }
@@ -108,8 +111,10 @@ class dropperGame extends Game {
     return this.slots[slot] === true ? true : false;
   }
 
-  updateSlot(slot) {
+  updateSlot(user, slot) {
+    this.slots[user.slot] = false;
     this.slots[slot] = true;
+    logger.info(`업데이트 슬롯`, this.slots);
   }
 
   removeSlot(slot) {
@@ -256,7 +261,14 @@ class dropperGame extends Game {
   reset() {
     // * 게임 내 정보 리셋
     this.stage = 1;
+    const positions = this.startPosition.map((start) => start.pos);
+
     this.slots = new Array(9).fill(false);
+
+    this.users.forEach((user) => {
+      this.slots[user.startInfos.slot] = true;
+    });
+
     this.setGameState(GAME_STATE.WAIT);
 
     logger.info(`[reset - stage]`, this.stage);

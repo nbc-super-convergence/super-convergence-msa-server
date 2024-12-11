@@ -89,7 +89,7 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     // * 게임에 slot 업데이트
     // ! 혹시나 다른 유저가 침범하지 못하도록 선 업데이트
-    game.updateSlot(slot);
+    game.updateSlot(user, slot);
 
     // * 유저 위치 정보 업데이트
     user.updateUserInfos(slot, rotation, state);
