@@ -88,7 +88,7 @@ const client = net.connect(gateOptions, async () => {
 
         const payload = packetParser(messageType, packet);
 
-        console.log(' [ IceServer _onData ] payload ====>> ', payload);
+        console.log(' [ BombServer _onData ] payload ====>> ', payload);
 
         // moveInterval(client, payload);
       } else {

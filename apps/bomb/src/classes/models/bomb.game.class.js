@@ -75,6 +75,9 @@ class BombGame extends Game {
 
   bombUserSelect() {
     const survivor = this.getAliveUsers();
+    if (survivor.length <= 1) {
+      return 'NULL';
+    }
     const randomUser = Math.floor(Math.random() * survivor.length);
     const bombUser = survivor[randomUser];
     return bombUser.sessionId;
@@ -95,7 +98,6 @@ class BombGame extends Game {
 
     targetUser.boom();
     const survivor = this.getAliveUsers();
-
     targetUser.ranking(survivor.length + 1);
     const nextBombUser = this.bombUserSelect();
     this.bombUserChange(nextBombUser);

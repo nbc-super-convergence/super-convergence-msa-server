@@ -74,9 +74,9 @@ class BombServer extends TcpServer {
 
           await handler({ socket, payload });
 
-          console.log(' [ IceServer _onData ] payload ====>> ', payload);
+          console.log(' [ BombServer _onData ] payload ====>> ', payload);
         } catch (error) {
-          logger.error('[ Ice: _onData ] ERROR ====>> ', error);
+          logger.error('[ BombServer: _onData ] ERROR ====>> ', error);
         }
       } else {
         break;

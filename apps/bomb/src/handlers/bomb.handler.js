@@ -54,7 +54,7 @@ export const bombPlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     const user = game.getUserToSessionId(sessionId);
 
-    logger.info(`icePlayerSyncRequest 유저`, user);
+    logger.info(`bombPlayerSyncRequest 유저`, user);
 
     if (!user) {
       throw new Error(`유저가 존재하지 않음`, bombConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
