@@ -557,6 +557,12 @@ class RedisUtil {
     const lockKey = `${this.prefix.LOCK}:${key}:${id}`;
     await this.client.del(lockKey);
   }
+
+  async getMiniGameChannel() {
+    const key = `BOARD:MINIGAME_CHANNEL`;
+    const result = await this.client.get(key);
+    return result;
+  }
 }
 
 export default RedisUtil;

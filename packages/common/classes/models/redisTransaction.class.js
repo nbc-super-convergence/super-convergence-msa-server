@@ -222,7 +222,10 @@ class redisTransaction {
    * @param {Number} tile
    */
   async createPurchaseTileInfo(boardId, sessionId, tile) {
-    return this.execute(async (multi) => {
+    // 기본금액 10G
+    let purchaseGold = 10;
+
+    await this.execute(async (multi) => {
       /**
        * 1. 타일 주인 매핑 정보 저장 hash
        * 2. 구매 이력 정보 저장 list
@@ -239,23 +242,26 @@ class redisTransaction {
           tile,
           JSON.stringify({
             sessionId,
-            gold: 10,
+            gold: purchaseGold,
           }),
         );
       } else {
         // * 타일주인이 있음 : 구매가 * 1.5
         const purchasingPrice = JSON.parse(tileOwner).gold;
+        purchaseGold = Math.floor(purchasingPrice * 1.5);
         await multi.hset(
           mapKey,
           tile,
           JSON.stringify({
             sessionId,
-            gold: Math.floor(purchasingPrice * 1.5),
+            gold: purchaseGold,
           }),
         );
       }
       await multi.sadd(historyKey, tile);
     });
+
+    return purchaseGold;
   }
 
   /**

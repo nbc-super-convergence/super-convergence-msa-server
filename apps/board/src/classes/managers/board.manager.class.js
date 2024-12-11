@@ -157,7 +157,9 @@ class BoardManager {
 
       // TODO: 1 - 타일 주인 정보 저장,
       // TODO: 2 - [업적용] 타일 구매이력 저장
-      await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
+      const purchaseGold = await redis.transaction.createPurchaseTileInfo(boardId, sessionId, tile);
+
+      logger.info('[ BOARD: ] purchaseGold ===>> ', purchaseGold);
 
       const playersInfo = [];
       const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
@@ -181,6 +183,7 @@ class BoardManager {
           sessionIds,
           playersInfo, // all
           playerInfo, // self
+          purchaseGold,
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };
@@ -349,6 +352,14 @@ class BoardManager {
       if (SELECT_MINI_GAME !== 'ALL') {
         channels = [redis.channel[SELECT_MINI_GAME]];
       }
+
+      // TODO: [ TEST ] redis 값에 따라 선택되게끔 수정 : 24.12.11(수)
+      const redisMiniGameChannel = await redis.getMiniGameChannel();
+      if (redisMiniGameChannel) {
+        channels = [redis.channel[redisMiniGameChannel]];
+      }
+
+      logger.info('[ BOARD: SELECT_MINI_GAME ] redisMiniGameChannel ===>> ', redisMiniGameChannel);
       logger.info('[ BOARD: SELECT_MINI_GAME ] SELECT_MINI_GAME ===>> ', SELECT_MINI_GAME);
       logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
 
@@ -398,6 +409,14 @@ class BoardManager {
     } catch (e) {
       logger.error('[ BOARD : turnEnd ] ERRROR ==>> ', e);
     }
+  }
+
+  /**
+   * TODO: [ TEST ] redis 값 읽어서 리턴
+   */
+  async getMiniGameChannel() {
+    const result = await redis.getMiniGameChannel();
+    return String(result).toUpperCase();
   }
 } //* class end
 
