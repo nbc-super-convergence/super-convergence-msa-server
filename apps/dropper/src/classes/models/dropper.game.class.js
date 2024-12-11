@@ -1,8 +1,8 @@
 import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { dropperMap } from '../../map/dropper.Map.js';
 import dropperUser from './dropper.user.class.js';
-import { redisUtil } from '../../../utils/redis.js';
-import { logger } from '../../../utils/logger.utils.js';
+import { redisUtil } from '../../utils/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 import { GAME_STATE, USER_STATE } from '../../constants/state.js';
 import { serializeForGate } from '@repo/common/utils';
 import {
@@ -10,7 +10,7 @@ import {
   dropLevelEndNotification,
   dropLevelStartNotification,
   dropPlayerDeathNotification,
-} from '../../../utils/dropper.notificaion.js';
+} from '../../utils/dropper.notificaion.js';
 
 export const sessionIds = new Map();
 
@@ -43,6 +43,9 @@ class dropperGame extends Game {
       }
 
       const newUser = new dropperUser(gameId, userId, slot, rotation);
+
+      // * 유저가 있는 슬롯은 true로 초기화
+      this.slots[slot] = true;
 
       this.users.push(newUser);
     }
@@ -108,8 +111,10 @@ class dropperGame extends Game {
     return this.slots[slot] === true ? true : false;
   }
 
-  updateSlot(slot) {
+  updateSlot(user, slot) {
+    this.slots[user.slot] = false;
     this.slots[slot] = true;
+    logger.info(`업데이트 슬롯`, this.slots);
   }
 
   removeSlot(slot) {
@@ -256,12 +261,23 @@ class dropperGame extends Game {
   reset() {
     // * 게임 내 정보 리셋
     this.stage = 1;
+    const positions = this.startPosition.map((start) => start.pos);
+
     this.slots = new Array(9).fill(false);
+
+    this.users.forEach((user) => {
+      this.slots[user.startInfos.slot] = true;
+    });
+
     this.setGameState(GAME_STATE.WAIT);
+
+    logger.info(`[reset - stage]`, this.stage);
+    logger.info(`[reset - slots]`, this.slots);
+    logger.info(`[reset - state]`, this.state);
 
     this.intervalManager.clearAll();
     // TODO: timeout이 실행되고나서 게임이 종료가 되었을 수도 있음
-    this.timeoutManager.clearAll();
+    //this.timeoutManager.clearAll();
   }
 }
 

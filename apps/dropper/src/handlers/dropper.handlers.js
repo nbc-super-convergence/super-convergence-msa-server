@@ -1,8 +1,8 @@
 import { sessionIds } from '../classes/models/dropper.game.class.js';
 import dropGameManager from '../classes/managers/dropper.game.manager.js';
-import { logger } from '../../utils/logger.utils.js';
+import { logger } from '../utils/logger.utils.js';
 import { dropConfig } from '../config/config.js';
-import { redisUtil } from '../../utils/redis.js';
+import { redisUtil } from '../utils/redis.js';
 
 export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
@@ -89,7 +89,7 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     // * 게임에 slot 업데이트
     // ! 혹시나 다른 유저가 침범하지 못하도록 선 업데이트
-    game.updateSlot(slot);
+    game.updateSlot(user, slot);
 
     // * 유저 위치 정보 업데이트
     user.updateUserInfos(slot, rotation, state);

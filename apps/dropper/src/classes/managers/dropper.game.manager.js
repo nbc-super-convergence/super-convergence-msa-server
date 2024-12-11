@@ -1,5 +1,5 @@
 import { serializeForGate } from '@repo/common/utils';
-import { logger } from '../../../utils/logger.utils.js';
+import { logger } from '../../utils/logger.utils.js';
 import dropperGame from '../models/dropper.game.class.js';
 import { GAME_STATE } from '../../constants/state.js';
 import {
@@ -8,7 +8,7 @@ import {
   dropMiniGameReadyNotification,
   dropPlayerDeathNotification,
   dropPlayerSyncNotification,
-} from '../../../utils/dropper.notificaion.js';
+} from '../../utils/dropper.notificaion.js';
 
 class dropperGameManager {
   constructor() {

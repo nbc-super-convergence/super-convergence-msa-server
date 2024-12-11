@@ -1,8 +1,8 @@
 import { TcpServer } from '@repo/common/classes';
 import { config } from '@repo/common/config';
 import { dropConfig } from '../../config/config.js';
-import { redisUtil, subRedisClient } from '../../../utils/redis.js';
-import { logger } from '../../../utils/logger.utils.js';
+import { redisUtil, subRedisClient } from '../../utils/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 import dropperGameManager from '../managers/dropper.game.manager.js';
 import { deserialize, packetParser } from '@repo/common/utils';
 import { getHandlerByMessageType } from '../../handlers/index.js';
