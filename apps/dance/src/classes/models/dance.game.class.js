@@ -230,11 +230,11 @@ class DanceGame extends Game {
       user.setState(state);
 
       this.moveToNextCommand(user);
-      return ResponseHelper.success({ correct: true }, { state });
+      return ResponseHelper.success(true, { state });
     }
 
     user.setState(STATE.DANCE_FAIL);
-    return ResponseHelper.success({ correct: false }, { state: STATE.DANCE_FAIL });
+    return ResponseHelper.success(false, { state: STATE.DANCE_FAIL });
   }
 
   handleTableComplete(sessionId, endTime) {

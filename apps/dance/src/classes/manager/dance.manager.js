@@ -108,7 +108,7 @@ class DanceGameManager {
   }
 
   danceKeyPressNoti(sessionId, result, game) {
-    logger.info(`[DanceGameManager - danceKeyPressNoti]`);
+    logger.info(`[DanceGameManager - danceKeyPressNoti] result:`, result);
 
     const sessionIds = game.getOtherSessionIds(sessionId);
     logger.info(`[danceKeyPressNoti] ===> sessionIds `, sessionIds);
@@ -116,7 +116,7 @@ class DanceGameManager {
     return createNotification(
       {
         sessionId,
-        correct: result.correct,
+        correct: result.data,
         state: result.state,
       },
       MESSAGE_TYPE.DANCE_KEY_PRESS_NOTIFICATION,
