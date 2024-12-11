@@ -83,7 +83,7 @@ export const dropPlayerSyncRequestHandler = async ({ socket, payload }) => {
 
     // !  slot에 다른 유저 존재 유무 검증
     if (game.checkUserInSlot(slot)) {
-      logger.info(`[dropPlayerSyncRequestHandler - User is already exists in slot]`);
+      logger.info(`[dropPlayerSyncRequestHandler - User is already exists in ${slot}]`);
       return;
     }
 
