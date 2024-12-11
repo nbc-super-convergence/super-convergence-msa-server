@@ -352,6 +352,14 @@ class BoardManager {
       if (SELECT_MINI_GAME !== 'ALL') {
         channels = [redis.channel[SELECT_MINI_GAME]];
       }
+
+      // TODO: [ TEST ] redis 값에 따라 선택되게끔 수정 : 24.12.11(수)
+      const redisMiniGameChannel = await redis.getMiniGameChannel();
+      if (redisMiniGameChannel) {
+        channels = [redis.channel[redisMiniGameChannel]];
+      }
+
+      logger.info('[ BOARD: SELECT_MINI_GAME ] redisMiniGameChannel ===>> ', redisMiniGameChannel);
       logger.info('[ BOARD: SELECT_MINI_GAME ] SELECT_MINI_GAME ===>> ', SELECT_MINI_GAME);
       logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
 
@@ -401,6 +409,14 @@ class BoardManager {
     } catch (e) {
       logger.error('[ BOARD : turnEnd ] ERRROR ==>> ', e);
     }
+  }
+
+  /**
+   * TODO: [ TEST ] redis 값 읽어서 리턴
+   */
+  async getMiniGameChannel() {
+    const result = await redis.getMiniGameChannel();
+    return String(result).toUpperCase();
   }
 } //* class end
 
