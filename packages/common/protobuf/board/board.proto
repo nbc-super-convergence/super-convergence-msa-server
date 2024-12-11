@@ -106,6 +106,7 @@ message  S2C_PurchaseTileResponse {
 message  S2C_PurchaseTileNotification {
 	string sessionId = 1;
 	int32 tile = 2;
+	BoardPlayerData playerInfo = 3; 
 }
 
 message  C2S_PurchaseTrophyRequest {

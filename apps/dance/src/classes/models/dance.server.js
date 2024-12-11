@@ -48,6 +48,8 @@ class DanceServer extends TcpServer {
           // TODO: 나중에 수정하기
           const seq = '2';
 
+          logger.info('[ DANCE: this._socketMap ] ====>>> ', this._socketMap);
+
           this._socketMap[seq].socket.write(buffer);
         } catch (error) {
           logger.error(`[DanceChannel] ====> error`, error);
