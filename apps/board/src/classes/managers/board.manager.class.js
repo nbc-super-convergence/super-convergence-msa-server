@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BOARD_STATE } from '../../constants/state.js';
 import { getRollDiceResult } from '../../utils/dice.utils.js';
 import { logger } from '../../utils/logger.utils.js';
+import { SELECT_MINI_GAME } from '../../constants/env.js';
 
 class BoardManager {
   constructor() {
@@ -338,15 +339,20 @@ class BoardManager {
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const message = boardId;
 
-      const channels = [];
+      let channels = [];
       channels.push(redis.channel.ICE);
       channels.push(redis.channel.DANCE);
       channels.push(redis.channel.BOMB);
       channels.push(redis.channel.DROPPER);
 
+      // TODO: [ TEST ] env 값에 따라 선택되게끔 수정 : 24.12.11(수)
+      if (SELECT_MINI_GAME !== 'ALL') {
+        channels = [redis.channel[SELECT_MINI_GAME]];
+        logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
+      }
+
       // * random
       const randomVal = Math.floor(Math.random() * channels.length);
-
       const channel = channels[randomVal];
 
       await redis.client.publish(channel, message, (err, reply) => {
