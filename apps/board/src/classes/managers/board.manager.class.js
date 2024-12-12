@@ -194,6 +194,59 @@ class BoardManager {
   }
 
   /**
+   * 레디스 룸데이터를 proto 형식에 맞춰어 변경
+   * @param {Object} roomData redis-roomData
+   * @returns
+   */
+  async roomDataToResponse(roomData) {
+    try {
+      if (!roomData) return null;
+
+      // users가 문자열인 경우 파싱
+      let userIds = [];
+      if (typeof roomData.users === 'string') {
+        userIds = JSON.parse(roomData.users);
+      } else if (roomData.users instanceof Set) {
+        userIds = Array.from(roomData.users);
+      } else if (Array.isArray(roomData.users)) {
+        userIds = roomData.users.map((user) => user.sessionId);
+      }
+
+      // 파이프라인으로 한 번에 모든 유저 정보 조회
+      const pipeline = redis.client.pipeline();
+      userIds.forEach((sessionId) => {
+        pipeline.hgetall(`${redis.prefix.USER}:${sessionId}`);
+      });
+
+      const userDataResults = await pipeline.exec();
+      const users = userIds
+        .map((sessionId, index) => {
+          const userData = userDataResults[index]?.[1]; // Optional chaining 추가
+          return userData
+            ? {
+                sessionId,
+                nickname: userData.nickname || 'Unknown',
+              }
+            : null;
+        })
+        .filter((user) => user !== null);
+
+      return {
+        roomId: roomData.roomId,
+        ownerId: roomData.ownerId,
+        roomName: roomData.roomName,
+        lobbyId: roomData.lobbyId,
+        state: Number(roomData.state),
+        users,
+        maxUser: Number(roomData.maxUser),
+        readyUsers: Array.from(roomData.readyUsers),
+      };
+    } catch (error) {
+      logger.error('[ toResponse ] ====> unknown error', error);
+    }
+  }
+
+  /**
    * 대기실로 되돌아 가기
    * @param {String} sessionId
    */
@@ -206,19 +259,11 @@ class BoardManager {
 
       logger.info(' [ BOARD: backTotheRoom ] room ===>> ', room);
 
+      const roomDto = await this.roomDataToResponse(room);
       return {
         success: true,
         data: {
-          room: {
-            roomId: room.roomId,
-            ownerId: room.ownerId,
-            roomName: room.roomName,
-            lobbyId: room.lobbyId,
-            state: parseInt(room.state),
-            users: new Set(room.users ? JSON.parse(room.users) : []),
-            maxUser: parseInt(room.maxUser),
-            readyUsers: new Set(JSON.parse(room.readyUsers)),
-          },
+          room: roomDto,
           sessionIds,
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
