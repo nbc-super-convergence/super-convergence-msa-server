@@ -89,7 +89,7 @@ class DanceGameManager {
   getGameIdBySessionId(sessionId) {
     const gameId = this.sessionIds.get(sessionId);
     if (!gameId) {
-      logger.error('[ getGameIdBySessionId ] ====> gameId not found', { gameId });
+      logger.error('[ getGameIdBySessionId ] ====> gameId not found', { sessionId });
       return null;
     }
 
@@ -113,9 +113,11 @@ class DanceGameManager {
     const sessionIds = game.getOtherSessionIds(sessionId);
     logger.info(`[danceKeyPressNoti] ===> sessionIds `, sessionIds);
 
+    const user = game.getUser(sessionId);
+
     return createNotification(
       {
-        sessionId,
+        teamNumber: user.teamNumber,
         correct: result.data,
         state: result.state,
       },

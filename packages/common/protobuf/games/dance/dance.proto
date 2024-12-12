@@ -78,7 +78,7 @@ message S2C_DanceKeyPressResponse {
 }
 
 message S2C_DanceKeyPressNotification {
-    string sessionId = 1;                 // 입력한 플레이어
+    int32 teamNumber = 1;                 // 입력한 플레이어
     bool correct = 2;                     // 올바른 입력이었는지
     State state = 3;                      // 애니메이션
 }
