@@ -15,6 +15,7 @@ export const bombConfig = {
     PLAYERS: 'players',
   },
   FAIL_CODE,
+  REWARD: [20, 10, 5, 1],
 };
 
 export const bombMap = {

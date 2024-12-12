@@ -1,6 +1,8 @@
 import { User, Vector } from '@repo/common/classes';
 import { USER_STATE } from '../../constants/user.js';
 import { logger } from '../../utils/logger.utils.js';
+import { redisUtil } from '../../utils/redis.init.js';
+import { bombConfig } from '../../config/config.js';
 
 class BombUser extends User {
   constructor(gameId, sessionId, position, rotation) {
@@ -22,6 +24,7 @@ class BombUser extends User {
 
   gameReady() {
     this.isReady = true;
+    logger.info(`[bombGame - User.class, gameReady]  ${this.sessionId}=> READY, ${this.isReady} `);
   }
 
   isDead() {
@@ -41,13 +44,20 @@ class BombUser extends User {
     }
   }
 
+  updateGlod() {
+    const gold = bombConfig.REWARD[this.rank - 1];
+    redisUtil.updateBoardPlayerGold(this.gameId, this.sessionId, gold);
+    logger.info(`[bombGame - User.class, updateGold] GOLD =>`, gold);
+  }
+
   ranking(rank) {
     this.rank = rank;
+    logger.info(`[bombGame - User.class, ranking] => ${this.sessionId} =>`, rank);
   }
 
   reset() {
     logger.info(
-      `[bombGame - User.class] - reset`,
+      `[bombGame - User.class, reset] `,
       `Position =${this.position} InitialPosition = ${this.initialPos}`,
     );
 

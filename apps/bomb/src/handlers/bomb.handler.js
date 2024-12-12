@@ -1,7 +1,11 @@
+import bombGameManagerInstance from '../classes/managers/bomb.game.manager.js';
 import BombGameManager from '../classes/managers/bomb.game.manager.js';
 import { sessionIds } from '../classes/models/bomb.game.class.js';
 import { bombConfig } from '../config/config.js';
+import { GAME_STATE } from '../constants/game.js';
+import { USER_STATE } from '../constants/user.js';
 import { logger } from '../utils/logger.utils.js';
+import { redisUtil } from '../utils/redis.init.js';
 
 export const bombGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
@@ -27,6 +31,11 @@ export const bombGameReadyRequestHandler = async ({ socket, payload }) => {
       buffer = await BombGameManager.bombMiniGameStartNoti(socket, game);
     }
     socket.write(buffer);
+
+    // 특수조건=  혼자 게임을 시작한 경우 게임 종료
+    if (game.state === GAME_STATE.START && game.users.length <= 1) {
+      game.bombGameEnd(socket, game.users);
+    }
   } catch (error) {
     logger.error(`[bombGameReadyRequestHandler] ===> `, error);
   }
@@ -83,7 +92,7 @@ export const bombMoveRequestHandler = async ({ socket, payload }) => {
   try {
     logger.info(`Start [bombMoveRequestHandler]`);
 
-    const { sessionId } = payload;
+    const { sessionId, bombUserId } = payload;
 
     logger.info(`bombMoveRequestHandler payload`, payload);
 
@@ -105,6 +114,15 @@ export const bombMoveRequestHandler = async ({ socket, payload }) => {
       throw new Error(`유저가 존재하지 않음`, bombConfig.FAIL_CODE.USER_IN_GAME_NOT_FOUND);
     }
 
+    if (user.state === USER_STATE.DIE) {
+      logger.info(`bombMoveRequestHandler`, '사망한 대상에게 폭탄 넘기기 시도');
+      return;
+    }
+
+    if (game.bombUser !== bombUserId) {
+      logger.info(`bombMoveRequestHandler`, '폭탄이 없는 사람이 넘기기 시도');
+      return;
+    }
     logger.info(`bombMoveRequestHandler 폭탄 소유자 변경`, `${game.bombUser} =>${sessionId}`);
     game.bombUserChange(sessionId);
 
@@ -113,5 +131,66 @@ export const bombMoveRequestHandler = async ({ socket, payload }) => {
     socket.write(buffer);
   } catch (error) {
     logger.error(`[bombMoveRequestHandler] ===> `, error);
+  }
+};
+
+export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
+  try {
+    logger.info(`Start [bombCloseSocketRequestHandler]`);
+
+    const { sessionId } = payload;
+
+    logger.info(`bombCloseSocketRequestHandler payload`, payload);
+
+    const gameId = sessionIds.get(sessionId);
+
+    logger.info(`bombCloseSocketRequestHandler 종료 유저 gameId`, gameId);
+
+    const game = bombGameManagerInstance.getGameBySessionId(gameId);
+
+    if (!game) {
+      //bomb 게임을 진행하던 유저가 아님
+      return;
+    }
+    logger.info(` bombCloseSocketRequestHandler 게임`, game);
+
+    const user = game.getUserToSessionId(sessionId);
+
+    if (!user) {
+      //bomb 게임을 진행하던 유저가 아님
+    }
+
+    logger.info(` bombCloseSocketRequestHandler 유저`, user);
+    game.removeUser(sessionId);
+    logger.info(` bombCloseSocketRequestHandler 강제종료 유저 GAME 세션에서 제거 => `, sessionId);
+
+    if (game.bombUser === sessionId) {
+      // 종료 유저가 폭탄 소지중일 경우
+      logger.info(` bombCloseSocketRequestHandler 종료 유저가 폭탄 소지중 `, sessionId);
+      const bombUser = game.bombUserSelect();
+      game.bombUserChange(bombUser);
+      const buffer = await BombGameManager.bombMoveNoti(bombUser, game);
+      socket.write(buffer);
+      logger.info(`bombCloseSocketRequestHandler 폭탄 소유자 변경`, `${sessionId} =>${bombUser}`);
+    }
+
+    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
+      //게임 준비화면에서 종료한 유저를 제외하고 모두 준비완료 상태일 경우
+      const buffer = await BombGameManager.bombMiniGameStartNoti(socket, game);
+      socket.write(buffer);
+      logger.info(
+        ` bombCloseSocketRequestHandler 준비화면 -> 강제종료 제외 모두 레디 상태 => `,
+        ' 게임 시작 ',
+      );
+    }
+
+    // 혼자인 경우 게임 종료
+    if (game.state === GAME_STATE.START && game.users.length <= 1) {
+      game.bombGameEnd(socket, game.users);
+    }
+
+    await redisUtil.deleteUserLocationField(sessionId, 'bomb');
+  } catch (error) {
+    logger.error(`[bombCloseSocketRequestHandler] ===> `, error);
   }
 };
