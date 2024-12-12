@@ -12,6 +12,7 @@ import '../../gate/gate.proto';
 import '../dance/dance.proto';
 import '../bomb/bomb.proto';
 import '../dropper/dropper.proto';
+import '../dart/dart.proto';
 
 message GamePacket {
     oneof payload {
@@ -139,6 +140,16 @@ message GamePacket {
         C2S_BombMoveRequest bombMoveRequest = 508;
         S2C_BombMoveNotification bombMoveNotification = 509;
         S2C_BombGameOverNotification bombGameOverNotification = 510;
+
+        // dart (601~)
+        S2C_DartMiniGameReadyNotification dartMiniGameReadyNotification = 601;
+        C2S_DartGameReadyRequest dartGameReadyRequest = 602;
+        S2C_DartGameReadyNotification dartGameReadyNotification = 603;
+        S2C_DartMiniGameStartNotification dartMiniGameStartNotification = 604;
+        C2S_DartGameThrowRequest dartGameThrowRequest = 605;
+        S2C_DartGameThrowNotification dartGameThrowNotification = 606;
+        S2C_DartGameOverNotification dartGameOverNotification = 607;
+
 
     }
 }
