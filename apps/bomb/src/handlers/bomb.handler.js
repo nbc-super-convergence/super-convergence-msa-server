@@ -31,6 +31,11 @@ export const bombGameReadyRequestHandler = async ({ socket, payload }) => {
       buffer = await BombGameManager.bombMiniGameStartNoti(socket, game);
     }
     socket.write(buffer);
+
+    // 특수조건=  혼자 게임을 시작한 경우 게임 종료
+    if (game.state === GAME_STATE.START && game.users.length <= 1) {
+      game.bombGameEnd(socket, game.users);
+    }
   } catch (error) {
     logger.error(`[bombGameReadyRequestHandler] ===> `, error);
   }
@@ -160,8 +165,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
     logger.info(` bombCloseSocketRequestHandler 강제종료 유저 GAME 세션에서 제거 => `, sessionId);
 
     if (game.bombUser === sessionId) {
-      logger.info(` bombCloseSocketRequestHandler 종료 유저가 폭탄 소지 ! `, sessionId);
-
+      logger.info(` bombCloseSocketRequestHandler 종료 유저가 폭탄 소지중 `, sessionId);
       const bombUser = game.bombUserSelect();
       game.bombUserChange(bombUser);
       const buffer = await BombGameManager.bombMoveNoti(bombUser, game);
@@ -169,33 +173,14 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
       logger.info(`bombCloseSocketRequestHandler 폭탄 소유자 변경`, `${sessionId} =>${bombUser}`);
     }
 
-    if (game.state === GAME_STATE.START && game.users.length <= 1) {
-      // 게임 진행중이고 강제종료로 인해 1명이 남은 경우
-
-      game.bombGameEnd(socket, game.users);
-      logger.info(
-        ` bombCloseSocketRequestHandler 강제종료 유저로 인해 혼자 남음 => `,
-        ' 게임 종료 ',
-      );
-    }
-
     if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
       //게임 준비화면에서 종료한 유저를 제외하고 모두 준비완료 상태일 경우
+      const buffer = await BombGameManager.bombMiniGameStartNoti(socket, game);
+      socket.write(buffer);
       logger.info(
         ` bombCloseSocketRequestHandler 준비화면 -> 강제종료 제외 모두 레디 상태 => `,
         ' 게임 시작 ',
       );
-
-      const buffer = await BombGameManager.bombMiniGameStartNoti(socket, game);
-      socket.write(buffer);
-
-      if (game.users.length <= 1) {
-        game.bombGameEnd(socket, game.users);
-        logger.info(
-          ` bombCloseSocketRequestHandler 강제종료 유저로 인해 혼자 시작 => `,
-          ' 게임 종료 ',
-        );
-      }
     }
 
     await redisUtil.deleteUserLocationField(user.sessionId, 'bomb');
