@@ -11,6 +11,7 @@ import {
   dropLevelStartNotification,
   dropPlayerDeathNotification,
 } from '../../utils/dropper.notificaion.js';
+import { calculateGoldByRank } from '../../utils/calculate.gold.js';
 
 export const sessionIds = new Map();
 
@@ -57,6 +58,9 @@ class dropperGame extends Game {
 
   removeUser(sessionId) {
     const index = this.users.findIndex((user) => user.sessionId === sessionId);
+
+    // * 유저 탈주시 슬롯 제거
+    this.removeSlot(this.users[index].slot);
 
     if (index !== -1) {
       return this.users.splice(index, 1);
@@ -234,9 +238,8 @@ class dropperGame extends Game {
             }
           }
 
-          setTimeout(() => {
-            this.handleGameEnd(socket);
-          }, 4000);
+          //! 타임아웃 추가하면 4초동안 interval 4번도는 버그 생김
+          this.handleGameEnd(socket);
         }
       },
       1000,
@@ -244,13 +247,32 @@ class dropperGame extends Game {
     );
   }
 
-  handleGameEnd(socket) {
+  async handleGameEnd(socket) {
     // * 게임 종료
     logger.info(`[handleGameEnd] ===> 게임 종료`);
     // 전체 유저 조회
     const users = this.getAllUsers();
 
     const sessionIds = this.getAllSessionIds();
+
+    //const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${board.boardId}:${sessionId}`;
+
+    // ! 레디스로 골드 업데이트
+    for (let key in users) {
+      let playerInfos = await redisUtil.getBoardPlayerinfo(this.id, users[key].sessionId);
+
+      logger.info(`[gameEnd - user.sessionId]` + users[key].sessionId);
+
+      logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
+
+      const updateGold = calculateGoldByRank(playerInfos.gold, users[key].rank);
+
+      playerInfos.gold = updateGold;
+
+      logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
+
+      await redisUtil.updateBoardPlayerInfo(this.id, users[key].sessionId, playerInfos);
+    }
 
     const message = dropGameOverNotification(users);
 
