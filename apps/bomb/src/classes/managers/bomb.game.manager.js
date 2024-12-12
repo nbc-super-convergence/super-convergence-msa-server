@@ -47,9 +47,8 @@ class BombGameManager {
   async bombMiniGameReadyNoti(game) {
     logger.info(`[bombGameManager - bombMiniGameReadyNoti]`);
 
-    game.setGameState(GAME_STATE.START);
+    game.setGameState(GAME_STATE.WAIT);
 
-    // * 게임 시작 Notification
     const sessionIds = game.getAllSessionIds();
 
     const users = game.getAllUser();
@@ -82,6 +81,7 @@ class BombGameManager {
   async bombMiniGameStartNoti(socket, game) {
     // * 미니 게임 시작
     logger.info(`[bombGameManager - bombMiniGameStartNoti]`);
+    game.setGameState(GAME_STATE.START);
 
     const sessionIds = game.getAllSessionIds();
 

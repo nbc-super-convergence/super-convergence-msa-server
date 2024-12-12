@@ -563,6 +563,17 @@ class RedisUtil {
     const result = await this.client.get(key);
     return result;
   }
+
+  /**
+   * 보드게임 플레이어 골드 증감
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {int} value
+   */
+  async updateBoardPlayerGold(boardId, sessionId, value) {
+    const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+    await this.client.hIncrBy(key, 'gold', value);
+  }
 }
 
 export default RedisUtil;

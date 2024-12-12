@@ -20,6 +20,7 @@ message S2C_BombMiniGameReadyNotification{
 //폭탄 미니게임 준비 완료
 message C2S_BombGameReadyRequest {
     string sessionId= 1; // 준비 완료한 플레이어 아이디
+    string bombUserId = 2; // 폭탄 주는 유저
 }
 
 //폭탄 미니게임 준비 완료 알림
@@ -61,6 +62,7 @@ message S2C_BombPlayerDeathNotification{
 //폭탄 건넴 
 message C2S_BombMoveRequest {
    string sessionId = 1; // 폭탄 받는 유저 
+   string bombUserId = 2; // 폭탄 주는 유저
 }
 
 message S2C_BombMoveNotification {

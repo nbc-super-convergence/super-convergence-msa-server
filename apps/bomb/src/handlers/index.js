@@ -1,5 +1,6 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 import {
+  bombCloseSocketRequestHandler,
   bombGameReadyRequestHandler,
   bombMoveRequestHandler,
   bombPlayerSyncRequestHandler,
@@ -10,6 +11,7 @@ const handlers = {
   [MESSAGE_TYPE.BOMB_GAME_READY_REQUEST]: { handler: bombGameReadyRequestHandler },
   [MESSAGE_TYPE.BOMB_PLAYER_SYNC_REQUEST]: { handler: bombPlayerSyncRequestHandler },
   [MESSAGE_TYPE.BOMB_MOVE_REQUEST]: { handler: bombMoveRequestHandler },
+  [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: bombCloseSocketRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {

@@ -1,5 +1,4 @@
 import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
-import { logger } from '@repo/common/config';
 import BombUser from './bomb.user.class.js';
 import { bombMap } from '../../config/config.js';
 import { GAME_STATE } from '../../constants/game.js';
@@ -9,6 +8,7 @@ import {
 } from '../../utils/bomb.notifications.js';
 import { USER_STATE } from '../../constants/user.js';
 import { serializeForGate } from '@repo/common/utils';
+import { logger } from '../../utils/logger.utils.js';
 
 export const sessionIds = new Map();
 
@@ -94,47 +94,65 @@ class BombGame extends Game {
   }
 
   bombTimeout(socket) {
-    const targetUser = this.getUserToSessionId(this.bombUser);
-
-    targetUser.boom();
     const survivor = this.getAliveUsers();
-    targetUser.ranking(survivor.length + 1);
-    const nextBombUser = this.bombUserSelect();
-    this.bombUserChange(nextBombUser);
-    const message = bombPlayerDeathNotification(targetUser.sessionId, nextBombUser);
-    const sessionIds = this.getAllSessionIds();
-    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
-    socket.write(buffer);
+    this.bombUserDeath(socket, survivor);
 
     if (survivor.length <= 1) {
-      // 생존자 1명
-      survivor[0].ranking(1);
-      const users = this.getAllUser();
-      const message = bombGameOverNotification(users);
-      const sessionIds = this.getAllSessionIds();
-      const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
-
-      this.timeoutManager.addTimeout(
-        this.id,
-        () => {
-          socket.write(buffer);
-          this.resetGame(users);
-        },
-        3000,
-        'end',
-      );
+      this.bombGameEnd(socket, survivor);
     } else {
       this.bombTimerStart(socket);
     }
   }
 
+  bombUserDeath(socket, survivor) {
+    const targetUser = this.getUserToSessionId(this.bombUser);
+    targetUser.boom();
+    targetUser.ranking(survivor.length + 1);
+    const nextBombUser = this.bombUserSelect();
+
+    logger.info(`[BombGame - Game.class = bombTimeout, nextBombUser ]`, nextBombUser);
+
+    this.bombUserChange(nextBombUser);
+    const message = bombPlayerDeathNotification(targetUser.sessionId, nextBombUser);
+    const sessionIds = this.getAllSessionIds();
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+    socket.write(buffer);
+  }
+
+  bombGameEnd(socket, survivor) {
+    survivor[0].ranking(1);
+    const users = this.getAllUser();
+    const message = bombGameOverNotification(users);
+    const sessionIds = this.getAllSessionIds();
+    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+    this.timeoutManager.addTimeout(
+      this.id,
+      () => {
+        socket.write(buffer);
+        this.resetGame(users);
+      },
+      3000,
+      'end',
+    );
+    this.goldUpdate(users);
+  }
+
+  goldUpdate(users) {
+    users.forEach((user) => user.updateGlod());
+  }
+
   resetGame(users) {
     this.timeoutManager.removeAllTimeoutById(this.id);
     this.bombUser = null;
-    this.setGameState(GAME_STATE.WAIT);
+    this.setGameState(GAME_STATE.END);
     for (const user of users) {
       user.reset();
     }
+  }
+
+  removeUser(sessionId) {
+    const users = this.users.filter((user) => user.sessionId !== sessionId);
+    this.users = users;
   }
 }
 
