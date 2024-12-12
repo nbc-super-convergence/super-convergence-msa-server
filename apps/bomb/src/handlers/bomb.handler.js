@@ -165,6 +165,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
     logger.info(` bombCloseSocketRequestHandler 강제종료 유저 GAME 세션에서 제거 => `, sessionId);
 
     if (game.bombUser === sessionId) {
+      // 종료 유저가 폭탄 소지중일 경우
       logger.info(` bombCloseSocketRequestHandler 종료 유저가 폭탄 소지중 `, sessionId);
       const bombUser = game.bombUserSelect();
       game.bombUserChange(bombUser);
@@ -181,6 +182,11 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
         ` bombCloseSocketRequestHandler 준비화면 -> 강제종료 제외 모두 레디 상태 => `,
         ' 게임 시작 ',
       );
+    }
+
+    // 혼자인 경우 게임 종료
+    if (game.state === GAME_STATE.START && game.users.length <= 1) {
+      game.bombGameEnd(socket, game.users);
     }
 
     await redisUtil.deleteUserLocationField(user.sessionId, 'bomb');
