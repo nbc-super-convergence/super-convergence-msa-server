@@ -156,6 +156,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
     }
 
     logger.info(` bombCloseSocketRequestHandler 유저`, user);
+    game.removeUser(sessionId);
 
     if (game.bombUser === sessionId) {
       logger.info(` bombCloseSocketRequestHandler 종료 유저가 폭탄 소지 ! `, sessionId);
@@ -167,7 +168,6 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
       logger.info(`bombCloseSocketRequestHandler 폭탄 소유자 변경`, `${sessionId} =>${bombUser}`);
     }
 
-    game.removeUser(sessionId);
     logger.info(` bombCloseSocketRequestHandler 강제종료 유저 GAME 세션에서 제거 => `, sessionId);
 
     //게임 준비화면에서 종료한 유저를 제외하고 모두 준비완료 상태일 경우

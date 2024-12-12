@@ -40,7 +40,7 @@ export default class JoiUtils {
         'any.required': '아이디를 입력해주세요.',
       }),
 
-      nickname: joi.string().min(4).max(12).required().messages({
+      nickname: joi.string().min(2).max(10).required().messages({
         'string.base': '이름은 문자열이어야 합니다.',
         'string.min': `이름의 길이는 최소 {#limit}자 이상입니다.`,
         'string.max': `이름의 길이는 최대 {#limit}자 이하입니다.`,
