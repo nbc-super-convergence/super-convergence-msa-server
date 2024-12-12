@@ -209,7 +209,16 @@ class BoardManager {
       return {
         success: true,
         data: {
-          room,
+          room: {
+            roomId: room.roomId,
+            ownerId: room.ownerId,
+            roomName: room.roomName,
+            lobbyId: room.lobbyId,
+            state: parseInt(room.state),
+            users: new Set(room.users ? JSON.parse(room.users) : []),
+            maxUser: parseInt(room.maxUser),
+            readyUsers: new Set(JSON.parse(room.readyUsers)),
+          },
           sessionIds,
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
