@@ -31,7 +31,7 @@ class DartServer extends TcpServer {
 
           await DartGameManager.addGame(boardId, JSON.parse(users));
         } else {
-          logger.info(`[Received ${dartConfig.REDIS.CHANNEL2}] ===> ${channel}: ${message}`);
+          logger.info(`[Received ${dartConfig.REDIS.CHANNEL}] ===> ${channel}: ${message}`);
 
           const game = await DartGameManager.getGameById(message);
           logger.info(`[dartGameChannel - game]`, game);

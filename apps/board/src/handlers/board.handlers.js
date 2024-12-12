@@ -234,7 +234,11 @@ export const backToTheRoomRequestHandler = async ({ socket, payload }) => {
   const { sessionId } = payload;
   let sessionIds = [sessionId];
   try {
+    logger.info(' [ BOARD: backToTheRoomRequestHandler ] sessionId ===>> ', sessionId);
+
     const result = await boardManager.backTotheRoom(sessionId);
+
+    logger.info(' [ BOARD: backToTheRoomRequestHandler ] result ===>> ', result);
 
     // * 나머지 NOTIFICATION
     sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
