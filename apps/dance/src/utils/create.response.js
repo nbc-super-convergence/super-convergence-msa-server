@@ -13,7 +13,7 @@ export const createResponse = (result, messageType, sessionId) => {
     case MESSAGE_TYPE.DANCE_KEY_PRESS_RESPONSE:
       response = {
         ...response,
-        correct: result.correct,
+        correct: result.data,
         state: result.state,
       };
       break;
