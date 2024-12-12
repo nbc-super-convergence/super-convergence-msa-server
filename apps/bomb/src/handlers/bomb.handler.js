@@ -189,7 +189,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
       game.bombGameEnd(socket, game.users);
     }
 
-    await redisUtil.deleteUserLocationField(user.sessionId, 'bomb');
+    await redisUtil.deleteUserLocationField(sessionId, 'bomb');
   } catch (error) {
     logger.error(`[bombCloseSocketRequestHandler] ===> `, error);
   }
