@@ -137,6 +137,34 @@ export const danceCloseSocketRequestHandler = ({ socket, payload }) => {
       const notiBuffer = danceGameManager.danceCloseSocketNoti(game, sessionId);
       socket.write(notiBuffer);
     }
+
+    //* 설명창에서 유저가 나간 후 모두 준비 상태면 게임 시작
+    if (game.isAllReady()) {
+      const startNotiBuffer = danceGameManager.danceStartNoti(game);
+      logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
+
+      //* 2분 시간 제한
+      setTimeout(() => {
+        logger.info('[ danceReadyRequestHandler ] ====> setTimeout', {
+          gameState: game.state,
+          GAME_STATE: GAME_STATE.WAIT,
+        });
+
+        if (game.state !== GAME_STATE.WAIT) {
+          game.endGame(REASON.TIME_OVER);
+          const gameOverBuffer = danceGameManager.danceGameOverNoti(game);
+          socket.write(gameOverBuffer);
+        }
+      }, 120000);
+
+      socket.write(startNotiBuffer);
+    }
+
+    //* 유저가 1명이면 게임 종료
+    if (game.users.size <= 0) {
+      const gameOverBuffer = danceGameManager.danceGameOverNoti(game);
+      socket.write(gameOverBuffer);
+    }
   } catch (error) {
     logger.error('[ danceCloseSocketRequestHandler ] ====> error', error);
   }
