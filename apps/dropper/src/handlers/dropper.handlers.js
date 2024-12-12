@@ -147,6 +147,9 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
       const buffer = game.dropMiniGameStartNoti(socket, game);
 
       socket.write(buffer);
+
+      game.breakFloorInterval(socket);
+      game.checkGameOverInterval(socket);
     }
   } catch (error) {
     logger.error(`[dropCloseSocketRequestHandler] ===> `, error);
