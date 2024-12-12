@@ -7,6 +7,7 @@ import iceUser from './ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
 import { logger } from '../../utils/logger.utils.js';
 import { redisUtil } from '../../utils/init/redis.js';
+import { calculateGoldByRank } from '../../utils/calculate.gold.js';
 
 export const sessionIds = new Map();
 
@@ -202,13 +203,28 @@ class iceGame extends Game {
     );
   }
 
-  handleGameEnd(socket) {
+  async handleGameEnd(socket) {
     // * 게임 종료
     logger.info(`[handleGameEnd] ===> 게임 종료`);
     // 전체 유저 조회
     const users = this.getAllUser();
 
     const sessionIds = this.getAllSessionIds();
+
+    // ! 레디스로 골드 업데이트
+    for (let key in users) {
+      let playerInfos = await redisUtil.getBoardPlayerinfo(this.id, users[key].sessionId);
+
+      logger.info(`[gameEnd - user.sessionId]` + users[key].sessionId);
+
+      logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
+
+      const updateGold = calculateGoldByRank(playerInfos.gold, users[key].rank);
+
+      logger.info(`[gameEnd - playerInfos.gold]:` + updateGold);
+
+      await redisUtil.updateBoardPlayerGold(this.id, users[key].sessionId, updateGold);
+    }
 
     const message = iceGameOverNotification(users);
 
