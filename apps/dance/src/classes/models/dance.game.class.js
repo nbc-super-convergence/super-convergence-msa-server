@@ -136,18 +136,15 @@ class DanceGame extends Game {
     // ]
 
     dancePools.forEach((pool) => {
-      const user = this.users.get(pool.sessionId);
-      if (user) {
-        //* 팀별로 춤표 저장
-        if (!this.dancePools.has(user.teamNumber)) {
-          this.dancePools.set(user.teamNumber, {
-            tables: pool.danceTables.map((table) => ({
-              commands: [...table.commands],
-            })),
-            currentTableIndex: 0,
-            currentCommandIndex: 0,
-          });
-        }
+      //* 팀별로 춤표 저장
+      if (!this.dancePools.has(pool.teamNumber)) {
+        this.dancePools.set(pool.teamNumber, {
+          tables: pool.danceTables.map((table) => ({
+            commands: [...table.commands],
+          })),
+          currentTableIndex: 0,
+          currentCommandIndex: 0,
+        });
       }
     });
   }
