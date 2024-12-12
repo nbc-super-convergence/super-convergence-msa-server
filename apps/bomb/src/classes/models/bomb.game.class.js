@@ -136,6 +136,7 @@ class BombGame extends Game {
       'end',
     );
     this.goldUpdate(users);
+    logger.info(`[BombGame - Game.class, bombGameEnd, message ]`, message);
   }
 
   goldUpdate(users) {

@@ -1,11 +1,9 @@
-import { serializeForGate } from '@repo/common/utils';
 import bombGameManagerInstance from '../classes/managers/bomb.game.manager.js';
 import BombGameManager from '../classes/managers/bomb.game.manager.js';
 import { sessionIds } from '../classes/models/bomb.game.class.js';
 import { bombConfig } from '../config/config.js';
 import { GAME_STATE } from '../constants/game.js';
 import { USER_STATE } from '../constants/user.js';
-import { bombGameOverNotification } from '../utils/bomb.notifications.js';
 import { logger } from '../utils/logger.utils.js';
 import { redisUtil } from '../utils/redis.init.js';
 
@@ -159,20 +157,35 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     logger.info(` bombCloseSocketRequestHandler 유저`, user);
 
+    if (game.bombUser === sessionId) {
+      logger.info(` bombCloseSocketRequestHandler 종료 유저가 폭탄 소지 ! `, sessionId);
+
+      const bombUser = game.bombUserSelect();
+      game.bombUserChange(bombUser);
+      const buffer = await BombGameManager.bombMoveNoti(bombUser, game);
+      socket.write(buffer);
+      logger.info(`bombCloseSocketRequestHandler 폭탄 소유자 변경`, `${sessionId} =>${bombUser}`);
+    }
+
     game.removeUser(sessionId);
+    logger.info(` bombCloseSocketRequestHandler 강제종료 유저 GAME 세션에서 제거 => `, sessionId);
 
     //게임 준비화면에서 종료한 유저를 제외하고 모두 준비완료 상태일 경우
     if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
-      if (game.bombUser === sessionId) {
-        const bombUser = game.bombUserSelect();
-        game.bombUserChange(bombUser);
-      }
+      logger.info(
+        ` bombCloseSocketRequestHandler 준비화면 -> 강제종료 제외 모두 레디 상태 => `,
+        ' 게임 시작 ',
+      );
 
       const buffer = await BombGameManager.bombMiniGameStartNoti(socket, game);
       socket.write(buffer);
 
       if (game.users.length <= 1) {
         game.bombGameEnd(socket, game.users);
+        logger.info(
+          ` bombCloseSocketRequestHandler 강제종료 유저로 인해 혼자 시작 => `,
+          ' 게임 종료 ',
+        );
       }
     }
     await redisUtil.deleteUserLocationField(user.sessionId, 'bomb');
