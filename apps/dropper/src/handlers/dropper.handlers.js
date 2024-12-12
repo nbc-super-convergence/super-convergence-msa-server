@@ -1,4 +1,4 @@
-import dropperGame, { sessionIds } from '../classes/models/dropper.game.class.js';
+import { sessionIds } from '../classes/models/dropper.game.class.js';
 import dropGameManager from '../classes/managers/dropper.game.manager.js';
 import { logger } from '../utils/logger.utils.js';
 import { dropConfig } from '../config/config.js';
@@ -144,7 +144,7 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
     await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'dropper');
 
     if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
-      const buffer = dropperGame.dropMiniGameStartNoti(socket, game);
+      const buffer = game.dropMiniGameStartNoti(socket, game);
 
       socket.write(buffer);
     }
