@@ -97,7 +97,7 @@ class BombGame extends Game {
     const survivor = this.getAliveUsers();
     this.bombUserDeath(socket, survivor);
 
-    if (survivor.length <= 1) {
+    if (survivor.length <= 2) {
       this.bombGameEnd(socket, survivor);
     } else {
       this.bombTimerStart(socket);
