@@ -22,11 +22,6 @@ message S2C_DartGameReadyNotification {
     string sessionId = 1;
 }
 
-
-message S2C_DartGameReadyNotification {
-    string sessionId = 1;
-}
-
 message S2C_DartMiniGameStartNotification {
     int64 startTime = 1; 
 }
