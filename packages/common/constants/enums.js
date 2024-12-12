@@ -142,4 +142,13 @@ export const FIELD_NAME = {
   508: 'bombMoveRequest',
   509: 'bombMoveNotification',
   510: 'bombGameOverNotification',
+
+  // dart (601~)
+  601: 'dartMiniGameReadyNotification',
+  602: 'dartGameReadyRequest',
+  603: 'dartGameReadyNotification',
+  604: 'dartMiniGameStartNotification',
+  605: 'dartGameThrowRequest',
+  606: 'dartGameThrowNotification',
+  607: 'dartGameOverNotification',
 };
