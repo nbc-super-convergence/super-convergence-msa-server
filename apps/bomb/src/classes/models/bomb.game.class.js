@@ -96,9 +96,10 @@ class BombGame extends Game {
   bombTimeout(socket) {
     const survivor = this.getAliveUsers();
     this.bombUserDeath(socket, survivor);
+    const afterSurvivor = this.getAliveUsers();
 
-    if (survivor.length <= 2) {
-      this.bombGameEnd(socket, survivor);
+    if (afterSurvivor.length <= 1) {
+      this.bombGameEnd(socket, afterSurvivor);
     } else {
       this.bombTimerStart(socket);
     }
@@ -107,7 +108,7 @@ class BombGame extends Game {
   bombUserDeath(socket, survivor) {
     const targetUser = this.getUserToSessionId(this.bombUser);
     targetUser.boom();
-    targetUser.ranking(survivor.length + 1);
+    targetUser.ranking(survivor.length);
     const nextBombUser = this.bombUserSelect();
 
     logger.info(`[BombGame - Game.class = bombTimeout, nextBombUser ]`, nextBombUser);
