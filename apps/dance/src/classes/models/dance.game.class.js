@@ -15,24 +15,13 @@ class DanceGame extends Game {
     this.teamResults = new Map(); //* teamNumber -> { sessionId, score, endTime }
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
-
-    this.timeoutManager = new TimeoutManager();
   }
 
   startGame() {
-    //* 1분 타이머 시작
-    this.timeoutManager.addTimeout(
-      'startGame',
-      () => {
-        this.endGame(REASON.TIME_OVER);
-      },
-      60000,
-      'danceTimeout',
-    );
+    this.state = GAME_STATE.START;
   }
 
   endGame(reason) {
-    this.timeoutManager.clearAll();
     this.reason = reason;
     this.state = GAME_STATE.WAIT;
   }
@@ -43,7 +32,6 @@ class DanceGame extends Game {
     this.teamResults.clear();
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
-    this.timeoutManager.clearAll();
   }
 
   addUser(sessionId, teamNumber) {
@@ -205,8 +193,18 @@ class DanceGame extends Game {
       return ResponseHelper.fail(FAIL_CODE.UNKNOWN_ERROR, false, { state: STATE.DANCE_FAIL });
     }
 
+    logger.info('[ validateKeyPress ] ====> dancePools', this.dancePools.get(sessionId));
+    logger.info('[ validateKeyPress ] ====> currentCommand', currentCommand);
+
     const isValid =
       currentCommand.targetSessionId === sessionId && currentCommand.direction === pressKey;
+
+    logger.info('[ validateKeyPress ] ====> isValid', {
+      targetSessionId: currentCommand.targetSessionId,
+      sessionId,
+      direction: currentCommand.direction,
+      pressKey,
+    });
 
     if (isValid) {
       let state;
