@@ -233,9 +233,18 @@ class redisTransaction {
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
       const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
 
+      const playerInfo = await this.redisUtil.getBoardPlayerinfo(boardId, sessionId);
+      logger.info('[ REDIS - TRANSACTION ] playerInfo ==>> ', playerInfo);
+
       // * 타일 주인 있는지 확인
       const tileOwner = await this.client.hget(mapKey, tile);
       if (!tileOwner) {
+        // * 골드가 부족하면 리턴 -1
+        if (Number(playerInfo.gold) < purchaseGold) {
+          logger.info(`골드가 부족함 : ${playerInfo.gold}, ${purchaseGold}`);
+          return -1;
+        }
+
         // * 타일주인이 없음 : 10G
         await multi.hset(
           mapKey,
@@ -249,6 +258,13 @@ class redisTransaction {
         // * 타일주인이 있음 : 구매가 * 1.5
         const purchasingPrice = JSON.parse(tileOwner).gold;
         purchaseGold = Math.floor(purchasingPrice * 1.5);
+
+        // * 골드가 부족하면 리턴 -1
+        if (Number(playerInfo.gold) < purchaseGold) {
+          logger.info(`골드가 부족함2 : ${playerInfo.gold}, ${purchaseGold}`);
+          return -1;
+        }
+
         await multi.hset(
           mapKey,
           tile,
@@ -259,6 +275,12 @@ class redisTransaction {
         );
       }
       await multi.sadd(historyKey, tile);
+
+      const nowGold = Number(playerInfo.gold) - purchaseGold;
+      const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+      await multi.hset(boardPlayerInfoKey, 'gold', nowGold);
+
+      logger.info('[ REDIS - TRANSACTION ] nowGold ==>> ', nowGold);
     });
 
     return purchaseGold;

@@ -162,8 +162,16 @@ class BoardManager {
       logger.info('[ BOARD: ] purchaseGold ===>> ', purchaseGold);
 
       const playersInfo = [];
-      const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionIds);
+      const playerInfo = await redis.getBoardPlayerinfo(boardId, sessionId);
       playerInfo.sessionId = sessionId;
+
+      // * -1이면 소유골드가 부족한 것
+      if (purchaseGold < 0) {
+        logger.error(
+          `[ BOARD: GOLD : purchaseGold: ${purchaseGold} ,, Gold: ${playerInfo.gold}]  `,
+        );
+        throw new Error('need more gold');
+      }
 
       const others = sessionIds.filter((sId) => sId !== sessionId);
       logger.info('[ BOARD: purchaseTileInBoard ] others ===>> ', others);
