@@ -203,6 +203,9 @@ class BoardManager {
       const sessionIds = await redis.getBoardPlayersBySessionId(sessionId);
       const roomId = await redis.getUserLocationField(sessionId, 'room');
       const room = await redis.getRoom(roomId);
+
+      logger.info(' [ BOARD: backTotheRoom ] room ===>> ', room);
+
       return {
         success: true,
         data: {

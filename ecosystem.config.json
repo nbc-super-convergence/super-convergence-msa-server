@@ -59,6 +59,12 @@
       "script": "./apps/bomb/dist/server.js",
       "instances": 1,
       "exec_mode": "fork"
+    },
+    {
+      "name": "dart",
+      "script": "./apps/dart/dist/server.js",
+      "instances": 1,
+      "exec_mode": "fork"
     }
   ]
 }
