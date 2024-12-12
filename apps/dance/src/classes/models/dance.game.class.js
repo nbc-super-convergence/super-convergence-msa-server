@@ -205,8 +205,18 @@ class DanceGame extends Game {
       return ResponseHelper.fail(FAIL_CODE.UNKNOWN_ERROR, false, { state: STATE.DANCE_FAIL });
     }
 
+    logger.info('[ validateKeyPress ] ====> dancePools', this.dancePools.get(sessionId));
+    logger.info('[ validateKeyPress ] ====> currentCommand', currentCommand);
+
     const isValid =
       currentCommand.targetSessionId === sessionId && currentCommand.direction === pressKey;
+
+    logger.info('[ validateKeyPress ] ====> isValid', {
+      targetSessionId: currentCommand.targetSessionId,
+      sessionId,
+      direction: currentCommand.direction,
+      pressKey,
+    });
 
     if (isValid) {
       let state;
