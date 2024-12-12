@@ -261,6 +261,8 @@ class dropperGame extends Game {
     for (let key in users) {
       let playerInfos = await redisUtil.getBoardPlayerinfo(this.id, users[key].sessionId);
 
+      logger.info(`[gameEnd - user.sessionId]` + users[key].sessionId);
+
       logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
 
       const updateGold = calculateGoldByRank(playerInfos.gold, users[key].rank);
