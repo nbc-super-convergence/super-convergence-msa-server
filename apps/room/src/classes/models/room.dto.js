@@ -6,6 +6,8 @@ class RoomDTO {
     try {
       if (!redisData) return null;
 
+      logger.info('[ fromRedis ] ====> redisData', { redisData });
+
       return {
         roomId: redisData.roomId,
         ownerId: redisData.ownerId,
@@ -14,7 +16,7 @@ class RoomDTO {
         state: parseInt(redisData.state),
         users: new Set(redisData.users ? JSON.parse(redisData.users) : []),
         maxUser: parseInt(redisData.maxUser),
-        readyUsers: new Set(JSON.parse(redisData.readyUsers)),
+        readyUsers: new Set(redisData.readyUsers ? JSON.parse(redisData.readyUsers) : []),
       };
     } catch (error) {
       logger.error('[ fromRedis ] ====> unknown error', error);
