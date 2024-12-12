@@ -4,7 +4,7 @@ package dance;
 import '../../common.proto';
 
 message DancePool {
-    string sessionId = 1;
+    int32 teamNumber = 1;
     repeated DanceTable danceTables = 2;
 }
 
