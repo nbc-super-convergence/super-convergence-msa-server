@@ -1,4 +1,4 @@
-import { Game, ResponseHelper, TimeoutManager } from '@repo/common/classes';
+import { Game, ResponseHelper } from '@repo/common/classes';
 import { logger } from '../../utils/logger.utils.js';
 import DanceUser from './dance.user.class.js';
 import { config } from '@repo/common/config';
@@ -121,11 +121,14 @@ class DanceGame extends Game {
     // dancePools의 구조:
     // [
     //   {
-    //     sessionId: string,
+    //     teamNumber: int,
     //     danceTables: [
     //       {
     //         commands: [
-    //           { direction: number, targetSessionId: string },
+    //           { direction: number, targetSessionId: 2 },
+    //           { direction: number, targetSessionId: 2 },
+    //           { direction: number, targetSessionId: 2 },
+    //           { direction: number, targetSessionId: 2 },
     //           ...
     //         ]
     //       },
@@ -287,21 +290,47 @@ class DanceGame extends Game {
     const disconnectedUser = this.getUser(sessionId);
     if (!disconnectedUser) return null;
 
-    //* 팀전에서만 대체 플레이어 찾기
-    if (this.users.size > 3) {
-      const teammate = Array.from(this.users.values()).find(
-        (user) => user.teamNumber === disconnectedUser.teamNumber && user.sessionId !== sessionId,
-      );
+    //* 나간 유저의 팀원
+    const teammate = Array.from(this.users.values()).find(
+      (user) => user.teamNumber === disconnectedUser.teamNumber && user.sessionId !== sessionId,
+    );
 
-      if (teammate) {
-        return {
-          disconnectedSessionId: sessionId,
-          replacementSessionId: teammate.sessionId,
-        };
+    const user = this.users.get(sessionId);
+
+    //* 팀전에서만 대체 플레이어 찾기
+    if (teammate) {
+      //* 입력 대상을 남은 팀원으로 변경
+      const dancePool = this.dancePools.get(disconnectedUser.teamNumber);
+      const updatedTables = dancePool.danceTables.map((table) => ({
+        commands: table.commands.map((command) => ({
+          direction: command.direction,
+          targetSessionId:
+            command.targetSessionId === sessionId ? teammate.sessionId : command.targetSessionId,
+        })),
+      }));
+
+      this.dancePools.set(disconnectedUser.teamNumber, {
+        ...dancePool,
+        danceTables: updatedTables,
+      });
+    } else {
+      //* 팀 결과 삭제
+      const teamResult = this.teamResults.get(user.teamNumber);
+      if (teamResult) {
+        teamResult.sessionId = teamResult.sessionId.filter((id) => id != sessionId);
+        if (teamResult.sessionId.length === 0) {
+          this.teamResults.delete(user.teamNumber);
+        }
       }
     }
 
-    return null;
+    //* 유저 삭제
+    this.users.delete(sessionId);
+
+    return {
+      disconnectedSessionId: sessionId,
+      replacementSessionId: teammate.sessionId,
+    };
   }
 }
 
