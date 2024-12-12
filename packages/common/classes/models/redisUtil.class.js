@@ -572,7 +572,10 @@ class RedisUtil {
    */
   async updateBoardPlayerGold(boardId, sessionId, value) {
     const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
-    await this.client.hincrby(key, 'gold', value);
+    const incGold = await this.client.hincrby(key, 'gold', value);
+    if (incGold <= 0) {
+      await this.client.hset(key, 'gold', 0);
+    }
   }
 }
 
