@@ -4,10 +4,10 @@ services:
       context: .
       dockerfile: apps/distributor/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
       - USER_DB1_HOST=shd1495.store
       - USER_DB1_PORT=3306
@@ -24,10 +24,10 @@ services:
       context: .
       dockerfile: apps/gate/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
     ports:
       - '7011:7011'
@@ -41,10 +41,10 @@ services:
       context: .
       dockerfile: apps/auth/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
     ports:
       - '7012:7012'
@@ -59,10 +59,10 @@ services:
       context: .
       dockerfile: apps/lobby/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
     ports:
       - '7013:7013'
@@ -77,10 +77,10 @@ services:
       context: .
       dockerfile: apps/room/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
     ports:
       - '7014:7014'
@@ -95,10 +95,10 @@ services:
       context: .
       dockerfile: apps/board/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
     ports:
       - '7015:7015'
@@ -113,10 +113,10 @@ services:
       context: .
       dockerfile: apps/ice/Dockerfile
     environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SERVER_HOST=distributor
     ports:
       - '7016:7016'
@@ -126,15 +126,77 @@ services:
       - distributor
       - gate
 
-  redis:
-    hostname: redis
-    container_name: redis
-    image: redis:latest
-    command: redis-server --requirepass myredispass
-    ports: # 바인딩할 포트:내부 포트
-      - '6379:6379'
+  dropper:
+    build:
+      context: .
+      dockerfile: apps/dropper/Dockerfile
+    environment:
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=distributor
+    ports:
+      - '7017:7017'
     networks:
       - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  dance:
+    build:
+      context: .
+      dockerfile: apps/dance/Dockerfile
+    environment:
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=distributor
+    ports:
+      - '7018:7018'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  bomb:
+    build:
+      context: .
+      dockerfile: apps/bomb/Dockerfile
+    environment:
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=distributor
+    ports:
+      - '7019:7019'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
+
+  dart:
+    build:
+      context: .
+      dockerfile: apps/dart/Dockerfile
+    environment:
+      # - NODE_ENV=production
+      # - REDIS_HOST=${REDIS_HOST}
+      # - REDIS_PORT=${REDIS_PORT}
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=distributor
+    ports:
+      - '7020:7020'
+    networks:
+      - super-convergence
+    depends_on:
+      - distributor
+      - gate
 
 networks:
   super-convergence:

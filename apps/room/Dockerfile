@@ -8,5 +8,5 @@ COPY . .
 RUN yarn install --frozen-lockfile --production=false && \
     yarn cache clean
 
-EXPOSE 7012
+EXPOSE 7014
 CMD ["node", "apps/room/src/server.js"]

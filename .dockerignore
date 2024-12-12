@@ -8,7 +8,7 @@ logs
 *.log
 
 # env 
-.env
+# .env
 
 # Git 
 .git

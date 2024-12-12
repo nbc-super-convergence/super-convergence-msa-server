@@ -2,6 +2,10 @@ name: develop-CD-pipeline
 
 on:
   push:
+    paths:
+      - 'apps/*/src/**' # src 폴더 내 변경사항 감지
+      - 'apps/*/Dockerfile'
+      - 'docker-compose.yml'
     branches:
       - develop
   pull_request:
@@ -14,6 +18,17 @@ jobs:
     runs-on: ubuntu-latest # 실행될 인스턴스 OS와 버전
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          files: |
+            apps/*/src/**
+            apps/*/Dockerfile
+
       - name: excuting remote ssh commands
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
         with:
@@ -24,7 +39,6 @@ jobs:
           script: | # 실행할 스크립트
             cd super-convergence-msa-server
             git pull origin develop
-            yarn install
-            yarn build --concurrency=1
-            pm2 kill
-            pm2 start ecosystem.config.json
+            docker-compose down
+            docker-compose build --no-cache
+            docker-compose up -d
