@@ -267,11 +267,9 @@ class dropperGame extends Game {
 
       const updateGold = calculateGoldByRank(playerInfos.gold, users[key].rank);
 
-      playerInfos.gold = updateGold;
+      logger.info(`[gameEnd - playerInfos.gold]:` + updateGold);
 
-      logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
-
-      await redisUtil.updateBoardPlayerInfo(this.id, users[key].sessionId, playerInfos);
+      await redisUtil.updateBoardPlayerGold(this.id, users[key].sessionId, updateGold);
     }
 
     const message = dropGameOverNotification(users);
