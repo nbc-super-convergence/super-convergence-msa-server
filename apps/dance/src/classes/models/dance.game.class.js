@@ -365,7 +365,8 @@ class DanceGame extends Game {
   }
 
   isAllReady() {
-    if (this.users.size <= 0) {
+    logger.info('[ isAllReady ] ====> error updating score', { size: this.users.size });
+    if (this.users.size < 1) {
       return false;
     }
 
@@ -387,7 +388,7 @@ class DanceGame extends Game {
     };
   }
 
-  handleDisconnect(sessionId) {
+  async handleDisconnect(sessionId) {
     const disconnectedUser = this.getUser(sessionId);
     if (!disconnectedUser) {
       logger.error('[ handleDisconnect ] ====> user not found', { sessionId });
