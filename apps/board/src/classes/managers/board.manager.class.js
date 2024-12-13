@@ -239,6 +239,9 @@ class BoardManager {
         })
         .filter((user) => user !== null);
 
+      await redis.updateRoomField(roomData.roomId, 'state', 0);
+      await redis.updateRoomField(roomData.roomId, 'readyUsers', '[]');
+
       return {
         roomId: roomData.roomId,
         ownerId: roomData.ownerId,
