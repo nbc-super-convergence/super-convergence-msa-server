@@ -186,7 +186,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const notification = {
       sessionId: sessionId,
       tile: result.data.tile,
-      playersInfo: result.data.playersInfo,
+      playerInfo: result.data.playerInfo,
       purchaseGold: result.data.purchaseGold,
     };
 
