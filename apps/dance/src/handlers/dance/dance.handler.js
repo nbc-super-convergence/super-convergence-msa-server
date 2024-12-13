@@ -1,4 +1,5 @@
 import danceGameManager from '../../classes/manager/dance.manager.js';
+import { redis } from '../../init/redis.js';
 import { GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
 import { handleError } from '../../utils/handle.error.js';
 import { logger } from '../../utils/logger.utils.js';
@@ -11,12 +12,14 @@ export const danceReadyRequestHandler = async ({ socket, payload }) => {
 
     const game = danceGameManager.getGameBySessionId(sessionId);
     if (!game) {
-      throw new Error('[ danceReadyRequestHandler ] ====> game not found');
+      logger.error('[ danceReadyRequestHandler ] ====> game not found');
+      return;
     }
 
     const user = game.getUser(sessionId);
     if (!user) {
-      throw new Error('[ danceReadyRequestHandler ] ====> user not found');
+      logger.error('[ danceReadyRequestHandler ] ====> user not found');
+      return;
     }
 
     user.setReady();
@@ -26,7 +29,7 @@ export const danceReadyRequestHandler = async ({ socket, payload }) => {
     socket.write(readyNotiBuffer);
 
     //* 모든 플레이어가 준비되었다면 게임 시작
-    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
+    if (game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
 
@@ -48,7 +51,8 @@ export const danceTableCreateRequestHandler = ({ socket, payload }) => {
 
     const game = danceGameManager.getGameBySessionId(sessionId);
     if (!game) {
-      throw new Error('[ danceTableCreateRequestHandler ] ====> Game not found');
+      logger.error('[ danceTableCreateRequestHandler ] ====> Game not found');
+      return;
     }
 
     //* 춤표 설정
@@ -70,7 +74,8 @@ export const danceKeyPressRequestHandler = ({ socket, payload }) => {
 
     const game = danceGameManager.getGameBySessionId(sessionId);
     if (!game) {
-      throw new Error('[ danceKeyPressRequestHandler ] ====> Game not found');
+      logger.error('[ danceKeyPressRequestHandler ] ====> Game not found');
+      return;
     }
 
     //* 키 입력 검증
@@ -96,7 +101,8 @@ export const danceTableCompleteRequestHandler = async ({ socket, payload }) => {
 
     const game = danceGameManager.getGameBySessionId(sessionId);
     if (!game) {
-      throw new Error('[ danceTableCompleteRequestHandler ] ====> Game not found');
+      logger.error('[ danceTableCompleteRequestHandler ] ====> Game not found');
+      return;
     }
 
     //* 테이블 완료 처리
@@ -118,13 +124,20 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     const { sessionId } = payload;
     logger.info('[ danceCloseSocketRequestHandler ] ====> start', { sessionId });
 
+    const location = await redis.getUserLocationField(sessionId, 'dance');
+    if (!location) {
+      logger.info('[ danceCloseSocketRequestHandler ] ====> not a user in the dance game');
+      return;
+    }
+
     const game = danceGameManager.getGameBySessionId(sessionId);
     if (!game) {
-      throw new Error('[ danceCloseSocketRequestHandler ] ====> Game not found');
+      logger.error('[ danceCloseSocketRequestHandler ] ====> Game not found');
+      return;
     }
 
     //* 연결 종료 처리 및 대체 플레이어 찾기
-    const replacementInfo = game.handleDisconnect(sessionId);
+    const replacementInfo = await game.handleDisconnect(sessionId);
     if (replacementInfo) {
       const notiBuffer = danceGameManager.danceCloseSocketNoti(game, sessionId);
       socket.write(notiBuffer);
