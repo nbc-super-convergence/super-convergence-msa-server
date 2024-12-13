@@ -332,25 +332,31 @@ class redisTransaction {
         pennaltyPlayerGold = Number(pennaltyPlayerGold) - penalty;
         ownerPlayerGold = Number(ownerPlayerGold) + penalty;
 
+        console.log('[ redisTransaction - tilePenalty ] penalty ==>> ', penalty);
+        console.log(
+          '[ redisTransaction - tilePenalty ] pennaltyPlayerGold ==>> ',
+          pennaltyPlayerGold,
+        );
+        console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
+
         await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
         await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
       }
 
       // TODO: 페널티 이력 저장?
-
-      // * 모든 플레이어 정보 반환
-      result.playersInfo = [];
-      const PlayersInfoKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
-      const playerSessionIds = await this.client.lrange(PlayersInfoKey, 0, -1);
-      playerSessionIds.forEach(async (sId) => {
-        const playerInfo = await this.client.hget(
-          `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`,
-        );
-        playerInfo.sessionId = sId;
-        result.playersInfo.push(playerInfo);
-      });
     });
 
+    // * 모든 플레이어 정보 반환
+    result.playersInfo = [];
+    const boardPlayersKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
+    const playerSessionIds = await this.client.smembers(boardPlayersKey);
+    playerSessionIds.forEach(async (sId) => {
+      const playerInfo = await this.client.hgetall(
+        `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`,
+      );
+      playerInfo.sessionId = sId;
+      result.playersInfo.push(playerInfo);
+    });
     return result;
   }
 
@@ -379,6 +385,7 @@ class redisTransaction {
         result.playersInfo.push(playerInfo);
       });
     });
+
     return result;
   }
 

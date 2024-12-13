@@ -41,7 +41,7 @@ class DartServer extends TcpServer {
             await redisUtil.createUserLocation(user.sessionId, 'dart', game.id);
           }
 
-          const buffer = await DartGameManager.dropMiniGameReadyNoti(game);
+          const buffer = await DartGameManager.makeMiniGameReadyNoti(game);
 
           // TODO: 나중에 수정하기 [ GATE ]
           const seq = '2';
