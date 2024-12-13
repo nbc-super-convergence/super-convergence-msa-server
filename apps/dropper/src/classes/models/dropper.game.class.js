@@ -82,7 +82,7 @@ class dropperGame extends Game {
   }
 
   isAllReady() {
-    if (this.users.size <= 0) {
+    if (this.users.length <= 0) {
       return false;
     }
 
