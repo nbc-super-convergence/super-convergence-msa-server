@@ -247,7 +247,7 @@ class BoardManager {
         state: Number(roomData.state),
         users,
         maxUser: Number(roomData.maxUser),
-        readyUsers: Array.from(roomData.readyUsers),
+        readyUsers: JSON.parse(roomData.readyUsers),
       };
     } catch (error) {
       logger.error('[ toResponse ] ====> unknown error', error);
