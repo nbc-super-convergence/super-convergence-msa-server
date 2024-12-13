@@ -20,7 +20,7 @@ class BombGame extends Game {
     this.intervalManager = new IntervalManager();
     this.timeoutManager = new TimeoutManager();
     this.startPosition = bombMap.startPosition;
-    this.state = GAME_STATE.WAIT;
+    this.state = GAME_STATE.END;
 
     this.bombUser = null;
   }
