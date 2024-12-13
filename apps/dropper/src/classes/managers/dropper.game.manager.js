@@ -87,7 +87,7 @@ class dropperGameManager {
     return buffer;
   }
 
-  async dropMiniGameStartNoti(socket, game) {
+  async dropMiniGameStartNoti(game) {
     // * 미니 게임 시작
     logger.info(`[dropGameManager - dropMiniGameStartNoti]`);
 

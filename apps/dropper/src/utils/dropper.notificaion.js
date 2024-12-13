@@ -71,7 +71,7 @@ export const dropGameOverNotification = (users) => {
   });
 
   // ranks와 endTime으로 payload 생성
-  const payload = { ranks, endTime: Date.now() + 6000 };
+  const payload = { ranks, endTime: Date.now() + 9000 };
 
   return { type, payload };
 };
