@@ -497,7 +497,7 @@ class redisTransaction {
           const tileCount = await this.client.scard(tileHistoryKey);
           logger.info(' tileCount => ', tileCount);
 
-          const gold = boardPlayerInfo.gold + tileCount * 50;
+          const gold = Number(boardPlayerInfo.gold) + tileCount * 50;
 
           result.rank.push({
             sessionId: playerSessionId,
