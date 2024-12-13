@@ -150,9 +150,23 @@ class LobbyManager {
         return ResponseHelper.success([]);
       }
 
-      logger.info('[ getUserList ] ====> success');
+      //* 한 번의 파이프라인으로 모든 유저 데이터 조회
+      const pipeline = redis.client.pipeline();
+      users.forEach((sessionId) => {
+        pipeline.hget(`${redis.prefix.USER}:${sessionId}`, 'nickname');
+      });
+      const result = await pipeline.exec();
 
-      return ResponseHelper.success(users);
+      const nicknames = result.map(([error, nickname]) => {
+        if (error) {
+          logger.error('[ getUserList ] ====> redis pipeline error', error);
+        }
+        return nickname;
+      });
+
+      logger.info('[ getUserList ] ====> success', { nicknames });
+
+      return ResponseHelper.success(nicknames);
     } catch (error) {
       logger.error('[ getUserList ] ====> unknown error', { error });
       return ResponseHelper.fail();
