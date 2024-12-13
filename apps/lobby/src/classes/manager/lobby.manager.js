@@ -150,23 +150,9 @@ class LobbyManager {
         return ResponseHelper.success([]);
       }
 
-      //* 한 번의 파이프라인으로 모든 유저 데이터 조회
-      const pipeline = redis.client.pipeline();
-      users.forEach((sessionId) => {
-        pipeline.hgetall(`${redis.prefix.USER}:${sessionId}`);
-      });
-
-      const results = await pipeline.exec();
-      const userList = users
-        .map((sessionId, index) => {
-          const userData = results[index]?.[1];
-          return userData ? Lobby.formatUserData(userData, sessionId) : null;
-        })
-        .filter(Boolean);
-
       logger.info('[ getUserList ] ====> success');
 
-      return ResponseHelper.success(userList);
+      return ResponseHelper.success(users);
     } catch (error) {
       logger.error('[ getUserList ] ====> unknown error', { error });
       return ResponseHelper.fail();
