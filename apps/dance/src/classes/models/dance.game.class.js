@@ -276,7 +276,7 @@ class DanceGame extends Game {
   }
 
   handleTableComplete(sessionId, endTime) {
-    if (!sessionId || endTime) {
+    if (!sessionId || !endTime) {
       logger.error('[ handleTableComplete ] ====> invalid params', { sessionId, endTime });
       return false;
     }
