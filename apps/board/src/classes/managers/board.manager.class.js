@@ -244,10 +244,10 @@ class BoardManager {
         ownerId: roomData.ownerId,
         roomName: roomData.roomName,
         lobbyId: roomData.lobbyId,
-        state: Number(roomData.state),
+        state: 0, //Number(roomData.state),
         users,
         maxUser: Number(roomData.maxUser),
-        readyUsers: JSON.parse(roomData.readyUsers),
+        readyUsers: '[]', //JSON.parse(roomData.readyUsers),
       };
     } catch (error) {
       logger.error('[ toResponse ] ====> unknown error', error);
