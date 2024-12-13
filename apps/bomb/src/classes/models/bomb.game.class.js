@@ -94,14 +94,18 @@ class BombGame extends Game {
   }
 
   bombTimeout(socket) {
-    const survivor = this.getAliveUsers();
-    this.bombUserDeath(socket, survivor);
-    const afterSurvivor = this.getAliveUsers();
+    try {
+      const survivor = this.getAliveUsers();
+      this.bombUserDeath(socket, survivor);
+      const afterSurvivor = this.getAliveUsers();
 
-    if (afterSurvivor.length <= 1) {
-      this.bombGameEnd(socket, afterSurvivor);
-    } else {
-      this.bombTimerStart(socket);
+      if (afterSurvivor.length <= 1) {
+        this.bombGameEnd(socket, afterSurvivor);
+      } else {
+        this.bombTimerStart(socket);
+      }
+    } catch (error) {
+      logger.error(`[BombGame - Game.class , bombTimeout = error >>> ]`, error);
     }
   }
 
@@ -111,7 +115,7 @@ class BombGame extends Game {
     targetUser.ranking(survivor.length);
     const nextBombUser = this.bombUserSelect();
 
-    logger.info(`[BombGame - Game.class = bombTimeout, nextBombUser ]`, nextBombUser);
+    logger.info(`[BombGame - Game.class , bombUserDeath = nextBombUser >>> ]`, nextBombUser);
 
     this.bombUserChange(nextBombUser);
     const message = bombPlayerDeathNotification(targetUser.sessionId, nextBombUser);
@@ -136,7 +140,7 @@ class BombGame extends Game {
       'end',
     );
     this.goldUpdate(users);
-    logger.info(`[BombGame - Game.class, bombGameEnd, message ]`, message);
+    logger.info(`[BombGame - Game.class, bombGameEnd = message >>> ]`, message);
   }
 
   goldUpdate(users) {
