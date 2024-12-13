@@ -185,7 +185,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
     }
 
     // 혼자인 경우 게임 종료
-    if (game.state === GAME_STATE.START && game.users.length <= 1) {
+    if (game.state === GAME_STATE.START && game.getAliveUsers().length <= 1) {
       game.bombGameEnd(socket, game.users);
     }
 
