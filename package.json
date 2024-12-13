@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "turbo build",
-    "start": "turbo run cache && turbo run start --no-daemon",
+    "start": "turbo run cache && turbo run start --concurrency=20 --no-daemon",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
