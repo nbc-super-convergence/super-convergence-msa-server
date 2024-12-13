@@ -3,6 +3,7 @@ import { logger } from '../../utils/logger.utils.js';
 import DanceUser from './dance.user.class.js';
 import { config } from '@repo/common/config';
 import { danceConfig } from '../../config/config.js';
+import danceGameManager from '../manager/dance.manager.js';
 
 const { FAIL_CODE, STATE } = config;
 const { GAME_STATE, REASON, DIRECTION } = danceConfig;
@@ -13,6 +14,7 @@ class DanceGame extends Game {
     this.users = new Map(); //* 유저의 세션 ID -> 유저 클래스
     this.dancePools = new Map(); //* 현재 게임의 춤표 풀
     this.teamResults = new Map(); //* teamNumber -> { sessionId, score, endTime }
+    this.timers = new Map(); //* 타이머 관리
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
   }
@@ -110,6 +112,33 @@ class DanceGame extends Game {
 
   setGameState(state) {
     this.state = state;
+  }
+
+  clearTimers() {
+    this.timers.forEach((timer) => clearTimeout(timer));
+    this.timers.clear();
+  }
+
+  startGameTimer(socket) {
+    if (this.timers.has('gameTimer')) {
+      clearTimeout(this.timers.get('gameTimer'));
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        if (this.state !== GAME_STATE.WAIT) {
+          this.endGame(REASON.TIME_OVER);
+          const gameOverBuffer = await danceGameManager.danceGameOverNoti(this);
+          if (!socket.destroyed) {
+            socket.write(gameOverBuffer);
+          }
+        }
+      } catch (error) {
+        logger.error('[ startGameTimer ] ====> Game timer error', error);
+      }
+    }, 120000);
+
+    this.timers.set('gameTimer', timer);
   }
 
   setDancePools(dancePools) {

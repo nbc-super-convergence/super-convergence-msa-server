@@ -30,23 +30,8 @@ export const danceReadyRequestHandler = async ({ socket, payload }) => {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
 
-      //* 2분 시간 제한
-      setTimeout(async () => {
-        try {
-          logger.info('[ danceReadyRequestHandler ] ====> setTimeout', {
-            gameState: game.state,
-            GAME_STATE: GAME_STATE.WAIT,
-          });
-
-          if (game.state !== GAME_STATE.WAIT) {
-            game.endGame(REASON.TIME_OVER);
-            const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
-            socket.write(gameOverBuffer);
-          }
-        } catch (error) {
-          logger.error('[ danceReadyRequestHandler ] ====> timeout error', { error });
-        }
-      }, 120000);
+      //* 게임 시작 타이머 시작
+      game.startGameTimer(socket);
 
       socket.write(startNotiBuffer);
     }
@@ -142,36 +127,24 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
       socket.write(notiBuffer);
     }
 
+    //* 유저가 1명이면 게임 종료
+    if (game.users.size <= 1) {
+      //* 타이머 제거
+      game.clearTimers();
+
+      const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
+      socket.write(gameOverBuffer);
+    }
+
     //* 설명창에서 유저가 나간 후 모두 준비 상태면 게임 시작
     if (game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceCloseSocketRequestHandler ] ====> gameStartNoti');
 
-      //* 2분 시간 제한
-      setTimeout(async () => {
-        try {
-          logger.info('[ danceCloseSocketRequestHandler ] ====> setTimeout', {
-            gameState: game.state,
-            GAME_STATE: GAME_STATE.WAIT,
-          });
-
-          if (game.state !== GAME_STATE.WAIT) {
-            game.endGame(REASON.TIME_OVER);
-            const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
-            socket.write(gameOverBuffer);
-          }
-        } catch (error) {
-          logger.error('[ danceCloseSocketRequestHandler ] ====> timeout error', error);
-        }
-      }, 120000);
+      //* 게임 시작 타이머 시작
+      game.startGameTimer(socket);
 
       socket.write(startNotiBuffer);
-    }
-
-    //* 유저가 1명이면 게임 종료
-    if (game.users.size <= 0) {
-      const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
-      socket.write(gameOverBuffer);
     }
   } catch (error) {
     logger.error('[ danceCloseSocketRequestHandler ] ====> error', error);
