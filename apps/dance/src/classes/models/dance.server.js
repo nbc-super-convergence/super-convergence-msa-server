@@ -27,14 +27,28 @@ class DanceServer extends TcpServer {
       if (channel === danceConfig.REDIS.CHANNEL) {
         //* `${boardId}:${users}`
         const [boardId, users] = message.split(':');
+        if (!boardId || !users) {
+          logger.error('[DanceChannel - Invalid message format]', { message });
+          return;
+        }
 
-        await danceGameManager.createGame(boardId, JSON.parse(users));
+        const parsedUsers = JSON.parse(users);
+        if (!Array.isArray(parsedUsers)) {
+          logger.error('[DanceChannel - Invalid users format]', { users });
+          return;
+        }
+
+        await danceGameManager.createGame(boardId, parsedUsers);
       } else {
         try {
           logger.info(`[DanceChannel - message]`, message);
 
           //* message가 아마 boardId?
           const game = danceGameManager.getGameByGameId(message);
+          if (!game) {
+            logger.error('[DanceChannel - Game not found]', { message });
+            return;
+          }
 
           logger.info(`[DanceChannel - game]`, game);
 
@@ -47,6 +61,12 @@ class DanceServer extends TcpServer {
 
           // TODO: 나중에 수정하기
           const seq = '2';
+
+          //* 소켓맵 검증
+          if (!this._socketMap || !this._socketMap[seq]) {
+            logger.error('[ DANCE: this._socketMap ] ====>>> Invalid socket map', { seq });
+            return;
+          }
 
           logger.info('[ DANCE: this._socketMap ] ====>>> ', this._socketMap);
 
