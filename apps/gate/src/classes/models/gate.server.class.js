@@ -135,7 +135,7 @@ class GateServer extends TcpServer {
     const closeSocketPacket = makeCloseSocketRequest(sessionId);
     // * 인증, 아이스, 그 외 미니게임들 추가 예정
     // * 인증(auth)은 언제나 마지막에 있어야 한다.
-    const serviceList = ['ice', 'bomb', 'dropper', 'auth'];
+    const serviceList = ['ice', 'bomb', 'dropper', 'auth', 'dance'];
     for (let i = 0; i < serviceList.length; i++) {
       const targetService = this._mapServices[serviceList[i] + '_1'];
       if (targetService && targetService.client) {
