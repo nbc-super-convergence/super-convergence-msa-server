@@ -143,6 +143,11 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
     // ! 나간 유저의 게임 위치 삭제
     await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'dropper');
 
+    // * 남은 유저 0명일 시 인터벌 종료
+    if (game.users.length === 0) {
+      game.intervalManager.clearAll();
+    }
+
     logger.info(`[게임 준비완료 확인]:`, game.isAllReady());
     if (game.state === GAME_STATE.WAIT && game.isAllReady() && game.users.length !== 0) {
       logger.info(`[현재 게임 상태]`, game);
