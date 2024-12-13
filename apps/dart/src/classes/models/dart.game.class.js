@@ -38,9 +38,19 @@ class DartGame extends Game {
     return this.users.find((user) => user.sessionId === sessionId);
   }
 
+  setGameState(state) {
+    this.state = state;
+  }
+
+  getAllSessionIds() {
+    return this.users.map((user) => user.sessionId);
+  }
+
   getUser() {}
 
-  getAllUsers() {}
+  getAllUsers() {
+    return this.users;
+  }
 
   updateMapSync() {}
 }

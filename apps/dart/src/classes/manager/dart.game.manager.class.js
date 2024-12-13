@@ -68,11 +68,15 @@ class DartGameManager {
     const sessionIds = game.getAllSessionIds();
     const users = game.getAllUsers();
 
+    console.log(' [ DART: makeMiniGameReadyNoti ] sessionIds ===>> ', sessionIds);
+    console.log(' [ DART: makeMiniGameReadyNoti ] users ===>> ', users);
+
     const type = MESSAGE_TYPE.DART_MINI_GAME_READY_NOTIFICATION;
     const payload = {
       players: users.map((user) => ({
         sessionId: user.sessionId,
-        slot: user.slot,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: 0,
       })),
     };
     const message = { type, payload };

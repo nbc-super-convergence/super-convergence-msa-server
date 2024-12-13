@@ -60,6 +60,7 @@ class RedisUtil {
       DANCE: 'danceGameChannel',
       BOMB: 'bombGameChannel',
       DROPPER: 'dropperGameChannel',
+      DART: 'dartGameChannel',
     };
 
     this.transaction = new redisTransaction(this);
