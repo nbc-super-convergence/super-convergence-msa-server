@@ -3,7 +3,7 @@ import { GAME_STATE, MESSAGE_TYPE, REASON } from '../../utils/constants.js';
 import { handleError } from '../../utils/handle.error.js';
 import { logger } from '../../utils/logger.utils.js';
 
-export const danceReadyRequestHandler = ({ socket, payload }) => {
+export const danceReadyRequestHandler = async ({ socket, payload }) => {
   const { sessionId } = payload;
 
   try {
@@ -31,7 +31,7 @@ export const danceReadyRequestHandler = ({ socket, payload }) => {
       logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
 
       //* 2분 시간 제한
-      setTimeout(() => {
+      setTimeout(async () => {
         logger.info('[ danceReadyRequestHandler ] ====> setTimeout', {
           gameState: game.state,
           GAME_STATE: GAME_STATE.WAIT,
@@ -39,7 +39,7 @@ export const danceReadyRequestHandler = ({ socket, payload }) => {
 
         if (game.state !== GAME_STATE.WAIT) {
           game.endGame(REASON.TIME_OVER);
-          const gameOverBuffer = danceGameManager.danceGameOverNoti(game);
+          const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
           socket.write(gameOverBuffer);
         }
       }, 120000);
@@ -99,7 +99,7 @@ export const danceKeyPressRequestHandler = ({ socket, payload }) => {
   }
 };
 
-export const danceTableCompleteRequestHandler = ({ socket, payload }) => {
+export const danceTableCompleteRequestHandler = async ({ socket, payload }) => {
   const { sessionId, endTime } = payload;
 
   try {
@@ -113,7 +113,7 @@ export const danceTableCompleteRequestHandler = ({ socket, payload }) => {
     //* 테이블 완료 처리
     const isGameOver = game.handleTableComplete(sessionId, endTime);
     if (isGameOver) {
-      const gameOverBuffer = danceGameManager.danceGameOverNoti(game);
+      const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
       socket.write(gameOverBuffer);
     }
   } catch (error) {
@@ -121,7 +121,7 @@ export const danceTableCompleteRequestHandler = ({ socket, payload }) => {
   }
 };
 
-export const danceCloseSocketRequestHandler = ({ socket, payload }) => {
+export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
   try {
     const { sessionId } = payload;
     logger.info('[ danceCloseSocketRequestHandler ] ====> start', { sessionId });
@@ -144,7 +144,7 @@ export const danceCloseSocketRequestHandler = ({ socket, payload }) => {
       logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
 
       //* 2분 시간 제한
-      setTimeout(() => {
+      setTimeout(async () => {
         logger.info('[ danceReadyRequestHandler ] ====> setTimeout', {
           gameState: game.state,
           GAME_STATE: GAME_STATE.WAIT,
@@ -152,7 +152,7 @@ export const danceCloseSocketRequestHandler = ({ socket, payload }) => {
 
         if (game.state !== GAME_STATE.WAIT) {
           game.endGame(REASON.TIME_OVER);
-          const gameOverBuffer = danceGameManager.danceGameOverNoti(game);
+          const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
           socket.write(gameOverBuffer);
         }
       }, 120000);
@@ -162,7 +162,7 @@ export const danceCloseSocketRequestHandler = ({ socket, payload }) => {
 
     //* 유저가 1명이면 게임 종료
     if (game.users.size <= 0) {
-      const gameOverBuffer = danceGameManager.danceGameOverNoti(game);
+      const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
       socket.write(gameOverBuffer);
     }
   } catch (error) {
