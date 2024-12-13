@@ -35,7 +35,7 @@ export const createNotification = (data, messageType, sessionIds) => {
 
     case MESSAGE_TYPE.DANCE_KEY_PRESS_NOTIFICATION:
       notification = {
-        sessionId: data.sessionId,
+        teamNumber: data.teamNumber,
         correct: data.correct,
         state: data.state,
       };
