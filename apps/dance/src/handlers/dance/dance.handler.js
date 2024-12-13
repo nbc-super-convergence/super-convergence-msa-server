@@ -1,5 +1,5 @@
 import danceGameManager from '../../classes/manager/dance.manager.js';
-import { GAME_STATE, MESSAGE_TYPE, REASON } from '../../utils/constants.js';
+import { MESSAGE_TYPE } from '../../utils/constants.js';
 import { handleError } from '../../utils/handle.error.js';
 import { logger } from '../../utils/logger.utils.js';
 
@@ -102,6 +102,9 @@ export const danceTableCompleteRequestHandler = async ({ socket, payload }) => {
     //* 테이블 완료 처리
     const isGameOver = game.handleTableComplete(sessionId, endTime);
     if (isGameOver) {
+      //* 게임 종료 시 타이머 정리
+      game.clearTimers();
+
       const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
       socket.write(gameOverBuffer);
     }
