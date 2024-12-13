@@ -332,6 +332,10 @@ class DanceGame extends Game {
   }
 
   isAllReady() {
+    if (this.users.size <= 0) {
+      return false;
+    }
+
     return Array.from(this.users.values()).every((user) => user.isReady);
   }
 
