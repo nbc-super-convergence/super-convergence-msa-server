@@ -62,12 +62,11 @@ class DanceGameManager {
     const game = this.games.get(gameId);
 
     if (game) {
-      //* 세션 ID 매핑 삭제
-      game.getAllSessionIds().forEach((sessionId) => {
-        this.sessionIds.delete(sessionId);
-      });
-      //* 게임 인스턴스 삭제
-      this.games.delete(gameId);
+      //* 타이머만 정리
+      game.timers.forEach((timer) => clearTimeout(timer));
+      game.timers.clear();
+
+      //* 게임 상태 초기화
       game.resetGameData();
     }
   }

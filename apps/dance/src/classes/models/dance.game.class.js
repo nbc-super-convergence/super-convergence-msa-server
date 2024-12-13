@@ -29,9 +29,25 @@ class DanceGame extends Game {
   }
 
   resetGameData() {
-    this.users.clear();
-    this.dancePools.clear();
-    this.teamResults.clear();
+    //* 타이머 정리
+    this.timers.forEach((timer) => clearTimeout(timer));
+    this.timers.clear();
+
+    //* 유저 ready 상태 초기화
+    this.users.forEach((user) => {
+      user.isReady = false;
+      user.setState(STATE.DANCE_WAIT);
+    });
+
+    //* 팀 결과 초기화
+    this.teamResults.forEach((_, teamNumber) => {
+      this.teamResults.set(teamNumber, {
+        sessionId: [],
+        score: 0,
+        endTime: 0,
+      });
+    });
+
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
   }
@@ -169,15 +185,13 @@ class DanceGame extends Game {
 
     dancePools.forEach((pool) => {
       //* 팀별로 춤표 저장
-      if (!this.dancePools.has(pool.teamNumber)) {
-        this.dancePools.set(pool.teamNumber, {
-          tables: pool.danceTables.map((table) => ({
-            commands: [...table.commands],
-          })),
-          currentTableIndex: 0,
-          currentCommandIndex: 0,
-        });
-      }
+      this.dancePools.set(pool.teamNumber, {
+        tables: pool.danceTables.map((table) => ({
+          commands: [...table.commands],
+        })),
+        currentTableIndex: 0,
+        currentCommandIndex: 0,
+      });
     });
   }
 
