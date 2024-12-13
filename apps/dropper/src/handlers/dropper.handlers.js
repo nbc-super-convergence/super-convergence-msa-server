@@ -37,7 +37,7 @@ export const dropGameReadyRequestHandler = async ({ socket, payload }) => {
 
     // * 모든 유저 준비 완료
     if (game.isAllReady()) {
-      buffer = await dropGameManager.dropMiniGameStartNoti(socket, game);
+      buffer = await dropGameManager.dropMiniGameStartNoti(game);
 
       //* 인터벌 시작
       game.breakFloorInterval(socket);
@@ -143,8 +143,11 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
     // ! 나간 유저의 게임 위치 삭제
     await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'dropper');
 
-    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
-      const buffer = game.dropMiniGameStartNoti(socket, game);
+    logger.info(`[게임 준비완료 확인]:`, game.isAllReady());
+    if (game.state === GAME_STATE.WAIT && game.isAllReady() && game.users.length !== 0) {
+      logger.info(`[현재 게임 상태]`, game);
+      logger.info(`[현재 유저의 상태]`, game.users[0]);
+      const buffer = await dropGameManager.dropMiniGameStartNoti(game);
 
       socket.write(buffer);
 
