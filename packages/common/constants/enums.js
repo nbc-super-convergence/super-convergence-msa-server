@@ -151,4 +151,8 @@ export const FIELD_NAME = {
   605: 'dartGameThrowRequest',
   606: 'dartGameThrowNotification',
   607: 'dartGameOverNotification',
+  608: 'dartPannelSyncRequest',
+  609: 'dartPannelSyncNotification',
+  610: 'dartSyncRequest',
+  611: 'dartSyncNotification',
 };
