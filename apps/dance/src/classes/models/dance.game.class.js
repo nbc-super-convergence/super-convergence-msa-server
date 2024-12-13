@@ -127,7 +127,9 @@ class DanceGame extends Game {
   }
 
   setGameState(state) {
-    this.state = state;
+    if (state) {
+      this.state = state;
+    }
   }
 
   clearTimers() {
@@ -136,6 +138,11 @@ class DanceGame extends Game {
   }
 
   startGameTimer(socket) {
+    if (!socket) {
+      logger.error('[ startGameTimer ] ====> sockt is undefined', { socket });
+      return null;
+    }
+
     if (this.timers.has('gameTimer')) {
       clearTimeout(this.timers.get('gameTimer'));
     }
@@ -183,16 +190,34 @@ class DanceGame extends Game {
     //   ...
     // ]
 
-    dancePools.forEach((pool) => {
-      //* 팀별로 춤표 저장
-      this.dancePools.set(pool.teamNumber, {
-        tables: pool.danceTables.map((table) => ({
-          commands: [...table.commands],
-        })),
-        currentTableIndex: 0,
-        currentCommandIndex: 0,
+    try {
+      dancePools.forEach((pool) => {
+        if (!pool.teamNumber || !Array.isArray(pool.danceTables)) {
+          throw new Error('[ setDancePools ] ====> Invalid pool structure');
+        }
+
+        //* 팀별로 춤표 저장
+        this.dancePools.set(pool.teamNumber, {
+          danceTables: pool.danceTables.map((table) => {
+            if (!Array.isArray(table.commands)) {
+              throw new Error('[ setDancePools ] ====> Invalid table structure');
+            }
+
+            return {
+              commands: table.commands.map((command) => ({
+                direction: command.direction,
+                targetSessionId: command.targetSessionId,
+              })),
+            };
+          }),
+          currentTableIndex: 0,
+          currentCommandIndex: 0,
+        });
       });
-    });
+    } catch (error) {
+      logger.error('[ setDancePools ] ====> error setting dance pools', { error });
+      this.dancePools.clear();
+    }
   }
 
   getCurrentCommand(user) {
@@ -207,7 +232,7 @@ class DanceGame extends Game {
       return null;
     }
 
-    const currentTable = pool.tables[pool.currentTableIndex];
+    const currentTable = pool.danceTables[pool.currentTableIndex];
     if (!currentTable) {
       logger.error('[ getCurrentCommand ] ====> invalid table', { pool });
       return null;
@@ -217,18 +242,26 @@ class DanceGame extends Game {
   }
 
   moveToNextCommand(user) {
+    if (!user?.teamNumber) {
+      logger.error('[ moveToNextCommand ] ====> user.teamNumber is undefined', { user });
+      return false;
+    }
+
     const pool = this.dancePools.get(user.teamNumber);
-    if (!pool) return false;
+    if (!pool?.danceTables) {
+      logger.error('[ moveToNextCommand ] ====> pool.danceTables is undefined', { user });
+      return false;
+    }
 
     pool.currentCommandIndex++;
-    const currentTable = pool.tables[pool.currentTableIndex];
+    const currentTable = pool.danceTables[pool.currentTableIndex];
 
     if (currentTable && pool.currentCommandIndex >= currentTable.commands.length) {
       //* 현재 테이블의 모든 커맨드 완료
       pool.currentTableIndex++;
       pool.currentCommandIndex = 0;
 
-      if (pool.currentTableIndex >= pool.tables.length) {
+      if (pool.currentTableIndex >= pool.danceTables.length) {
         //* 모든 테이블 완료
         return true;
       }
@@ -328,7 +361,7 @@ class DanceGame extends Game {
     const pool = this.dancePools.get(teamNumber);
     if (!pool) return false;
 
-    return pool.currentTableIndex >= pool.tables.length;
+    return pool.currentTableIndex >= pool.danceTables.length;
   }
 
   isAllReady() {
@@ -362,14 +395,12 @@ class DanceGame extends Game {
       (user) => user.teamNumber === disconnectedUser.teamNumber && user.sessionId !== sessionId,
     );
 
-    const user = this.users.get(sessionId);
-
     //* 팀전에서만 대체 플레이어 찾기
     if (teammate) {
       //* 입력 대상을 남은 팀원으로 변경
       const dancePool = this.dancePools.get(disconnectedUser.teamNumber);
-      if (!dancePool) {
-        logger.error('[ handleDisconnect ] ====> dancePool not found', {
+      if (!dancePool?.danceTables) {
+        logger.error('[ handleDisconnect ] ====> invalid dancePool', {
           teamNumber: disconnectedUser.teamNumber,
         });
         return null;
@@ -385,19 +416,20 @@ class DanceGame extends Game {
         }));
 
         this.dancePools.set(disconnectedUser.teamNumber, {
-          ...dancePool,
           danceTables: updatedTables,
+          currentTableIndex: dancePool.currentTableIndex,
+          currentCommandIndex: dancePool.currentCommandIndex,
         });
       } catch (error) {
         logger.error('[ handleDisconnect ] ====> error updating dancePool', { error });
       }
     } else {
       //* 팀 결과 삭제
-      const teamResult = this.teamResults.get(user.teamNumber);
+      const teamResult = this.teamResults.get(disconnectedUser.teamNumber);
       if (teamResult) {
         teamResult.sessionId = teamResult.sessionId.filter((id) => id != sessionId);
         if (teamResult.sessionId.length === 0) {
-          this.teamResults.delete(user.teamNumber);
+          this.teamResults.delete(disconnectedUser.teamNumber);
         }
       }
     }
