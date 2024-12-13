@@ -3,6 +3,7 @@ import { logger } from '../../utils/logger.utils.js';
 import { createNotification } from '../../utils/create.notification.js';
 import { GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
 import { createResponse } from '../../utils/create.response.js';
+import { redis } from '../../init/redis.js';
 
 class DanceGameManager {
   constructor() {
@@ -173,7 +174,7 @@ class DanceGameManager {
     return createNotification(dancePools, MESSAGE_TYPE.DANCE_TABLE_NOTIFICATION, sessionIds);
   }
 
-  danceGameOverNoti(game) {
+  async danceGameOverNoti(game) {
     logger.info(`[DanceGameManager - danceGameOverNoti]`);
 
     const results = game.getGameResults();
@@ -181,6 +182,30 @@ class DanceGameManager {
 
     const sessionIds = game.getAllSessionIds();
     logger.info(`[danceGameOverNoti] ===> sessionIds `, sessionIds);
+
+    const REWARD = {
+      0: 20, //* 1등
+      1: 10, //* 2등
+      2: 5, //* 3등
+      3: 1, //* 4등
+    };
+
+    //* 유저 위치 정보 삭제
+    try {
+      const pipeline = redis.client.pipeline();
+      results.TeamRank.forEach((teamNumber, rank) => {
+        const teamResult = results.result[rank];
+        const reward = REWARD[rank] || 0;
+
+        teamResult.sessionId.forEach((id) => {
+          pipeline.hincrby(`${redis.prefix.BOARD_PLAYER_INFO}:${game.id}:${id}`, 'gold', reward);
+          pipeline.hdel(`${redis.prefix.LOCATION}:${id}`, 'dance');
+        });
+      });
+      await pipeline.exec();
+    } catch (error) {
+      logger.error(`[danceGameOverNoti] ===> redis pipeline error `, error);
+    }
 
     //* 게임 데이터 초기화
     this.deleteGame(game.id);
