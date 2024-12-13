@@ -44,6 +44,10 @@ class BombGame extends Game {
   }
 
   isAllReady() {
+    if (this.users.length <= 0) {
+      return false;
+    }
+
     return this.users.filter((user) => user.isReady === true).length === this.users.length;
   }
 
