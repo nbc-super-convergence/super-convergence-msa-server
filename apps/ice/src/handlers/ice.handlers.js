@@ -1,6 +1,7 @@
 import iceGameManager from '../classes/managers/ice.game.manager.js';
 import { sessionIds } from '../classes/models/ice.game.class.js';
 import { iceConfig } from '../config/config.js';
+import { GAME_STATE } from '../constants/states.js';
 import { redisUtil } from '../utils/init/redis.js';
 import { logger } from '../utils/logger.utils.js';
 
@@ -200,6 +201,25 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     // ! 나간 유저의 게임 위치 삭제
     await redisUtil.deleteUserLocationField(deletedUser.sessionId, 'ice');
+
+    // * 남은 유저 0명일 시 인터벌 종료
+    if (game.users.length === 0) {
+      game.intervalManager.clearAll();
+    }
+
+    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
+      logger.info(`[현재 게임 상태]`, game);
+      logger.info(`[현재 유저의 상태]`, game.users[0]);
+      const buffer = await iceGameManager.iceMiniGameStartNoti(game);
+
+      socket.write(buffer);
+
+      // * 맵 변경, 게임 종료 타이머, 게임 종료 인터벌
+      // TODO: 가는 시간까지 포함해서 싱크가 정확하지 않을수도 있음
+      game.changeMapTimer(socket);
+      game.iceGameTimer(socket);
+      game.checkGameOverInterval(socket);
+    }
   } catch (error) {
     logger.error(`[iceCloseSocketRequestHandler] ===> `, error);
     //TODO: 별도의 에러처리 필요, failCode 전송? success 추가 정도 생각중

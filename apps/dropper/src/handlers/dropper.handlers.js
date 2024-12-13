@@ -148,8 +148,7 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
       game.intervalManager.clearAll();
     }
 
-    logger.info(`[게임 준비완료 확인]:`, game.isAllReady());
-    if (game.state === GAME_STATE.WAIT && game.isAllReady() && game.users.length !== 0) {
+    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
       logger.info(`[현재 게임 상태]`, game);
       logger.info(`[현재 유저의 상태]`, game.users[0]);
       const buffer = await dropGameManager.dropMiniGameStartNoti(game);
