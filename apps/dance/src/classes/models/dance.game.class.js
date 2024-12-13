@@ -185,12 +185,12 @@ class DanceGame extends Game {
   validateKeyPress(sessionId, pressKey) {
     const user = this.getUser(sessionId);
     if (!user) {
-      return ResponseHelper.fail(FAIL_CODE.UNKNOWN_ERROR, false, { state: STATE.DANCE_FAIL });
+      return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND, false, { state: STATE.DANCE_FAIL });
     }
 
     const currentCommand = this.getCurrentCommand(user);
     if (!currentCommand) {
-      return ResponseHelper.fail(FAIL_CODE.UNKNOWN_ERROR, false, { state: STATE.DANCE_FAIL });
+      return ResponseHelper.fail(FAIL_CODE.INVALID_TEAM_NUMBER, false, { state: STATE.DANCE_FAIL });
     }
 
     logger.info('[ validateKeyPress ] ====> dancePools', this.dancePools.get(sessionId));
