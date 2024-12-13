@@ -40,9 +40,9 @@ class DanceGame extends Game {
     });
 
     //* 팀 결과 초기화
-    this.teamResults.forEach((_, teamNumber) => {
+    this.teamResults.forEach((result, teamNumber) => {
       this.teamResults.set(teamNumber, {
-        sessionId: [],
+        sessionId: result.sessionId,
         score: 0,
         endTime: 0,
       });
