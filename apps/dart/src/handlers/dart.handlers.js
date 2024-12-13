@@ -79,13 +79,86 @@ export const dartGameThrowRequestHandler = async ({ socket, payload }) => {
 };
 
 /**
+ * 다트판 싱크 요청
+ * DART_PANNEL_SYNC_REQUEST
+ *
+ * 알림
+ * => DART_PANNEL_SYNC_NOTIFICATION
+ */
+export const dartPannelSyncRequestHandler = async ({ socket, payload }) => {
+  // * 그대로 전달
+  try {
+    const { sessionId, location } = payload;
+
+    logger.info(
+      '[ DART: dartPannelSyncRequestHandler ] sessionId, location ===>>> ',
+      sessionId,
+      location,
+    );
+
+    const sessionIds = await dartGameManager.getSessionIds(sessionId);
+
+    // * 전체 NOTIFICATION
+    const notificationMessageType = MESSAGE_TYPE.DART_PANNEL_SYNC_NOTIFICATION;
+    const notification = {
+      sessionId,
+      location,
+    };
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+  } catch (error) {
+    logger.error('[ DART: dartPannelSyncRequestHandler ] ', error);
+  }
+};
+
+/**
+ * 다트 싱크 요청
+ * DART_SYNC_REQUEST
+ *
+ * 알림
+ * => DART_SYNC_NOTIFICATION
+ */
+export const dartSyncRequestHandler = async ({ socket, payload }) => {
+  // * 그대로 전달
+  try {
+    const { sessionId, angle } = payload;
+
+    logger.info('[ DART: dartSyncRequestHandler ] sessionId, angle ===>>> ', sessionId, angle);
+
+    const sessionIds = await dartGameManager.getSessionIds(sessionId);
+
+    // * 전체 NOTIFICATION
+    const notificationMessageType = MESSAGE_TYPE.DART_SYNC_NOTIFICATION;
+    const notification = {
+      sessionId,
+      angle,
+    };
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+  } catch (error) {
+    logger.error('[ DART: dartSyncRequestHandler ] ', error);
+  }
+};
+
+/**
  * [ 미니게임 - 다트 ] 유저 접속 종료
  *
  */
 export const dartCloseSocketRequestHandler = async ({ socket, payload }) => {
   try {
     const { sessionId } = payload;
-    //
+    // TODO: 종료 처리 예정
+    logger.info('[ DART: dartGameThrowRequestHandler ] sessionId ==>> ', sessionId);
   } catch (error) {
     logger.error('[ DART: dartGameThrowRequestHandler ] ', error);
   }

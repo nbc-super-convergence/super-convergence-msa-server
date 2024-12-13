@@ -136,6 +136,16 @@ class DartGameManager {
       return { success: false, data: null, failCode: FAIL_CODE.UNKNOWN_ERROR };
     }
   }
+
+  /**
+   * 같은 게임 세션 ID 조회
+   * @param {String} sessionId
+   */
+  async getSessionIds(sessionId) {
+    const boardId = await redisUtil.getUserLocationField(sessionId, 'board');
+    const sessionIds = await redisUtil.getBoardPlayers(boardId);
+    return sessionIds;
+  }
 } // end
 
 const dartGameManagerInstance = DartGameManager.getInstance();

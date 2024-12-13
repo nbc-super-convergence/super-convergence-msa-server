@@ -61,3 +61,26 @@ message S2C_DartGameOverNotification {
         int32 totalPoint = 3;
     }
 }
+
+
+// 다트판 싱크 패킷
+message C2S_DartPannelSyncRequest {
+	string sessionId = 1;
+	Vector location = 2;
+}
+
+message S2C_DartPannelSyncNotification {
+  string sessionId = 1;
+	Vector location = 2;
+}
+
+// 다트 싱크 패킷 
+message C2S_DartSyncRequest {
+	string sessionId = 1;
+	Vector angle = 2;
+}
+
+message S2C_DartSyncNotification {
+  string sessionId = 1;
+	Vector angle = 2;
+}

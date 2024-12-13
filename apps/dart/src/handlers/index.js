@@ -3,12 +3,16 @@ import {
   dartCloseSocketRequestHandler,
   dartGameReadyRequestHandler,
   dartGameThrowRequestHandler,
+  dartPannelSyncRequestHandler,
+  dartSyncRequestHandler,
 } from './dart.handlers.js';
 
 const handlers = {
   // * REQUEST
   [MESSAGE_TYPE.DART_GAME_READY_REQUSET]: { handler: dartGameReadyRequestHandler },
   [MESSAGE_TYPE.DART_GAME_THROW_REQUEST]: { handler: dartGameThrowRequestHandler },
+  [MESSAGE_TYPE.DART_PANNEL_SYNC_REQUEST]: { handler: dartPannelSyncRequestHandler },
+  [MESSAGE_TYPE.DART_SYNC_REQUEST]: { handler: dartSyncRequestHandler },
   [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: dartCloseSocketRequestHandler },
 };
 

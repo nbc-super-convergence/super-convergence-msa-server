@@ -149,7 +149,10 @@ message GamePacket {
         C2S_DartGameThrowRequest dartGameThrowRequest = 605;
         S2C_DartGameThrowNotification dartGameThrowNotification = 606;
         S2C_DartGameOverNotification dartGameOverNotification = 607;
-
+        C2S_DartPannelSyncRequest dartPannelSyncRequest = 608;
+        S2C_DartPannelSyncNotification dartPannelSyncNotification = 609;
+        C2S_DartSyncRequest dartSyncRequest = 610;
+        S2C_DartSyncNotification dartSyncNotification = 611;
 
     }
 }
