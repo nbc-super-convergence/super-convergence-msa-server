@@ -223,7 +223,7 @@ class iceGame extends Game {
 
       logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
 
-      const updateGold = calculateGoldByRank(playerInfos.gold, users[key].rank);
+      const updateGold = calculateGoldByRank(users[key].rank);
 
       logger.info(`[gameEnd - playerInfos.gold]:` + updateGold);
 
