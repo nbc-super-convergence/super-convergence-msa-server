@@ -140,11 +140,16 @@ class BombGame extends Game {
       'end',
     );
     this.goldUpdate(users);
+    this.locationDelete(users);
     logger.info(`[BombGame - Game.class, bombGameEnd = message >>> ]`, message);
   }
 
   goldUpdate(users) {
     users.forEach((user) => user.updateGlod());
+  }
+
+  locationDelete(users) {
+    users.forEach((user) => user.updateLocation());
   }
 
   resetGame(users) {

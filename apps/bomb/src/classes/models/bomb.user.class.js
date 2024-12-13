@@ -50,6 +50,14 @@ class BombUser extends User {
     logger.info(`[bombGame - User.class, updateGold] GOLD =>`, gold);
   }
 
+  updateLocation() {
+    redisUtil.deleteUserLocationField(this.sessionId, 'bomb');
+    logger.info(
+      `[bombGame - User.class, updateLocation] Delete location 'bomb' =>`,
+      this.sessionId,
+    );
+  }
+
   ranking(rank) {
     this.rank = rank;
     logger.info(`[bombGame - User.class, ranking] => ${this.sessionId} =>`, rank);

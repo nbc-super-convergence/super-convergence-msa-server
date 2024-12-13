@@ -149,7 +149,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
     const game = bombGameManagerInstance.getGameBySessionId(gameId);
 
     if (!game) {
-      //bomb 게임을 진행하던 유저가 아님
+      //보드를 시작하지 않은 유저
       return;
     }
     logger.info(` bombCloseSocketRequestHandler 게임`, game);
@@ -157,7 +157,7 @@ export const bombCloseSocketRequestHandler = async ({ socket, payload }) => {
     const user = game.getUserToSessionId(sessionId);
 
     if (!user) {
-      //bomb 게임을 진행하던 유저가 아님
+      //보드를 시작하지 않은 유저
     }
 
     logger.info(` bombCloseSocketRequestHandler 유저`, user);
