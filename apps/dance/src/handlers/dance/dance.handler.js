@@ -1,5 +1,5 @@
 import danceGameManager from '../../classes/manager/dance.manager.js';
-import { MESSAGE_TYPE } from '../../utils/constants.js';
+import { GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
 import { handleError } from '../../utils/handle.error.js';
 import { logger } from '../../utils/logger.utils.js';
 
@@ -26,7 +26,7 @@ export const danceReadyRequestHandler = async ({ socket, payload }) => {
     socket.write(readyNotiBuffer);
 
     //* 모든 플레이어가 준비되었다면 게임 시작
-    if (game.isAllReady()) {
+    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
 
@@ -140,7 +140,7 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     }
 
     //* 설명창에서 유저가 나간 후 모두 준비 상태면 게임 시작
-    if (game.isAllReady()) {
+    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceCloseSocketRequestHandler ] ====> gameStartNoti');
 
