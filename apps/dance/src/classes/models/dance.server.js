@@ -80,6 +80,13 @@ class DanceServer extends TcpServer {
           const payload = packetParser(messageType, packet);
           console.log(' [ Dance_onData ] payload ====>> ', payload);
 
+          //* payload가 null이면 처리 중단
+          if (!payload) {
+            logger.error('[ Dance_onData ] Failed to parse packet');
+            socket.buffer = socket.buffer.subarray(length);
+            continue;
+          }
+
           const handler = getHandlerByMessageType(messageType);
           if (!handler) {
             logger.error(`[ Dance_onData ] No handler found for messageType: ${messageType}`);
@@ -94,6 +101,9 @@ class DanceServer extends TcpServer {
           logger.error('[ Dance_onData ] Packet processing error:', {
             error: packetError,
           });
+          //* 에러 발생시 현재 버퍼 클리어
+          socket.buffer = Buffer.alloc(0);
+          break;
         }
       }
     } catch (error) {
