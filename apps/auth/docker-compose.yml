@@ -1,0 +1,25 @@
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - USER_DB1_HOST=${USER_DB1_HOST}
+      - USER_DB1_PORT=${USER_DB1_PORT}
+      - USER_DB1_NAME=${USER_DB1_NAME}
+      - USER_DB1_USER=${USER_DB1_USER}
+      - USER_DB1_PASSWORD=${USER_DB1_PASSWORD}
+      - SERVER_HOST=${SERVER_HOST}
+      - DISTRIBUTOR_HOST=${DISTRIBUTOR_HOST}
+    ports:
+      - '7012:7012'
+    networks:
+      - super-convergence
+
+networks:
+  super-convergence:
+    driver: bridge

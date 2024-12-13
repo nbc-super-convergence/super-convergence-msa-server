@@ -1,0 +1,20 @@
+services:
+  dance:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=${SERVER_HOST}
+      - DISTRIBUTOR_HOST=${DISTRIBUTOR_HOST}
+    ports:
+      - '7018:7018'
+    networks:
+      - super-convergence
+
+networks:
+  super-convergence:
+    driver: bridge

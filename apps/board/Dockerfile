@@ -8,5 +8,5 @@ COPY . .
 RUN yarn install --frozen-lockfile --production=false && \
     yarn cache clean
 
-EXPOSE 7012
+EXPOSE 7015
 CMD ["node", "apps/board/src/server.js"]
