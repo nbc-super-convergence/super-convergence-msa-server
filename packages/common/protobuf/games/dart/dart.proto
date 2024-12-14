@@ -38,7 +38,7 @@ message DartGameData {
 
 // 미니게임 - 던지기 요청
 message C2S_DartGameThrowRequest{
-  string sessionId = 1;
+    string sessionId = 1;
 	float distance = 2;
 	Vector angle = 3;
 	Vector location = 4;
@@ -47,7 +47,7 @@ message C2S_DartGameThrowRequest{
 
 // 미니게임 - 던지기 알림 
 message S2C_DartGameThrowNotification {
-	repeated DartGameData result = 1;
+	DartGameData result = 1;
 }
 
 // 미니게임 종료 
