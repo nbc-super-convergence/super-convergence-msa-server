@@ -448,6 +448,16 @@ class DanceGame extends Game {
           disconnectedSessionId: sessionId,
           replacementSessionId: teammate.sessionId,
         };
+
+        //* 나간 팀원 팀 결과에서 제외
+        const teamResult = this.teamResults.get(disconnectedUser.teamNumber);
+        if (teamResult) {
+          this.teamResults.set(disconnectedUser.teamNumber, {
+            sessionId: [teammate.sessionId],
+            score: teamResult.score,
+            endTime: teamResult.endTime,
+          });
+        }
       } catch (error) {
         logger.error('[ handleDisconnect ] ====> error updating dancePool', { error });
       }
@@ -460,6 +470,9 @@ class DanceGame extends Game {
           this.teamResults.delete(disconnectedUser.teamNumber);
         }
       }
+
+      //* 춤표 삭제
+      this.dancePools.delete(disconnectedUser.teamNumber);
     }
 
     //* 유저 삭제
