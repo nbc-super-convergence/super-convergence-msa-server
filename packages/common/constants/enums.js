@@ -86,6 +86,7 @@ export const FIELD_NAME = {
   79: 'diceGameNotification',
   80: 'turnEndRequest',
   81: 'turnEndNotification',
+  82: 'boardGoldSyncNotification',
 
   // Post Game (91-100)
   91: 'backToTheRoomRequest',
