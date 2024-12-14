@@ -69,7 +69,7 @@ class RoomManager {
    */
   async joinRoom(sessionId, roomId) {
     try {
-      const { nickname, location, roomData } = await RoomValidator.validateAll(sessionId);
+      const { nickname, location } = await RoomValidator.validateAll(sessionId);
 
       //* 이미 대기방에 있는 유저인지 검증
       if (location?.room) {
@@ -99,7 +99,7 @@ class RoomManager {
       }
 
       //* 입장
-      const room = RoomDTO.fromRedis(roomData);
+      const room = RoomDTO.fromRedis(redisData);
       const result = Room.join(room, sessionId);
 
       if (!result.success) return result;
