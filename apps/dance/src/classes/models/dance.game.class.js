@@ -16,9 +16,10 @@ class DanceGame extends Game {
     this.dancePools = new Map(); //* 현재 게임의 춤표 풀
     this.teamResults = new Map(); //* teamNumber -> { sessionId, score, endTime }
     this.timers = new Map(); //* 타이머 관리
-    this.state = GAME_STATE.WAIT;
-    this.reason = REASON.TIME_OVER;
-    this.mode = GAME_MODE.INDIVIDUAL;
+    this.state = GAME_STATE.WAIT; //* 게임 상태
+    this.reason = REASON.TIME_OVER; //* 게임 종료 이유
+    this.mode = GAME_MODE.INDIVIDUAL; //* 게임 모드
+    this.isSwitch = false; //* 개인전 전환 필요 여부
   }
 
   startGame() {
@@ -41,14 +42,20 @@ class DanceGame extends Game {
       user.setState(STATE.DANCE_WAIT);
     });
 
-    //* 팀 결과 초기화
-    this.teamResults.forEach((result, teamNumber) => {
-      this.teamResults.set(teamNumber, {
-        sessionId: result.sessionId,
-        score: 0,
-        endTime: 0,
+    //* 모드 전환이 필요한 경우 전환
+    if (this.isSwitch) {
+      this.switchMode();
+      this.isSwitch = false;
+    } else {
+      //* 팀 결과 초기화
+      this.teamResults.forEach((result, teamNumber) => {
+        this.teamResults.set(teamNumber, {
+          sessionId: result.sessionId,
+          score: 0,
+          endTime: 0,
+        });
       });
-    });
+    }
 
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
@@ -397,12 +404,19 @@ class DanceGame extends Game {
       return null;
     }
 
+    let result = null;
+    const remainingUsers = this.users.size - 1;
+
+    //* 팀전에서 한 명이 나가서 3명이 되는 경우
+    if (this.mode === GAME_MODE.TEAM && remainingUsers === 3) {
+      //* 다음 게임부터 개인전으로 전환하도록 플래그 설정
+      this.isSwitch = true;
+    }
+
     //* 나간 유저의 팀원
     const teammate = Array.from(this.users.values()).find(
       (user) => user.teamNumber === disconnectedUser.teamNumber && user.sessionId !== sessionId,
     );
-
-    let result = null;
 
     //* 팀전에서만 대체 플레이어 찾기
     if (teammate) {
@@ -453,6 +467,25 @@ class DanceGame extends Game {
     await redis.deleteUserLocationField(sessionId, 'dance');
 
     return result;
+  }
+
+  switchMode() {
+    this.mode = GAME_MODE.INDIVIDUAL;
+
+    this.teamResults.clear();
+
+    //* 각 유저에게 새로운 팀 번호 할당
+    Array.from(this.users.values()).forEach((user, idx) => {
+      const newTeamNumber = idx + 1;
+      user.teamNumber = newTeamNumber;
+
+      //* 새로운 팀 결과 초기화
+      this.teamResults.set(newTeamNumber, {
+        sessionId: [user.sessionId],
+        score: 0,
+        endTime: 0,
+      });
+    });
   }
 }
 
