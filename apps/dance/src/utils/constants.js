@@ -18,7 +18,8 @@ export const MESSAGE_TYPE = {
 
 export const GAME_STATE = {
   WAIT: 0,
-  START: 1,
+  PREPARE: 1,
+  START: 2,
 };
 
 export const REASON = {

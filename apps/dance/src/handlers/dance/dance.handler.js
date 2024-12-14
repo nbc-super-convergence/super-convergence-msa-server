@@ -28,8 +28,13 @@ export const danceReadyRequestHandler = async ({ socket, payload }) => {
     const readyNotiBuffer = danceGameManager.danceReadyNoti(sessionId, game);
     socket.write(readyNotiBuffer);
 
+    logger.info('[ danceReadyRequestHandler ] ====> PrepareCheck', {
+      gameState: game.state,
+      check: GAME_STATE.PREPARE,
+    });
+
     //* 모든 플레이어가 준비되었다면 게임 시작
-    if (game.isAllReady()) {
+    if (game.state === GAME_STATE.PREPARE && game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceReadyRequestHandler ] ====> gameStartNoti');
 
@@ -124,9 +129,9 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     const { sessionId } = payload;
     logger.info('[ danceCloseSocketRequestHandler ] ====> start', { sessionId });
 
-    const location = await redis.getUserLocationField(sessionId, 'dance');
+    const location = await redis.getUserLocationField(sessionId, 'board');
     if (!location) {
-      logger.info('[ danceCloseSocketRequestHandler ] ====> not a user in the dance game');
+      logger.info('[ danceCloseSocketRequestHandler ] ====> not a user in the board game');
       return;
     }
 
@@ -146,7 +151,7 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     }
 
     //* 유저가 1명이면 게임 종료
-    if (game.users.size <= 1) {
+    if (game.state === GAME_STATE.WAIT && game.users.size <= 1) {
       //* 타이머 제거
       game.clearTimers();
 
@@ -154,8 +159,13 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
       socket.write(gameOverBuffer);
     }
 
+    logger.info('[ danceCloseSocketRequestHandler ] ====> PrepareCheck', {
+      gameState: game.state,
+      check: GAME_STATE.PREPARE,
+    });
+
     //* 설명창에서 유저가 나간 후 모두 준비 상태면 게임 시작
-    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
+    if (game.state === GAME_STATE.PREPARE && game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceCloseSocketRequestHandler ] ====> gameStartNoti');
 

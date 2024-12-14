@@ -22,6 +22,10 @@ class DanceGame extends Game {
     this.isSwitch = false; //* 개인전 전환 필요 여부
   }
 
+  prepareGame() {
+    this.state = GAME_STATE.PREPARE;
+  }
+
   startGame() {
     this.state = GAME_STATE.START;
   }
@@ -374,7 +378,7 @@ class DanceGame extends Game {
   }
 
   isAllReady() {
-    logger.info('[ isAllReady ] ====> error updating score', { size: this.users.size });
+    logger.info('[ isAllReady ] ====> users size', { size: this.users.size });
     if (this.users.size < 1) {
       return false;
     }
@@ -448,6 +452,16 @@ class DanceGame extends Game {
           disconnectedSessionId: sessionId,
           replacementSessionId: teammate.sessionId,
         };
+
+        //* 나간 팀원 팀 결과에서 제외
+        const teamResult = this.teamResults.get(disconnectedUser.teamNumber);
+        if (teamResult) {
+          this.teamResults.set(disconnectedUser.teamNumber, {
+            sessionId: [teammate.sessionId],
+            score: teamResult.score,
+            endTime: teamResult.endTime,
+          });
+        }
       } catch (error) {
         logger.error('[ handleDisconnect ] ====> error updating dancePool', { error });
       }
@@ -460,6 +474,9 @@ class DanceGame extends Game {
           this.teamResults.delete(disconnectedUser.teamNumber);
         }
       }
+
+      //* 춤표 삭제
+      this.dancePools.delete(disconnectedUser.teamNumber);
     }
 
     //* 유저 삭제
