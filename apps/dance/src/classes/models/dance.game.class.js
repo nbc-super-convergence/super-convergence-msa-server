@@ -4,6 +4,7 @@ import DanceUser from './dance.user.class.js';
 import { config } from '@repo/common/config';
 import { danceConfig } from '../../config/config.js';
 import danceGameManager from '../manager/dance.manager.js';
+import { redis } from '../../init/redis.js';
 
 const { FAIL_CODE, STATE } = config;
 const { GAME_STATE, REASON, DIRECTION } = danceConfig;
@@ -441,6 +442,7 @@ class DanceGame extends Game {
 
     //* 유저 삭제
     this.users.delete(sessionId);
+    await redis.deleteUserLocationField(sessionId, 'dance');
 
     return {
       disconnectedSessionId: sessionId,
