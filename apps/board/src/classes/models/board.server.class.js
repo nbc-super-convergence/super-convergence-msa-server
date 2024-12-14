@@ -3,12 +3,45 @@ import { config } from '@repo/common/config';
 import { getHandlerByMessageType } from '../../handlers/index.js';
 import { deserialize, packetParser } from '@repo/common/utils';
 import { logger } from '../../utils/logger.utils.js';
+import { subRedisUtil } from '../../utils/redis.js';
+import boardManager from '../managers/board.manager.class.js';
 
 /**
  * 보드게임 서버
  *
  */
 class BoardServer extends TcpServer {
+  constructor(name, host, port, types) {
+    super(name, host, port, types);
+
+    // * 보드 골드 싱크 채널 구독
+    this.subScriber = subRedisUtil.client;
+
+    this.subScriber.subscribe(subRedisUtil.channel.BOARD_GOLD, (err, count) => {
+      if (err) {
+        logger.error(`[ BOARD: Sbuscribe error] ==> `, err);
+        return;
+      }
+      logger.info(`[BOARD: Subscribed to ${count} channel(s).]`);
+    });
+
+    // * 메세지
+    this.subScriber.on('message', async (channel, message) => {
+      //
+      let buffer;
+      if (channel === subRedisUtil.channel.BOARD_GOLD) {
+        // message : ${boardId}
+
+        const boardId = message;
+
+        buffer = await boardManager.makeBoardPlayersGoldSyncNoti(boardId);
+      }
+      // TODO: 나중에 수정하기 (2 : Gate 서버)
+      const seq = '2';
+      this._socketMap[seq].socket.write(buffer);
+    });
+  }
+
   // * _onData() Overriding
   _onData = (socket) => async (data) => {
     //
