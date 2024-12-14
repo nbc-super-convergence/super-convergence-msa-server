@@ -52,8 +52,8 @@ message GamePacket {
         C2S_GamePrepareRequest gamePrepareRequest = 41;
         S2C_GamePrepareResponse gamePrepareResponse = 42;
         S2C_GamePrepareNotification gamePrepareNotification = 43;
-        C2S_RoomKickRequest roomKickrequest = 44;
-        S2C_RoomKickResponse roomKickresponse = 45;
+        C2S_RoomKickRequest roomKickRequest = 44;
+        S2C_RoomKickResponse roomKickResponse = 45;
         S2C_RoomKickNotification roomKickNotification = 46;
 
         // Game start (51-60)

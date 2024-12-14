@@ -107,9 +107,9 @@ class Room {
    */
   static leave(roomData, sessionId) {
     try {
-      if (!roomData.users.has(sessionId)) {
-        logger.error('[ leave ] ====> not a user in the room', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
+      if (roomData.state !== ROOM_STATE.WAIT && roomData.state !== ROOM_STATE.PREPARE) {
+        logger.error('[ leave ] ====> state must be wait or prepare', { state: roomData?.state });
+        return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
       }
 
       //* 준비중이였던 유저가 나간 경우
@@ -147,18 +147,10 @@ class Room {
    */
   static updateReady(roomData, sessionId, isReady) {
     try {
-      if (sessionId === roomData.ownerId) {
-        logger.error('[ updateReady ] ====> owner can not prepare', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.OWNER_CANNOT_READY);
-      }
-
-      if (!roomData.users.has(sessionId)) {
-        logger.error('[ updateReady ] ====> roomData.users.has == false', { sessionId });
-        return ResponseHelper.fail(config.FAIL_CODE.USER_NOT_IN_ROOM);
-      }
-
       if (roomData.state !== ROOM_STATE.WAIT && roomData.state !== ROOM_STATE.PREPARE) {
-        logger.error('[ updateReady ] ====> state must be wait or prepare', { sessionId });
+        logger.error('[ updateReady ] ====> state must be wait or prepare', {
+          state: roomData?.state,
+        });
         return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
       }
 
