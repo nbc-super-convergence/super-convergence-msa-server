@@ -150,7 +150,7 @@ class BombGame extends Game {
   }
 
   async goldUpdate(users) {
-    users.forEach((user) => user.updateGlod());
+    await users.forEach((user) => user.updateGlod());
 
     const channel = redisUtil.channel.BOARD_GOLD;
     const message = this.id;
@@ -163,8 +163,8 @@ class BombGame extends Game {
     });
   }
 
-  locationDelete(users) {
-    users.forEach((user) => user.updateLocation());
+  async locationDelete(users) {
+    await users.forEach((user) => user.updateLocation());
   }
 
   resetGame(users) {

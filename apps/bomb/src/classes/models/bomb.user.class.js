@@ -44,14 +44,14 @@ class BombUser extends User {
     }
   }
 
-  updateGlod() {
+  async updateGlod() {
     const gold = bombConfig.REWARD[this.rank - 1];
-    redisUtil.updateBoardPlayerGold(this.gameId, this.sessionId, gold);
+    await redisUtil.updateBoardPlayerGold(this.gameId, this.sessionId, gold);
     logger.info(`[bombGame - User.class, updateGold] GOLD =>`, gold);
   }
 
-  updateLocation() {
-    redisUtil.deleteUserLocationField(this.sessionId, 'bomb');
+  async updateLocation() {
+    await redisUtil.deleteUserLocationField(this.sessionId, 'bomb');
     logger.info(
       `[bombGame - User.class, updateLocation] Delete location 'bomb' =>`,
       this.sessionId,
