@@ -147,7 +147,9 @@ message  S2C_TilePenaltyNotification {
 	repeated BoardPlayerData playersInfo = 3;
 }
 
-
+message S2C_BoardGoldSyncNotification {
+	repeated BoardPlayerData playersInfo = 1;
+}
 
 
 
