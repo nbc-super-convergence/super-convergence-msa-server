@@ -182,12 +182,19 @@ class DanceGameManager {
     const sessionIds = game.getAllSessionIds();
     logger.info(`[danceGameOverNoti] ===> sessionIds `, sessionIds);
 
-    const REWARD = {
-      0: 20, //* 1등
-      1: 10, //* 2등
-      2: 5, //* 3등
-      3: 1, //* 4등
-    };
+    let REWARD;
+    if (game.teamNumber.size > 2) {
+      REWARD = {
+        0: 15, //* 1등
+        1: 5, //* 2등
+      };
+    } else {
+      REWARD = {
+        0: 20, //* 1등
+        1: 10, //* 2등
+        2: 5, //* 3등
+      };
+    }
 
     //* 유저 위치 정보 삭제
     try {
@@ -210,6 +217,51 @@ class DanceGameManager {
     this.deleteGame(game.id);
 
     return createNotification(results, MESSAGE_TYPE.DANCE_GAME_OVER_NOTIFICATION, sessionIds);
+  }
+
+  danceCloseSocketNoti(game, replacementInfo) {
+    try {
+      if (!game || !replacementInfo) {
+        logger.error('[ danceCloseSocketNoti ] ====> args is invalid', {
+          replacementInfo,
+          gameId: game?.id,
+        });
+        return null;
+      }
+
+      logger.info('[ danceCloseSocketNoti ] ====> start', {
+        replacementInfo,
+        gameId: game.id,
+      });
+
+      //* 모든 세션 ID 가져오기 (연결이 끊긴 유저 제외)
+      const sessionIds = game
+        .getAllSessionIds()
+        .filter((id) => id !== replacementInfo.disconnectedSessionId);
+
+      if (sessionIds.length === 0) {
+        logger.info('[ danceCloseSocketNoti ] ====> No remaining users');
+        return null;
+      }
+
+      const notificationData = {
+        disconnectedSessionId: replacementInfo.disconnectedSessionId,
+        replacementSessionId: replacementInfo.replacementSessionId,
+      };
+
+      logger.info('[ danceCloseSocketNoti ] ====> Creating notification', {
+        notificationData,
+        remainingUsers: sessionIds.length,
+      });
+
+      return createNotification(
+        notificationData,
+        MESSAGE_TYPE.DANCE_CLOSE_SOCKET_NOTIFICATION,
+        sessionIds,
+      );
+    } catch (error) {
+      logger.error(`[danceCloseSocketNoti] ===> error `, error);
+    }
   }
 }
 

@@ -401,6 +401,8 @@ class DanceGame extends Game {
       (user) => user.teamNumber === disconnectedUser.teamNumber && user.sessionId !== sessionId,
     );
 
+    let result = null;
+
     //* 팀전에서만 대체 플레이어 찾기
     if (teammate) {
       //* 입력 대상을 남은 팀원으로 변경
@@ -426,6 +428,11 @@ class DanceGame extends Game {
           currentTableIndex: dancePool.currentTableIndex,
           currentCommandIndex: dancePool.currentCommandIndex,
         });
+
+        result = {
+          disconnectedSessionId: sessionId,
+          replacementSessionId: teammate.sessionId,
+        };
       } catch (error) {
         logger.error('[ handleDisconnect ] ====> error updating dancePool', { error });
       }
@@ -444,10 +451,7 @@ class DanceGame extends Game {
     this.users.delete(sessionId);
     await redis.deleteUserLocationField(sessionId, 'dance');
 
-    return {
-      disconnectedSessionId: sessionId,
-      replacementSessionId: teammate.sessionId,
-    };
+    return result;
   }
 }
 
