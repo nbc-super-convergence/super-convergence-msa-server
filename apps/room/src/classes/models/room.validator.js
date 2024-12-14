@@ -1,46 +1,97 @@
 import { redis } from '../../init/redis.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class RoomValidator {
   /**
-   * 유저 세션 검증
+   * 유저와 관련된 모든 데이터를 한 번에 조회
    * @param {string} sessionId
+   * @returns {Object} 유저의 정보들
    */
-  static async userSession(sessionId) {
-    return await redis.getUserToSession(sessionId);
+  static async getUserData(sessionId) {
+    try {
+      const pipeline = redis.client.pipeline();
+
+      //* 유저 세션 데이터
+      pipeline.hget(`${redis.prefix.USER}:${sessionId}, 'nickname'`);
+
+      //* 유저 위치 정보
+      pipeline.hgetall(`${redis.prefix.LOCATION}:${sessionId}`);
+
+      const [userResult, locationResult] = await pipeline.exec();
+
+      return {
+        nickname: userResult[1] || null,
+        location: locationResult[1] || {},
+      };
+    } catch (error) {
+      logger.error('[ getUserData ] ====> error', error);
+      return {
+        nickname: null,
+        location: {},
+      };
+    }
   }
 
   /**
-   * 유저의 위치 검증 (로비)
-   * @param {string} sessionId
-   */
-  static async userLobbyLocation(sessionId) {
-    return await redis.getUserLocationField(sessionId, 'lobby');
-  }
-
-  /**
-   * 유저의 위치와 로비 일치 여부
-   * @param {string} sessionId
-   * @param {string} targetLobbyId
-   */
-  static async lobbyMatch(sessionId, targetLobbyId) {
-    const lobbyId = await redis.getUserLocationField(sessionId, 'lobby');
-    return lobbyId === targetLobbyId;
-  }
-
-  /**
-   * 대기방 존재 여부
+   * 대기방 관련 데이터를 한 번에 조회
    * @param {string} roomId
+   * @returns {Object} 유저의 대기방 정보
    */
-  static async roomExists(roomId) {
-    return await redis.getRoom(roomId);
+  static async getRoomData(roomId) {
+    try {
+      const pipeline = redis.client.pipeline();
+
+      //* 대기방 데이터
+      pipeline.hgetall(`${redis.prefix.ROOM}:${roomId}`);
+
+      const [roomResult] = await pipeline.exec();
+
+      return {
+        roomData: roomResult[1] || null,
+      };
+    } catch (error) {
+      logger.error('[ getRoomData ] ====> error', error);
+      return { roomData: null };
+    }
   }
 
   /**
-   * 유저의 위치 검증 (대기방)
+   * 유저와 대기방 데이터를 모두 한 번에 검증
    * @param {string} sessionId
+   * @returns {Object} 유저의 정보들
    */
-  static async userRoomLocation(sessionId) {
-    return await redis.getUserLocationField(sessionId, 'room');
+  static async validateAll(sessionId) {
+    try {
+      const pipeline = redis.client.pipeline();
+
+      //* 유저 관련 데이터 조회
+      pipeline.hget(`${redis.prefix.USER}:${sessionId}`, 'nickname');
+      pipeline.hgetall(`${redis.prefix.LOCATION}:${sessionId}`);
+
+      const [userResult, locationResult] = await pipeline.exec();
+
+      const location = locationResult[1] || {};
+      let roomData = null;
+
+      //* location에 room이 있으면 해당 방 정보도 조회
+      if (location.room) {
+        const roomResult = await redis.client.hgetall(`${redis.prefix.ROOM}:${location.room}`);
+        roomData = roomResult;
+      }
+
+      return {
+        nickname: userResult[1] || null,
+        location,
+        roomData,
+      };
+    } catch (error) {
+      logger.error('[ validateAll ] ====> error', error);
+      return {
+        nickname: null,
+        location: {},
+        roomData: null,
+      };
+    }
   }
 }
 
