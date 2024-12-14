@@ -151,7 +151,7 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     }
 
     //* 유저가 1명이면 게임 종료
-    if (game.state === GAME_STATE.WAIT && game.users.size <= 1) {
+    if (game.state !== GAME_STATE.WAIT && game.users.size <= 1) {
       //* 타이머 제거
       game.clearTimers();
 
