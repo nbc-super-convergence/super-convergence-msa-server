@@ -26,6 +26,12 @@ export const createNotification = (data, messageType, sessionIds) => {
       };
       break;
 
+    case MESSAGE_TYPE.ROOM_KICK_NOTIFICATION:
+      notification = {
+        room: data.room,
+      };
+      break;
+
     default:
       break;
   }

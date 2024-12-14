@@ -38,8 +38,13 @@ export const createResponse = (result, messageType, sessionId) => {
       };
       break;
 
-    // room 데이터가 필요없는 응답들
-    case MESSAGE_TYPE.LEAVE_ROOM_RESPONSE:
+    case MESSAGE_TYPE.ROOM_KICK_RESPONSE:
+      response = {
+        ...response,
+        room: result.data,
+      };
+      break;
+
     default:
       break;
   }
