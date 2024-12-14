@@ -431,9 +431,25 @@ class BoardManager {
       logger.info('[ BOARD: SELECT_MINI_GAME ] SELECT_MINI_GAME ===>> ', SELECT_MINI_GAME);
       logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
 
+      // * 이전 미니게임 선택지와 같으면 다시 선택
+      let beforeVal = await redis.getBoardGameField(boardId, 'miniGameVal');
+      beforeVal = beforeVal ? Number(beforeVal) : -1;
+
       // * random
-      const randomVal = Math.floor(Math.random() * channels.length);
+      let randomVal = beforeVal;
+      while (randomVal === beforeVal) {
+        randomVal = Math.floor(Math.random() * channels.length);
+        logger.info(
+          '[ BOARD: startMiniGameRequest ] randomVal, beforeVal ==>> ',
+          randomVal,
+          beforeVal,
+        );
+      }
+
       const channel = channels[randomVal];
+
+      // * 미니게임 Idx 저장
+      await redis.updateBoardGameField(boardId, 'miniGameVal', randomVal);
 
       await redis.client.publish(channel, message, (err, reply) => {
         if (err) {
