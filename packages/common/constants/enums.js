@@ -56,6 +56,9 @@ export const FIELD_NAME = {
   41: 'gamePrepareRequest',
   42: 'gamePrepareResponse',
   43: 'gamePrepareNotification',
+  44: 'roomKickRequest',
+  45: 'roomKickResponse',
+  46: 'roomKickNotification',
 
   // Game start (51-60)
   51: 'gameStartRequest',
