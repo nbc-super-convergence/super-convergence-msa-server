@@ -139,8 +139,10 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     //* 연결 종료 처리 및 대체 플레이어 찾기
     const replacementInfo = await game.handleDisconnect(sessionId);
     if (replacementInfo) {
-      const notiBuffer = danceGameManager.danceCloseSocketNoti(game, sessionId);
-      socket.write(notiBuffer);
+      const notiBuffer = danceGameManager.danceCloseSocketNoti(game, replacementInfo);
+      if (notiBuffer) {
+        socket.write(notiBuffer);
+      }
     }
 
     //* 유저가 1명이면 게임 종료

@@ -32,3 +32,8 @@ export const DIRECTION = {
   LEFT: 90,
   RIGHT: 270,
 };
+
+export const GAME_MODE = {
+  INDIVIDUAL: 0,
+  TEAM: 1,
+};

@@ -4,9 +4,10 @@ import DanceUser from './dance.user.class.js';
 import { config } from '@repo/common/config';
 import { danceConfig } from '../../config/config.js';
 import danceGameManager from '../manager/dance.manager.js';
+import { redis } from '../../init/redis.js';
 
 const { FAIL_CODE, STATE } = config;
-const { GAME_STATE, REASON, DIRECTION } = danceConfig;
+const { GAME_STATE, REASON, DIRECTION, GAME_MODE } = danceConfig;
 
 class DanceGame extends Game {
   constructor(id) {
@@ -17,6 +18,7 @@ class DanceGame extends Game {
     this.timers = new Map(); //* 타이머 관리
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
+    this.mode = GAME_MODE.INDIVIDUAL;
   }
 
   startGame() {
@@ -400,6 +402,8 @@ class DanceGame extends Game {
       (user) => user.teamNumber === disconnectedUser.teamNumber && user.sessionId !== sessionId,
     );
 
+    let result = null;
+
     //* 팀전에서만 대체 플레이어 찾기
     if (teammate) {
       //* 입력 대상을 남은 팀원으로 변경
@@ -425,6 +429,11 @@ class DanceGame extends Game {
           currentTableIndex: dancePool.currentTableIndex,
           currentCommandIndex: dancePool.currentCommandIndex,
         });
+
+        result = {
+          disconnectedSessionId: sessionId,
+          replacementSessionId: teammate.sessionId,
+        };
       } catch (error) {
         logger.error('[ handleDisconnect ] ====> error updating dancePool', { error });
       }
@@ -441,11 +450,9 @@ class DanceGame extends Game {
 
     //* 유저 삭제
     this.users.delete(sessionId);
+    await redis.deleteUserLocationField(sessionId, 'dance');
 
-    return {
-      disconnectedSessionId: sessionId,
-      replacementSessionId: teammate.sessionId,
-    };
+    return result;
   }
 }
 
