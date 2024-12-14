@@ -210,6 +210,19 @@ class DanceGameManager {
       logger.error(`[danceGameOverNoti] ===> redis pipeline error `, error);
     }
 
+    //* boardGoldChannel에 메시지(boardId) 발행
+    const channel = redis.channel.BOARD_GOLD || 'boardGoldChannel';
+    const message = game.id || 'boardId';
+    await redis.client.publish(channel, message, (err, reply) => {
+      if (err) {
+        logger.error('[ DANCE: danceGameOverNoti ] publish err ==>> ', err);
+      } else {
+        logger.info(
+          `[ DANCE: danceGameOverNoti ]  Message sent to ${channel}, ${reply} subscribers received the message`,
+        );
+      }
+    });
+
     //* 게임 데이터 초기화
     this.deleteGame(game.id);
 
