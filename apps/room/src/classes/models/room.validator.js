@@ -46,12 +46,10 @@ class RoomValidator {
 
       const [roomResult] = await pipeline.exec();
 
-      return {
-        roomData: roomResult[1] || null,
-      };
+      return roomResult[1] || null;
     } catch (error) {
       logger.error('[ getRoomData ] ====> error', error);
-      return { roomData: null };
+      return null;
     }
   }
 
