@@ -174,7 +174,7 @@ class Room {
         roomData.readyUsers.delete(sessionId);
       }
 
-      //* 모든 유저가의 준비 상태 체크
+      //* 모든 유저의 준비 상태 체크
       const allUsersReady = Array.from(roomData.users.keys())
         .filter((id) => id !== roomData.ownerId)
         .every((id) => roomData.readyUsers.has(id));
@@ -237,6 +237,42 @@ class Room {
       .map((user) => user.sessionId);
 
     return otherIds;
+  }
+
+  /**
+   * 특정 유저를 대기방에서 추방
+   * @param {RoomData} roomData 대기방 데이터
+   * @param {string} targetSessionId 추방시킬 유저의 세션 ID
+   * @returns {RoomReponse} 추방 결과
+   */
+  static kick(roomData, targetSessionId) {
+    try {
+      if (roomData.state !== ROOM_STATE.WAIT && roomData.state !== ROOM_STATE.PREPARE) {
+        logger.error('[ kick ] ====> state must be wait or prepare', { state: roomData?.state });
+        return ResponseHelper.fail(config.FAIL_CODE.INVALID_ROOM_STATE);
+      }
+
+      //* 추방
+      if (roomData.users.has(targetSessionId)) {
+        roomData.users.delete(targetSessionId);
+        roomData.readyUsers.delete(targetSessionId);
+
+        //* 모든 유저의 준비 상태 체크
+        const allUsersReady = Array.from(roomData.users.keys())
+          .filter((id) => id !== roomData.ownerId)
+          .every((id) => roomData.readyUsers.has(id));
+
+        //* 대기방 상태 업데이트
+        roomData.state = allUsersReady ? ROOM_STATE.PREPARE : ROOM_STATE.WAIT;
+      }
+
+      logger.info('[ kick ] ====> success');
+
+      return ResponseHelper.success(roomData);
+    } catch (error) {
+      logger.error('[ kick ] ====> unknown error', error);
+      return ResponseHelper.fail();
+    }
   }
 }
 

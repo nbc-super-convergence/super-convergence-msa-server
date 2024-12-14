@@ -306,6 +306,70 @@ class RoomManager {
       return ResponseHelper.fail();
     }
   }
+
+  /**
+   * 특정 유저를 추방
+   * @param {string} sessionId 방장의 세션 ID
+   * @param {string} targetSessionId 추방시킬 유저의 세션 ID
+   * @returns {RoomReponse} 추방 결과
+   */
+  async kickUser(sessionId, targetSessionId) {
+    try {
+      //* 대기방에 있는 유저가 맞는지 검증
+      const ownerRoomId = await RoomValidator.userRoomLocation(sessionId);
+      const targetRoomId = await RoomValidator.userRoomLocation(targetSessionId);
+      if (!ownerRoomId || !targetRoomId) {
+        logger.error('[ kickUser ] ====> roomId is undefined', { sessionId, targetSessionId });
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
+      }
+
+      //* 유저 세션 검증
+      const ownerUserData = await RoomValidator.userSession(sessionId);
+      const targetUserData = await RoomValidator.userSession(targetSessionId);
+      if (!ownerUserData || !targetUserData) {
+        logger.error('[ kickUser ] ====> userData is undefined', { sessionId, targetSessionId });
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
+      }
+
+      //* 대기방이 있는지 검증
+      const ownerRedisData = await RoomValidator.roomExists(ownerRoomId);
+      const targetRedisData = await RoomValidator.roomExists(targetRoomId);
+      if (!ownerRedisData || !targetRedisData) {
+        logger.error('[ kickUser ] ====> redisData is undefined', {
+          ownerRedisData,
+          targetRedisData,
+        });
+        return ResponseHelper.fail(FAIL_CODE.ROOM_NOT_FOUND);
+      }
+
+      //* 현재 대기방에 있는 유저가 맞는지 검증
+      if (ownerRoomId === targetRoomId && ownerRedisData.roomId !== targetRedisData.roomId) {
+        logger.error('[ kickUser ] ====> invalid user', { ownerRoomId, targetRoomId });
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
+      }
+
+      const roomData = RoomDTO.fromRedis(ownerRedisData);
+
+      // * 방장이 맞는지 검증
+      if (roomData.ownerId !== sessionId) {
+        logger.error('[ kickUser ] ====> not the owner', { sessionId });
+        return ResponseHelper.fail(FAIL_CODE.NOT_THE_OWNER);
+      }
+
+      //* 추방
+      const result = Room.kick(roomData, targetSessionId);
+      logger.info('[ kickUser ] ====> result', result);
+
+      if (!result.success) return result;
+      await redis.updateRoomFields(ownerRoomId, RoomDTO.toRedis(result.data));
+
+      const responseData = await RoomDTO.toResponse(result.data);
+      return ResponseHelper.success(responseData);
+    } catch (error) {
+      logger.error('[ kickUser ] ====> unknown error', error);
+      return ResponseHelper.fail();
+    }
+  }
 }
 
 const roomManagerInstance = RoomManager.getInstance();

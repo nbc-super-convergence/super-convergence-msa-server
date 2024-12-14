@@ -69,3 +69,18 @@ message S2C_GamePrepareNotification{
     bool isReady = 2;
     RoomStateType state = 3;
 }
+
+message C2S_RoomKickRequest {
+    string sessionId = 1;
+    string targetSessionId = 2;
+}
+
+message S2C_RoomKickResponse {
+	bool success = 1;
+	RoomData room = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message S2C_RoomKickNotification {
+	RoomData room = 1;
+}
