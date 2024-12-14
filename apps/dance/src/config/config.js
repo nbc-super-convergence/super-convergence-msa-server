@@ -1,4 +1,4 @@
-import { DIRECTION, GAME_STATE, MESSAGE_TYPE, REASON } from '../utils/constants.js';
+import { DIRECTION, GAME_MODE, GAME_STATE, MESSAGE_TYPE, REASON } from '../utils/constants.js';
 import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT } from './env.js';
 
 export const danceConfig = {
@@ -18,4 +18,5 @@ export const danceConfig = {
   GAME_STATE,
   REASON,
   DIRECTION,
+  GAME_MODE,
 };

@@ -1,7 +1,7 @@
 import DanceGame from '../models/dance.game.class.js';
 import { logger } from '../../utils/logger.utils.js';
 import { createNotification } from '../../utils/create.notification.js';
-import { GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
+import { GAME_MODE, GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
 import { createResponse } from '../../utils/create.response.js';
 import { redis } from '../../init/redis.js';
 
@@ -42,6 +42,7 @@ class DanceGameManager {
           const teamNumber = idx < 2 ? 1 : 2;
           game.addUser(user, teamNumber);
           this.sessionIds.set(user, gameId);
+          game.mode = GAME_MODE.TEAM;
         });
       } else {
         //* 3명 이하일 경우 각자 다른 팀 번호
@@ -183,16 +184,16 @@ class DanceGameManager {
     logger.info(`[danceGameOverNoti] ===> sessionIds `, sessionIds);
 
     let REWARD;
-    if (game.teamNumber.size > 2) {
-      REWARD = {
-        0: 15, //* 1등
-        1: 5, //* 2등
-      };
-    } else {
+    if (game.mode == GAME_MODE.INDIVIDUAL) {
       REWARD = {
         0: 20, //* 1등
         1: 10, //* 2등
         2: 5, //* 3등
+      };
+    } else {
+      REWARD = {
+        0: 15, //* 1등
+        1: 5, //* 2등
       };
     }
 

@@ -7,7 +7,7 @@ import danceGameManager from '../manager/dance.manager.js';
 import { redis } from '../../init/redis.js';
 
 const { FAIL_CODE, STATE } = config;
-const { GAME_STATE, REASON, DIRECTION } = danceConfig;
+const { GAME_STATE, REASON, DIRECTION, GAME_MODE } = danceConfig;
 
 class DanceGame extends Game {
   constructor(id) {
@@ -18,6 +18,7 @@ class DanceGame extends Game {
     this.timers = new Map(); //* 타이머 관리
     this.state = GAME_STATE.WAIT;
     this.reason = REASON.TIME_OVER;
+    this.mode = GAME_MODE.INDIVIDUAL;
   }
 
   startGame() {
