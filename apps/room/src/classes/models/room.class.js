@@ -239,6 +239,12 @@ class Room {
     return otherIds;
   }
 
+  /**
+   * 특정 유저를 대기방에서 추방
+   * @param {RoomData} roomData 대기방 데이터
+   * @param {string} targetSessionId 추방시킬 유저의 세션 ID
+   * @returns {RoomReponse} 추방 결과
+   */
   static kick(roomData, targetSessionId) {
     try {
       if (roomData.state !== ROOM_STATE.WAIT && roomData.state !== ROOM_STATE.PREPARE) {

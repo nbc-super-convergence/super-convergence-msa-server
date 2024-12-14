@@ -307,6 +307,12 @@ class RoomManager {
     }
   }
 
+  /**
+   * 특정 유저를 추방
+   * @param {string} sessionId 방장의 세션 ID
+   * @param {string} targetSessionId 추방시킬 유저의 세션 ID
+   * @returns {RoomReponse} 추방 결과
+   */
   async kickUser(sessionId, targetSessionId) {
     try {
       //* 대기방에 있는 유저가 맞는지 검증
