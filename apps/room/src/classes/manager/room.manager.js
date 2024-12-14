@@ -32,7 +32,7 @@ class RoomManager {
    */
   async createRoom(sessionId, roomName) {
     try {
-      const { nickname, location, roomData } = await RoomValidator.validateAll(sessionId);
+      const { nickname, location } = await RoomValidator.validateAll(sessionId);
 
       //* 유저 세션 검증
       if (!nickname) {
@@ -53,7 +53,7 @@ class RoomManager {
 
       logger.info('[ createRoom ] ====> success');
 
-      const responseData = await RoomDTO.toResponse(roomData);
+      const responseData = await RoomDTO.toResponse(room);
       return ResponseHelper.success(responseData);
     } catch (error) {
       logger.error('[ createRoom ] ====> unknown error', error);
