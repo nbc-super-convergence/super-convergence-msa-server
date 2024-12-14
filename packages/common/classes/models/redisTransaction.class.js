@@ -408,6 +408,10 @@ class redisTransaction {
       // BOARD_PLAYERS
       const boardPlayerKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
       const boardPlayerCount = await this.client.scard(boardPlayerKey);
+
+      logger.info('[ BOARD: boardDartCount ] histCount ===>>> ', histCount);
+      logger.info('[ BOARD: boardDartCount ] boardPlayerCount ===>>> ', boardPlayerCount);
+
       // TODO:
       if (histCount < boardPlayerCount) {
         await multi.zadd(dartHistKey, {

@@ -9,8 +9,10 @@ const redisConfig = {
 };
 
 const redisClient = new RedisClient(redisConfig).getClient();
-
 export const redis = new RedisUtil(redisClient);
+
+const subRedisClient = new RedisClient(redisConfig).getClient();
+export const subRedisUtil = new RedisUtil(subRedisClient);
 
 // TODO: [ TEST ] REDIS PUB/SUB TEST --------------------------
 export const createRedisSubcriber = (channel) => {

@@ -5,6 +5,8 @@ import { BOARD_STATE } from '../../constants/state.js';
 import { getRollDiceResult } from '../../utils/dice.utils.js';
 import { logger } from '../../utils/logger.utils.js';
 import { SELECT_MINI_GAME } from '../../constants/env.js';
+import { MESSAGE_TYPE } from '@repo/common/header';
+import { serializeForGate } from '@repo/common/utils';
 
 class BoardManager {
   constructor() {
@@ -423,35 +425,46 @@ class BoardManager {
       channels.push(redis.channel.BOMB);
       channels.push(redis.channel.DROPPER);
 
-      // TODO: [ TEST ] env 값에 따라 선택되게끔 수정 : 24.12.11(수)
-      if (SELECT_MINI_GAME !== 'ALL') {
-        channels = [redis.channel[SELECT_MINI_GAME]];
-      }
-
-      // TODO: [ TEST ] redis 값에 따라 선택되게끔 수정 : 24.12.11(수)
-      const redisMiniGameChannel = await redis.getMiniGameChannel();
-      if (redisMiniGameChannel) {
-        channels = [redis.channel[redisMiniGameChannel]];
-      }
-
-      logger.info('[ BOARD: SELECT_MINI_GAME ] redisMiniGameChannel ===>> ', redisMiniGameChannel);
-      logger.info('[ BOARD: SELECT_MINI_GAME ] SELECT_MINI_GAME ===>> ', SELECT_MINI_GAME);
-      logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
-
       // * 이전 미니게임 선택지와 같으면 다시 선택
       let beforeVal = await redis.getBoardGameField(boardId, 'miniGameVal');
       beforeVal = beforeVal ? Number(beforeVal) : -1;
+
+      let whileCnt = 0;
 
       // * random
       let randomVal = beforeVal;
       while (randomVal === beforeVal) {
         randomVal = Math.floor(Math.random() * channels.length);
         logger.info(
-          '[ BOARD: startMiniGameRequest ] randomVal, beforeVal ==>> ',
+          '[ BOARD: startMiniGameRequest ] randomVal, beforeVal, channels.length, whileCnt ==>> ',
           randomVal,
           beforeVal,
+          channels.length,
+          whileCnt,
         );
+        // * 무한루프 방지
+        if (whileCnt > 10) {
+          break;
+        }
+        whileCnt++;
       }
+
+      // TODO: [ TEST ] env 값에 따라 선택되게끔 수정 : 24.12.11(수)
+      if (SELECT_MINI_GAME !== 'ALL') {
+        channels = [redis.channel[SELECT_MINI_GAME]];
+        randomVal = 0;
+      }
+
+      // TODO: [ TEST ] redis 값에 따라 선택되게끔 수정 : 24.12.11(수)
+      const redisMiniGameChannel = await redis.getMiniGameChannel();
+      if (redisMiniGameChannel) {
+        channels = [redis.channel[redisMiniGameChannel]];
+        randomVal = 0;
+      }
+
+      logger.info('[ BOARD: SELECT_MINI_GAME ] redisMiniGameChannel ===>> ', redisMiniGameChannel);
+      logger.info('[ BOARD: SELECT_MINI_GAME ] SELECT_MINI_GAME ===>> ', SELECT_MINI_GAME);
+      logger.info('[ BOARD: SELECT_MINI_GAME ] channels ===>> ', channels);
 
       const channel = channels[randomVal];
 
@@ -516,6 +529,33 @@ class BoardManager {
   async getMiniGameChannel() {
     const result = await redis.getMiniGameChannel();
     return String(result).toUpperCase();
+  }
+
+  /**
+   * * 보드 - 유저 골드 동기화 패킷 생성
+   *  S2C_BoardGoldSyncNotification: 82
+   * @param {String} boardId
+   * @returns buffer
+   */
+  async makeBoardPlayersGoldSyncNoti(boardId) {
+    logger.info('[ BOARD: makeBoardPlayersGoldSyncNoti ] boardId ===>>> ', boardId);
+
+    const sessionIds = await redis.getBoardPlayers(boardId);
+
+    const type = MESSAGE_TYPE.BOARD_GOLD_SYNC_NOTIFICATION;
+    const payload = [];
+
+    for (let i = 0; i < sessionIds.length; i++) {
+      const sessionId = sessionIds[i];
+      const boardPlayerData = await redis.getBoardPlayerinfo(boardId, sessionId);
+      boardPlayerData.sessionId = sessionId;
+
+      payload.push(boardPlayerData);
+    }
+    logger.info('[ BOARD: makeBoardPlayersGoldSyncNoti ] payload ===>>> ', payload);
+
+    const buffer = serializeForGate(type, payload, 0, sessionIds);
+    return buffer;
   }
 } //* class end
 

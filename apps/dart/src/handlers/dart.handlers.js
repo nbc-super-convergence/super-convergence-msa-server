@@ -49,13 +49,14 @@ export const dartGameThrowRequestHandler = async ({ socket, payload }) => {
 
     let sessionIds = [sessionId];
     const dartData = {
+      sessionId,
       distance,
       angle,
       location,
       power,
     };
 
-    // TODO: 변경 예정
+    // TODO: 변경 예정, 일단은 안씀
     const result = await dartGameManager.dartThrow(sessionId, dartData);
 
     logger.info('[ DART: dartGameThrowRequestHandler ] result ===>>> ', result);
@@ -64,7 +65,7 @@ export const dartGameThrowRequestHandler = async ({ socket, payload }) => {
     sessionIds = result.data.sessionIds;
     const notificationMessageType = MESSAGE_TYPE.DART_GAME_THROW_NOTIFICATION;
     const notification = {
-      result: result.data.rank,
+      result: dartData,
     };
     const notificationPacket = serializeForGate(
       notificationMessageType,
