@@ -1,6 +1,6 @@
 import danceGameManager from '../../classes/manager/dance.manager.js';
 import { redis } from '../../init/redis.js';
-import { GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
+import { MESSAGE_TYPE } from '../../utils/constants.js';
 import { handleError } from '../../utils/handle.error.js';
 import { logger } from '../../utils/logger.utils.js';
 
@@ -124,9 +124,9 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     const { sessionId } = payload;
     logger.info('[ danceCloseSocketRequestHandler ] ====> start', { sessionId });
 
-    const location = await redis.getUserLocationField(sessionId, 'dance');
+    const location = await redis.getUserLocationField(sessionId, 'board');
     if (!location) {
-      logger.info('[ danceCloseSocketRequestHandler ] ====> not a user in the dance game');
+      logger.info('[ danceCloseSocketRequestHandler ] ====> not a user in the board game');
       return;
     }
 
@@ -155,7 +155,7 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
     }
 
     //* 설명창에서 유저가 나간 후 모두 준비 상태면 게임 시작
-    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
+    if (game.isAllReady()) {
       const startNotiBuffer = danceGameManager.danceStartNoti(game);
       logger.info('[ danceCloseSocketRequestHandler ] ====> gameStartNoti');
 
