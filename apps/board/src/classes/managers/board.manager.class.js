@@ -239,21 +239,28 @@ class BoardManager {
         })
         .filter((user) => user !== null);
 
-      await redis.updateRoomField(roomData.roomId, 'state', 0);
-      await redis.updateRoomField(roomData.roomId, 'readyUsers', '[]');
+      const readyUsers = JSON.parse(roomData.readyUsers);
+      logger.info('[ BOARD: roomData ] users.length ===>> ', users.length);
+      logger.info('[ BOARD: roomData ] readyUsers.length ===>> ', readyUsers.length);
+
+      let roomState = Number(roomData.state);
+      if (users.length - 1 === readyUsers.length) {
+        // PREPARE : 1
+        roomState = Number(1);
+      }
 
       return {
         roomId: roomData.roomId,
         ownerId: roomData.ownerId,
         roomName: roomData.roomName,
         lobbyId: roomData.lobbyId,
-        state: 0, //Number(roomData.state),
+        state: roomState,
         users,
         maxUser: Number(roomData.maxUser),
-        readyUsers: '[]', //JSON.parse(roomData.readyUsers),
+        readyUsers, //'[]'
       };
     } catch (error) {
-      logger.error('[ toResponse ] ====> unknown error', error);
+      logger.error('[ BOARD: toResponse ] ====> unknown error', error);
     }
   }
 
@@ -482,6 +489,14 @@ class BoardManager {
       const result = await redis.transaction.turnEnd(sessionId, boardId);
 
       logger.info('[ BOARD: turnEnd ] result ==>> ', result);
+
+      if (result.isGameOver) {
+        // * 대기방 초기화
+        const userLocation = await redis.getUserLocation(sessionId);
+        const roomData = await redis.getRoom(userLocation.room);
+        await redis.updateRoomField(roomData.roomId, 'state', 0);
+        await redis.updateRoomField(roomData.roomId, 'readyUsers', '[]');
+      }
 
       return {
         data: {
