@@ -242,18 +242,18 @@ class redisTransaction {
         // * 골드가 부족하면 리턴 -1
         if (Number(playerInfo.gold) < purchaseGold) {
           logger.info(`골드가 부족함 : ${playerInfo.gold}, ${purchaseGold}`);
-          return -1;
+          purchaseGold = -1;
+        } else {
+          // * 타일주인이 없음 : 10G
+          await multi.hset(
+            mapKey,
+            tile,
+            JSON.stringify({
+              sessionId,
+              gold: purchaseGold,
+            }),
+          );
         }
-
-        // * 타일주인이 없음 : 10G
-        await multi.hset(
-          mapKey,
-          tile,
-          JSON.stringify({
-            sessionId,
-            gold: purchaseGold,
-          }),
-        );
       } else {
         // * 타일주인이 있음 : 구매가 * 1.5
         const purchasingPrice = JSON.parse(tileOwner).gold;
@@ -262,17 +262,17 @@ class redisTransaction {
         // * 골드가 부족하면 리턴 -1
         if (Number(playerInfo.gold) < purchaseGold) {
           logger.info(`골드가 부족함2 : ${playerInfo.gold}, ${purchaseGold}`);
-          return -1;
+          purchaseGold = -1;
+        } else {
+          await multi.hset(
+            mapKey,
+            tile,
+            JSON.stringify({
+              sessionId,
+              gold: purchaseGold,
+            }),
+          );
         }
-
-        await multi.hset(
-          mapKey,
-          tile,
-          JSON.stringify({
-            sessionId,
-            gold: purchaseGold,
-          }),
-        );
       }
       await multi.sadd(historyKey, tile);
 
