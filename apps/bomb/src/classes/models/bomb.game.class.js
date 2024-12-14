@@ -9,6 +9,7 @@ import {
 import { USER_STATE } from '../../constants/user.js';
 import { serializeForGate } from '@repo/common/utils';
 import { logger } from '../../utils/logger.utils.js';
+import { redisUtil } from '../../utils/redis.init.js';
 
 export const sessionIds = new Map();
 
@@ -128,7 +129,7 @@ class BombGame extends Game {
     socket.write(buffer);
   }
 
-  bombGameEnd(socket, survivor) {
+  async bombGameEnd(socket, survivor) {
     survivor[0].ranking(1);
     const users = this.getAllUser();
     const message = bombGameOverNotification(users);
@@ -143,13 +144,23 @@ class BombGame extends Game {
       3000,
       'end',
     );
-    this.goldUpdate(users);
+    await this.goldUpdate(users);
     this.locationDelete(users);
     logger.info(`[BombGame - Game.class, bombGameEnd = message >>> ]`, message);
   }
 
-  goldUpdate(users) {
+  async goldUpdate(users) {
     users.forEach((user) => user.updateGlod());
+
+    const channel = redisUtil.channel.BOARD_GOLD;
+    const message = this.id;
+    await redisUtil.client.publish(channel, message, (err, reply) => {
+      if (err) {
+        logger.error(`[bombGame - User.class, updateGlod] GOLD => err `, err);
+      } else {
+        logger.error(`[bombGame - User.class, updateGlod] GOLD => reply`, reply);
+      }
+    });
   }
 
   locationDelete(users) {
