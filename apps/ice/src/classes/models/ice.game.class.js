@@ -240,6 +240,20 @@ class iceGame extends Game {
 
     this.reset();
     this.clearAllPlayers();
+
+    // * 골드 pub
+    const goldChannel = redisUtil.channel.BOARD_GOLD || 'boardGoldChannel';
+    const pubMessage = this.id || 'boardID';
+
+    await redisUtil.client.publish(goldChannel, pubMessage, (err, reply) => {
+      if (err) {
+        logger.error('[ ice - handleGameEnd:GoldPub ] startMiniGameRequest ==>> ', err);
+      } else {
+        logger.info(
+          `[ ice - handleGameEnd:GoldPub ]  Message sent to channel1, ${reply} subscribers received the message`,
+        );
+      }
+    });
   }
 
   reset() {

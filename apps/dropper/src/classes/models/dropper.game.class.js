@@ -286,6 +286,20 @@ class dropperGame extends Game {
 
     this.reset();
     this.clearAllPlayers();
+
+    // * 골드 pub
+    const goldChannel = redisUtil.channel.BOARD_GOLD || 'boardGoldChannel';
+    const pubMessage = this.id || 'boardID';
+
+    await redisUtil.client.publish(goldChannel, pubMessage, (err, reply) => {
+      if (err) {
+        logger.error('[ dropper - handleGameEnd:GoldPub ]  ==>> ', err);
+      } else {
+        logger.info(
+          `[ dropper - handleGameEnd:GoldPub ]  Message sent to channel1, ${reply} subscribers received the message`,
+        );
+      }
+    });
   }
 
   reset() {
