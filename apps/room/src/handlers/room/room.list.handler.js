@@ -3,7 +3,7 @@ import roomManager from '../../classes/manager/room.manager.js';
 import { createResponse } from '../../utils/create.response.js';
 import { handleError } from '../../utils/handle.error.js';
 
-export const roomListHandler = async ({ socket, payload }) => {
+export const roomListRequestHandler = async ({ socket, payload }) => {
   const { sessionId } = payload;
 
   try {
