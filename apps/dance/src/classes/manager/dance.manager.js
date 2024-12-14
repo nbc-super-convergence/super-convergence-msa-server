@@ -63,10 +63,6 @@ class DanceGameManager {
     const game = this.games.get(gameId);
 
     if (game) {
-      //* 타이머만 정리
-      game.timers.forEach((timer) => clearTimeout(timer));
-      game.timers.clear();
-
       //* 게임 상태 초기화
       game.resetGameData();
     }
@@ -131,7 +127,7 @@ class DanceGameManager {
     logger.info(`[DanceGameManager - miniGameReadyNotification]`);
 
     //* 게임 상태 변경
-    game.setGameState(GAME_STATE.START);
+    game.prepareGame();
 
     const sessionIds = game.getAllSessionIds();
     logger.info(`[miniGameReadyNotification] ===> sessionIds `, sessionIds);
@@ -178,7 +174,7 @@ class DanceGameManager {
     logger.info(`[DanceGameManager - danceGameOverNoti]`);
 
     const results = game.getGameResults();
-    logger.info(`[danceGameOverNoti] ===> sessionIds `, results);
+    logger.info(`[danceGameOverNoti] ===> results `, results);
 
     const sessionIds = game.getAllSessionIds();
     logger.info(`[danceGameOverNoti] ===> sessionIds `, sessionIds);
