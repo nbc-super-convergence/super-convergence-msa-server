@@ -160,6 +160,7 @@ class BoardManager {
   async purchaseTileInBoard(sessionId, tile) {
     //
     try {
+      let isPurchased = true;
       const boardId = await redis.getUserLocationField(sessionId, 'board');
       const sessionIds = await redis.getBoardPlayers(boardId);
 
@@ -180,7 +181,7 @@ class BoardManager {
         logger.error(
           `[ BOARD: GOLD : purchaseGold: ${purchaseGold} ,, Gold: ${playerInfo.gold}]  `,
         );
-        throw new Error('need more gold');
+        isPurchased = false;
       }
 
       const others = sessionIds.filter((sId) => sId !== sessionId);
@@ -196,6 +197,7 @@ class BoardManager {
 
       return {
         success: true,
+        isPurchased,
         data: {
           tile,
           sessionIds,

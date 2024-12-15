@@ -180,7 +180,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
   try {
     const result = await boardManager.purchaseTileInBoard(sessionId, tile);
 
-    if (result.success) {
+    if (result.isPurchased) {
       // * 나머지 NOTIFICATION
       sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
       const notificationMessageType = MESSAGE_TYPE.PURCHASE_TILE_NOTIFICATION;
@@ -205,6 +205,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
     const responseMessageType = MESSAGE_TYPE.PURCHASE_TILE_RESPONSE;
     const response = {
       success: result.success,
+      isPurchased: result.isPurchased,
       tile: result.data.tile,
       playerInfo: result.data.playerInfo,
       purchaseGold: result.data.purchaseGold,

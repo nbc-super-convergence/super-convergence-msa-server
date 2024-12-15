@@ -11,29 +11,15 @@ import dartGameManager from '../classes/manager/dart.game.manager.class.js';
 export const dartGameReadyRequestHandler = async ({ socket, payload }) => {
   try {
     const { sessionId } = payload;
-    const gameId = sessionIds.get(sessionId);
 
-    const game = dartGameManager.getGameBySessionId(gameId);
-    if (!dartGameManager.isValidGame(game.id)) {
-      throw new Error(`[ DART : dartGameReadyRequestHandler - ValiGame Error]`, game.id);
-    }
-
-    const user = game.getUserBySessionId(sessionId);
-    if (!game.isValidUser(user.sessionId)) {
-      throw new Error(`[DART : dartGameReadyRequestHandler - ValiUser Error]`, user.sessionId);
-    }
-
-    // * 유저 게임 준비
-    user.gameReady();
-
-    let buffer = await dartGameManager.makeMiniGameReadyNoti(user, game);
+    const result = await dartGameManager.makeDartGameReadyNoti(sessionId);
 
     // * 모든 유저 준비 완료
-    if (game.isAllReady()) {
-      buffer = await dartGameManager.makeMiniGameStartNoti(socket, game);
+    if (result.isAllReady) {
+      result.buffer = await dartGameManager.makeMiniGameStartNoti(result.sessionIds);
     }
 
-    socket.write(buffer);
+    socket.write(result.buffer);
   } catch (error) {
     logger.error('[ DART: dartGameReadyRequestHandler ] ', error);
   }

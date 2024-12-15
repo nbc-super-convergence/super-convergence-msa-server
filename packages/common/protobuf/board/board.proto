@@ -91,20 +91,21 @@ message C2S_StartMiniGameRequest {
 
 // 
 
-message  C2S_PurchaseTileRequest {
+message C2S_PurchaseTileRequest {
 	string sessionId = 1;
 	int32 tile = 2;
 }
 
-message  S2C_PurchaseTileResponse {
+message S2C_PurchaseTileResponse {
   	bool success = 1;
-	int32 tile = 2;
-	BoardPlayerData playerInfo = 3; 
-	int32 purchaseGold = 4;
-	GlobalFailCode failCode = 5;
+	bool isPurchased = 2;
+	int32 tile = 3;
+	BoardPlayerData playerInfo = 4; 
+	int32 purchaseGold = 5;
+	GlobalFailCode failCode = 6;
 }
 
-message  S2C_PurchaseTileNotification {
+message S2C_PurchaseTileNotification {
 	string sessionId = 1;
 	int32 tile = 2;
 	BoardPlayerData playerInfo = 3; 

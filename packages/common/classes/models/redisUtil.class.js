@@ -579,6 +579,17 @@ class RedisUtil {
       await this.client.hset(key, 'gold', 0);
     }
   }
+
+  async getDartPlayerReady(boardId, sessionId) {
+    const key = `${this.prefix.DART_PLAYER_READY}:${boardId}:${sessionId}`;
+    return await this.client.get(key);
+  }
+
+  async setDartPlayerReady(boardId, sessionId) {
+    const key = `${this.prefix.DART_PLAYER_READY}:${boardId}:${sessionId}`;
+    await this.client.set(key, '1');
+    await this.client.expire(key, this.expire);
+  }
 }
 
 export default RedisUtil;
