@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import RedisUtil from './redisUtil.class.js';
 
 class RedisClient {
   constructor(config) {
@@ -48,8 +49,8 @@ class RedisClient {
   static createPubSubClient(config) {
     //* pub/sub용 단일 노드 연결 (클러스터의 첫 번째 노드 사용)
     const pubsubClient = new Redis({
-      host: config.NODES[0].HOST || 'localhost',
-      port: config.NODES[0].PORT || 6379,
+      host: config.PUB_SUB.host || 'localhost',
+      port: config.PUB_SUB.port || 6385,
       password: config.PASSWORD,
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);
@@ -65,7 +66,7 @@ class RedisClient {
       console.log('PubSub Redis connected');
     });
 
-    return pubsubClient;
+    return new RedisUtil(pubsubClient).client;
   }
 
   getClient() {
