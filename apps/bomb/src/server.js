@@ -1,5 +1,5 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
-import { SERVER_HOST } from './constants/env.js';
+import { SERVER_HOST, DISTRIBUTOR_HOST } from './constants/env.js';
 import BombServer from './classes/models/bomb.server.class.js';
 
 const SERVER_NAME = 'bomb';
@@ -11,7 +11,7 @@ const server = new BombServer(SERVER_NAME, SERVER_HOST, SERVER_PORT, bombMessage
 
 await server.start();
 
-server.connectToDistributor(SERVER_HOST, 7010, (data) => {
+server.connectToDistributor(DISTRIBUTOR_HOST, 7010, (data) => {
   // Distributor 연결
   console.log('Distributor Notification', data);
 });

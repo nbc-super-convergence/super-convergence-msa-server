@@ -1,6 +1,6 @@
 import { MESSAGE_TYPE } from '@repo/common/header';
 import DropperServer from './classes/models/dropper.server.class.js';
-import { SERVER_HOST } from './constants/env.js';
+import { SERVER_HOST, DISTRIBUTOR_HOST } from './constants/env.js';
 
 const SERVER_NAME = 'dropper';
 const SERVER_PORT = 7017;
@@ -11,6 +11,6 @@ const server = new DropperServer(SERVER_NAME, SERVER_HOST, SERVER_PORT, messageT
 
 await server.start();
 
-server.connectToDistributor(SERVER_HOST, 7010, (data) => {
+server.connectToDistributor(DISTRIBUTOR_HOST, 7010, (data) => {
   console.log('Distributor Notification', data);
 });
