@@ -8,14 +8,15 @@ export const danceConfig = {
     CLUSTER: true,
     NODES: [
       //* 마스터 노드
-      { HOST: REDIS_HOST, PORT: REDIS_PORTS.PORT1 },
-      { HOST: REDIS_HOST, PORT: REDIS_PORTS.PORT2 },
-      { HOST: REDIS_HOST, PORT: REDIS_PORTS.PORT3 },
+      { host: REDIS_HOST, port: REDIS_PORTS.PORT1 },
+      { host: REDIS_HOST, port: REDIS_PORTS.PORT2 },
+      { host: REDIS_HOST, port: REDIS_PORTS.PORT3 },
       //* 복제 노드
-      { HOST: REDIS_HOST, PORT: REDIS_PORTS.PORT4 },
-      { HOST: REDIS_HOST, PORT: REDIS_PORTS.PORT5 },
-      { HOST: REDIS_HOST, PORT: REDIS_PORTS.PORT6 },
+      { host: REDIS_HOST, port: REDIS_PORTS.PORT4 },
+      { host: REDIS_HOST, port: REDIS_PORTS.PORT5 },
+      { host: REDIS_HOST, port: REDIS_PORTS.PORT6 },
     ],
+    PUB_SUB: { host: REDIS_HOST, port: REDIS_PORTS.PUB_SUB },
     PASSWORD: REDIS_PASSWORD,
   },
   BOARD: {
