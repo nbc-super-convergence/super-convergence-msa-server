@@ -6,7 +6,7 @@ import { GAME_STATE, USER_STATE } from '../../constants/states.js';
 import iceUser from './ice.user.class.js';
 import { iceConfig } from '../../config/config.js';
 import { logger } from '../../utils/logger.utils.js';
-import { redisUtil } from '../../utils/init/redis.js';
+import { pubRedisClient, redisUtil } from '../../utils/init/redis.js';
 import { calculateGoldByRank } from '../../utils/calculate.gold.js';
 
 export const sessionIds = new Map();
@@ -245,7 +245,7 @@ class iceGame extends Game {
     const goldChannel = redisUtil.channel.BOARD_GOLD || 'boardGoldChannel';
     const pubMessage = this.id || 'boardID';
 
-    await redisUtil.client.publish(goldChannel, pubMessage, (err, reply) => {
+    await pubRedisClient.publish(goldChannel, pubMessage, (err, reply) => {
       if (err) {
         logger.error('[ ice - handleGameEnd:GoldPub ] startMiniGameRequest ==>> ', err);
       } else {

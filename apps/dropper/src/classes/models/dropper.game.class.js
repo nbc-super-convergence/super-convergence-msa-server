@@ -1,7 +1,7 @@
 import { Game, IntervalManager, TimeoutManager } from '@repo/common/classes';
 import { dropperMap } from '../../map/dropper.Map.js';
 import dropperUser from './dropper.user.class.js';
-import { redisUtil } from '../../utils/redis.js';
+import { pubRedisClient, redisUtil } from '../../utils/redis.js';
 import { logger } from '../../utils/logger.utils.js';
 import { GAME_STATE, USER_STATE } from '../../constants/state.js';
 import { serializeForGate } from '@repo/common/utils';
@@ -291,7 +291,7 @@ class dropperGame extends Game {
     const goldChannel = redisUtil.channel.BOARD_GOLD || 'boardGoldChannel';
     const pubMessage = this.id || 'boardID';
 
-    await redisUtil.client.publish(goldChannel, pubMessage, (err, reply) => {
+    await pubRedisClient.publish(goldChannel, pubMessage, (err, reply) => {
       if (err) {
         logger.error('[ dropper - handleGameEnd:GoldPub ]  ==>> ', err);
       } else {
