@@ -10,18 +10,17 @@ class redisTransaction {
   }
 
   /**
-   * 트랜잭션 실행을 위한 헬퍼 메소드
-   * @param {Function} transactionCallback - 트랜잭션 내에서 실행할 콜백 함수
+   * 순차적으로 실행 시켜주는 헬퍼 메소드
+   * @param {Function} callback - 실행할 콜백 함수
    * @returns {Promise<any>} 트랜잭션 결과
    */
-  async execute(transactionCallback) {
-    const multi = this.client.multi();
+  async execute(callback) {
     try {
-      await transactionCallback(multi);
-      return await multi.exec();
+      await callback(this.client);
+      return true;
     } catch (error) {
-      await multi.discard();
       console.error('[ redisTransaction ] ===> error', error);
+      return false;
     }
   }
 
@@ -31,14 +30,14 @@ class redisTransaction {
    * @param {string} lobbyId
    */
   async joinLobby(sessionId, lobbyId) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const lobbyKey = `${this.prefix.LOBBY_USERS}:${lobbyId}`;
       const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
 
-      multi.sadd(lobbyKey, sessionId);
-      multi.expire(lobbyKey, this.expire);
-      multi.hset(locationKey, 'lobby', lobbyId);
-      multi.expire(locationKey, this.expire);
+      await client.sadd(lobbyKey, sessionId);
+      await client.expire(lobbyKey, this.expire);
+      await client.hset(locationKey, 'lobby', lobbyId);
+      await client.expire(locationKey, this.expire);
     });
   }
 
@@ -48,16 +47,16 @@ class redisTransaction {
    * @param {string} lobbyId
    */
   async leaveLobby(sessionId, lobbyId, nickname) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const lobbyKey = `${this.prefix.LOBBY_USERS}:${lobbyId}`;
       const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
       const userKey = `${this.prefix.USER}:${sessionId}`;
       const loginKey = `${this.prefix.LOGIN}`;
 
-      multi.srem(lobbyKey, sessionId);
-      multi.hdel(locationKey, 'lobby');
-      multi.del(userKey);
-      multi.srem(loginKey, nickname);
+      await client.srem(lobbyKey, sessionId);
+      await client.hdel(locationKey, 'lobby');
+      await client.del(userKey);
+      await client.srem(loginKey, nickname);
     });
   }
 
@@ -66,13 +65,13 @@ class redisTransaction {
    * @param {RoomData} room
    */
   async createRoom(room, sessionId) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const roomKey = `${this.prefix.ROOM}:${room.roomId}`;
       const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
       const lobbyRoomListKey = `${this.prefix.LOBBY_ROOM_LIST}:${room.lobbyId}`;
 
-      multi.exists(roomKey);
-      multi.hset(roomKey, {
+      await client.exists(roomKey);
+      await client.hset(roomKey, {
         roomId: room.roomId,
         ownerId: room.ownerId,
         roomName: room.roomName,
@@ -82,10 +81,10 @@ class redisTransaction {
         maxUser: room.maxUser,
         readyUsers: room.readyUsers,
       });
-      multi.expire(roomKey, this.expire);
-      multi.sadd(lobbyRoomListKey, roomKey);
-      multi.hset(locationKey, 'room', room.roomId);
-      multi.expire(locationKey, this.expire);
+      await client.expire(roomKey, this.expire);
+      await client.sadd(lobbyRoomListKey, roomKey);
+      await client.hset(locationKey, 'room', room.roomId);
+      await client.expire(locationKey, this.expire);
     });
   }
 
@@ -96,14 +95,14 @@ class redisTransaction {
    * @param {string} sessionId
    */
   async joinRoom(roomId, room, sessionId) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const roomKey = `${this.prefix.ROOM}:${roomId}`;
       const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
 
-      multi.hset(roomKey, room);
-      multi.expire(roomKey, this.expire);
-      multi.hset(locationKey, 'room', roomId);
-      multi.expire(roomKey, this.expire);
+      await client.hset(roomKey, room);
+      await client.expire(roomKey, this.expire);
+      await client.hset(locationKey, 'room', roomId);
+      await client.expire(roomKey, this.expire);
     });
   }
 
@@ -113,12 +112,12 @@ class redisTransaction {
    * @param {string} lobbyId
    */
   async deleteRoom(roomId, lobbyId) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const roomKey = `${this.prefix.ROOM}:${roomId}`;
       const lobbyRoomListKey = `${this.prefix.LOBBY_ROOM_LIST}:${lobbyId}`;
 
-      multi.del(roomKey);
-      multi.srem(lobbyRoomListKey, roomKey);
+      await client.del(roomKey);
+      await client.srem(lobbyRoomListKey, roomKey);
     });
   }
 
@@ -127,18 +126,18 @@ class redisTransaction {
    * @param {*} board
    */
   async createBoardGame(board) {
-    const result = await this.execute(async (multi) => {
+    const result = await this.execute(async (client) => {
       const boardKey = `${this.prefix.BOARD}:${board.boardId}`;
       const playersKey = `${this.prefix.BOARD_PLAYERS}:${board.boardId}`;
 
-      multi.exists(boardKey);
+      await client.exists(boardKey);
 
       // * 룸 상태 변경 [BOARD]
       const roomKey = `${this.prefix.ROOM}:${board.roomId}`;
-      multi.hset(roomKey, 'state', config.ROOM_STATE.BOARD);
+      await client.hset(roomKey, 'state', config.ROOM_STATE.BOARD);
 
       // * 보드 정보 저장
-      multi.hset(boardKey, {
+      await client.hset(boardKey, {
         boardId: board.boardId,
         roomId: board.roomId,
         ownerId: board.ownerId,
@@ -146,20 +145,20 @@ class redisTransaction {
         maxTurn: board.turn,
         nowTurn: 1,
       });
-      multi.expire(boardKey, this.expire);
+      await client.expire(boardKey, this.expire);
 
       const users = JSON.parse(board.users);
-      users.forEach((sessionId) => {
+      users.forEach(async (sessionId) => {
         console.log('[ createBoardGame : for ] sessionId ===> ', sessionId);
 
         // * 보드 플레이어 목록 저장
-        multi.sadd(playersKey, sessionId);
-        multi.expire(playersKey, this.expire);
+        await client.sadd(playersKey, sessionId);
+        await client.expire(playersKey, this.expire);
 
         // * 보드 플레이어 정보 저장
         // 골드, 트로피, 플레이어 타일 위치,
         const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${board.boardId}:${sessionId}`;
-        multi.hset(boardPlayerInfoKey, {
+        await client.hset(boardPlayerInfoKey, {
           gold: 10, // TODO: 게임 데이터에서 파싱?
           trophy: 0,
           tileLocation: 0, // TODO: 시작 위치?
@@ -167,18 +166,12 @@ class redisTransaction {
 
         const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
         // * 유저 위치정보 - 보드 저장
-        multi.hset(locationKey, 'board', board.boardId);
-        multi.expire(locationKey, this.expire);
+        await client.hset(locationKey, 'board', board.boardId);
+        await client.expire(locationKey, this.expire);
       });
     });
 
-    // * 트랜잭션 성공했을 때만 publish
-    if (result) {
-      const channel = this.redisUtil.channel.BOARD;
-      const message = board.boardId + ':' + board.users;
-      await this.client.publish(channel, message);
-      console.log(`[${channel}] Channel Notification Sent: [${message}]`);
-    }
+    return result;
   }
 
   /**
@@ -188,15 +181,15 @@ class redisTransaction {
    * @param {UserData} user
    */
   async createUser(sessionId, loginId, user) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const userKey = `${this.prefix.USER}:${sessionId}`;
       const loginKey = `${this.prefix.LOGIN}`;
 
-      multi.hset(userKey, {
+      await client.hset(userKey, {
         nickname: user.nickname,
       });
-      multi.expire(userKey, this.expire);
-      multi.sadd(loginKey, user.nickname);
+      await client.expire(userKey, this.expire);
+      await client.sadd(loginKey, user.nickname);
     });
   }
 
@@ -206,12 +199,12 @@ class redisTransaction {
    * @param {string} loginId
    */
   async deleteUser(sessionId, loginId) {
-    return this.execute(async (multi) => {
+    return this.execute(async (client) => {
       const userKey = `${this.prefix.USER}:${sessionId}`;
       const loginKey = `${this.prefix.LOGIN}`;
 
-      multi.del(loginKey, loginId);
-      multi.del(userKey);
+      await client.del(loginKey, loginId);
+      await client.del(userKey);
     });
   }
 
@@ -225,7 +218,7 @@ class redisTransaction {
     // 기본금액 10G
     let purchaseGold = 10;
 
-    await this.execute(async (multi) => {
+    await this.execute(async (client) => {
       /**
        * 1. 타일 주인 매핑 정보 저장 hash
        * 2. 구매 이력 정보 저장 list
@@ -245,7 +238,7 @@ class redisTransaction {
           purchaseGold = -1;
         } else {
           // * 타일주인이 없음 : 10G
-          await multi.hset(
+          await client.hset(
             mapKey,
             tile,
             JSON.stringify({
@@ -264,7 +257,7 @@ class redisTransaction {
           logger.info(`골드가 부족함2 : ${playerInfo.gold}, ${purchaseGold}`);
           purchaseGold = -1;
         } else {
-          await multi.hset(
+          await client.hset(
             mapKey,
             tile,
             JSON.stringify({
@@ -274,11 +267,11 @@ class redisTransaction {
           );
         }
       }
-      await multi.sadd(historyKey, tile);
+      await client.sadd(historyKey, tile);
 
       const nowGold = Number(playerInfo.gold) - purchaseGold;
       const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
-      await multi.hset(boardPlayerInfoKey, 'gold', nowGold);
+      await client.hset(boardPlayerInfoKey, 'gold', nowGold);
 
       logger.info('[ REDIS - TRANSACTION ] nowGold ==>> ', nowGold);
     });
@@ -302,7 +295,7 @@ class redisTransaction {
      * 벌금 적용 : 0까지만, 대신 타일 주인도 깎인 만큼만 증가 시켜줄 것 [v]
      */
     const result = {};
-    await this.execute(async (multi) => {
+    await this.execute(async (client) => {
       // * Keys
       const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
       const tileOwnerStr = await this.client.hget(mapKey, tile);
@@ -339,8 +332,8 @@ class redisTransaction {
         );
         console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
-        await multi.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
-        await multi.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+        await client.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
+        await client.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
       }
 
       // TODO: 페널티 이력 저장?
@@ -367,7 +360,7 @@ class redisTransaction {
   async getBoardPlayersInfo(sessionId) {
     //
     const result = {};
-    await this.execute(async (multi) => {
+    await this.execute(async (client) => {
       result.playersInfo = [];
 
       // * boardId 조회
@@ -400,7 +393,7 @@ class redisTransaction {
     const result = {};
     result.isOk = false;
     result.diceGameDatas = [];
-    await this.execute(async (multi) => {
+    await this.execute(async (client) => {
       // BOARD_DART_HISTORY
       const dartHistKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}`;
       const histCount = await this.client.zrange(dartHistKey, 0, -1).length;
@@ -414,7 +407,7 @@ class redisTransaction {
 
       // TODO:
       if (histCount < boardPlayerCount) {
-        await multi.zadd(dartHistKey, {
+        await client.zadd(dartHistKey, {
           score: dartData.distance,
           value: sessionId,
         });
@@ -426,7 +419,7 @@ class redisTransaction {
           location: JSON.stringify(dartData.location),
           power: dartData.power,
         };
-        await multi.hset(dartInfoKey, dartInfoData);
+        await client.hset(dartInfoKey, dartInfoData);
       } else {
         const boardPlayers = await this.client.smembers(boardPlayerKey);
         console.log('[ boardPlayers ] ====>> ', boardPlayers);
@@ -464,7 +457,7 @@ class redisTransaction {
     result.isGameOver = false;
     result.rank = [];
 
-    await this.execute(async (multi) => {
+    await this.execute(async (client) => {
       // TODO: manager에 있는거 옮기고, 영수증 처리 ㄱㄱ
 
       const boardKey = `${this.prefix.BOARD}:${boardId}`;
@@ -525,7 +518,7 @@ class redisTransaction {
       } else {
         // * 턴 + 1
         logger.info('[ turnEnd ] nowTurn type ===>> ', typeof nowTurn);
-        await multi.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
+        await client.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
         logger.info(' result rank ELSSS ===>> ', result.rank);
       }
     });

@@ -56,24 +56,23 @@ class RoomDTO {
         userIds = roomData.users.map((user) => user.sessionId);
       }
 
-      // 파이프라인으로 한 번에 모든 유저 정보 조회
-      const pipeline = redis.client.pipeline();
-      userIds.forEach((sessionId) => {
-        pipeline.hgetall(`${redis.prefix.USER}:${sessionId}`);
-      });
-
-      const userDataResults = await pipeline.exec();
-      const users = userIds
-        .map((sessionId, index) => {
-          const userData = userDataResults[index]?.[1]; // Optional chaining 추가
+      //* 클러스터 환경에서는 Promise.all로 병렬 처리
+      const userDataPromises = userIds.map(async (sessionId) => {
+        try {
+          const userData = await redis.client.hgetall(`${redis.prefix.USER}:${sessionId}`);
           return userData
             ? {
                 sessionId,
-                nickname: userData.nickname || 'Unknown',
+                nickname: userData.nickname,
               }
             : null;
-        })
-        .filter((user) => user !== null);
+        } catch (error) {
+          logger.error(`[ toResponse ] ====> Error redis ${sessionId}:`, error);
+          return null;
+        }
+      });
+
+      const users = (await Promise.all(userDataPromises)).filter((user) => user !== null);
 
       return {
         roomId: roomData.roomId,

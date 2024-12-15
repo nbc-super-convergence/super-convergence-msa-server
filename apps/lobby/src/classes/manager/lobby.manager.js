@@ -150,19 +150,20 @@ class LobbyManager {
         return ResponseHelper.success([]);
       }
 
-      //* 한 번의 파이프라인으로 모든 유저 데이터 조회
-      const pipeline = redis.client.pipeline();
-      users.forEach((sessionId) => {
-        pipeline.hget(`${redis.prefix.USER}:${sessionId}`, 'nickname');
-      });
-      const result = await pipeline.exec();
-
-      const nicknames = result.map(([error, nickname]) => {
-        if (error) {
-          logger.error('[ getUserList ] ====> redis pipeline error', error);
+      //* Promise.all을 사용하여 병렬로 유저 데이터 조회
+      const nicknamePromises = users.map(async (sessionId) => {
+        try {
+          return await redis.getUserToSessionfield(sessionId, 'nickname');
+        } catch (error) {
+          logger.error('[ getUserList ] ====> redis error', {
+            error,
+            sessionId,
+          });
+          return null;
         }
-        return nickname;
       });
+
+      const nicknames = await Promise.all(nicknamePromises);
 
       logger.info('[ getUserList ] ====> success', { nicknames });
 

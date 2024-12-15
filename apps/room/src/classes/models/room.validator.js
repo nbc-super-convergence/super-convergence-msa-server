@@ -9,19 +9,14 @@ class RoomValidator {
    */
   static async getUserData(sessionId) {
     try {
-      const pipeline = redis.client.pipeline();
-
-      //* 유저 세션 데이터
-      pipeline.hget(`${redis.prefix.USER}:${sessionId}, 'nickname'`);
-
-      //* 유저 위치 정보
-      pipeline.hgetall(`${redis.prefix.LOCATION}:${sessionId}`);
-
-      const [userResult, locationResult] = await pipeline.exec();
+      const [nickname, location] = await Promise.all([
+        redis.getUserToSession(sessionId),
+        redis.getUserLocation(sessionId),
+      ]);
 
       return {
-        nickname: userResult[1] || null,
-        location: locationResult[1] || {},
+        nickname: nickname || null,
+        location: location || {},
       };
     } catch (error) {
       logger.error('[ getUserData ] ====> error', error);
@@ -39,14 +34,8 @@ class RoomValidator {
    */
   static async getRoomData(roomId) {
     try {
-      const pipeline = redis.client.pipeline();
-
-      //* 대기방 데이터
-      pipeline.hgetall(`${redis.prefix.ROOM}:${roomId}`);
-
-      const [roomResult] = await pipeline.exec();
-
-      return roomResult[1] || null;
+      const roomData = await redis.getRoom(roomId);
+      return roomData || null;
     } catch (error) {
       logger.error('[ getRoomData ] ====> error', error);
       return null;
@@ -60,26 +49,20 @@ class RoomValidator {
    */
   static async validateAll(sessionId) {
     try {
-      const pipeline = redis.client.pipeline();
+      // 클러스터 환경에서는 Promise.all 사용
+      const [nickname, location] = await Promise.all([
+        redis.getUserToSession(sessionId),
+        redis.getUserLocation(sessionId),
+      ]);
 
-      //* 유저 관련 데이터 조회
-      pipeline.hget(`${redis.prefix.USER}:${sessionId}`, 'nickname');
-      pipeline.hgetall(`${redis.prefix.LOCATION}:${sessionId}`);
-
-      const [userResult, locationResult] = await pipeline.exec();
-
-      const location = locationResult[1] || {};
       let roomData = null;
-
-      //* location에 room이 있으면 해당 방 정보도 조회
-      if (location.room) {
-        const roomResult = await redis.client.hgetall(`${redis.prefix.ROOM}:${location.room}`);
-        roomData = roomResult;
+      if (location && location.room) {
+        roomData = await redis.getRoom(location.room);
       }
 
       return {
-        nickname: userResult[1] || null,
-        location,
+        nickname: nickname || null,
+        location: location || {},
         roomData,
       };
     } catch (error) {

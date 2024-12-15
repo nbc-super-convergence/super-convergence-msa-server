@@ -9,7 +9,7 @@ import {
 import { USER_STATE } from '../../constants/user.js';
 import { serializeForGate } from '@repo/common/utils';
 import { logger } from '../../utils/logger.utils.js';
-import { redisUtil } from '../../utils/redis.init.js';
+import { pubRedisClient, redisUtil } from '../../utils/redis.init.js';
 
 export const sessionIds = new Map();
 
@@ -154,7 +154,7 @@ class BombGame extends Game {
 
     const channel = redisUtil.channel.BOARD_GOLD;
     const message = this.id;
-    await redisUtil.client.publish(channel, message, (err, reply) => {
+    await pubRedisClient.publish(channel, message, (err, reply) => {
       if (err) {
         logger.error(`[bombGame - User.class, updateGlod] GOLD => err `, err);
       } else {

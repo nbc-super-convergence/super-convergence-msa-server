@@ -1,5 +1,5 @@
 import { FAIL_CODE } from '@repo/common/failcodes';
-import { redis } from '../../utils/redis.js';
+import { pubRedisClient, redis } from '../../utils/redis.js';
 import { v4 as uuidv4 } from 'uuid';
 import { BOARD_STATE } from '../../constants/state.js';
 import { getRollDiceResult } from '../../utils/dice.utils.js';
@@ -57,7 +57,15 @@ class BoardManager {
         logger.info(' [ BOARD: createBoard ] IF  board ===>>> ', board);
 
         // * redisUtil에서 redisTransaction으로 변경
-        await redis.transaction.createBoardGame(board);
+        const result = await redis.transaction.createBoardGame(board);
+
+        // * 트랜잭션 성공했을 때만 publish
+        if (result) {
+          const channel = redis.channel.BOARD;
+          const message = board.boardId + ':' + board.users;
+          await pubRedisClient.publish(channel, message);
+          console.log(`[${channel}] Channel Notification Sent: [${message}]`);
+        }
 
         const users = JSON.parse(roomData.users);
         const data = {};
@@ -222,24 +230,23 @@ class BoardManager {
         userIds = roomData.users.map((user) => user.sessionId);
       }
 
-      // 파이프라인으로 한 번에 모든 유저 정보 조회
-      const pipeline = redis.client.pipeline();
-      userIds.forEach((sessionId) => {
-        pipeline.hgetall(`${redis.prefix.USER}:${sessionId}`);
-      });
-
-      const userDataResults = await pipeline.exec();
-      const users = userIds
-        .map((sessionId, index) => {
-          const userData = userDataResults[index]?.[1]; // Optional chaining 추가
+      //* 클러스터 환경에서는 Promise.all로 병렬 처리
+      const userDataPromises = userIds.map(async (sessionId) => {
+        try {
+          const userData = await redis.client.hgetall(`${redis.prefix.USER}:${sessionId}`);
           return userData
             ? {
                 sessionId,
-                nickname: userData.nickname || 'Unknown',
+                nickname: userData.nickname,
               }
             : null;
-        })
-        .filter((user) => user !== null);
+        } catch (error) {
+          logger.error(`[ toResponse ] ====> Error redis ${sessionId}:`, error);
+          return null;
+        }
+      });
+
+      const users = (await Promise.all(userDataPromises)).filter((user) => user !== null);
 
       const readyUsers = JSON.parse(roomData.readyUsers);
       logger.info('[ BOARD: roomData ] users.length ===>> ', users.length);
@@ -471,7 +478,7 @@ class BoardManager {
       // * 미니게임 Idx 저장
       await redis.updateBoardGameField(boardId, 'miniGameVal', randomVal);
 
-      await redis.client.publish(channel, message, (err, reply) => {
+      await pubRedisClient.publish(channel, message, (err, reply) => {
         if (err) {
           logger.error('[ BOARD: startMiniGameRequest ] startMiniGameRequest ==>> ', err);
         } else {
