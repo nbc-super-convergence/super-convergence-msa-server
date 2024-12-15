@@ -6,8 +6,6 @@ const redisClient = new RedisClient(danceConfig.REDIS).getClient();
 export const redis = new RedisUtil(redisClient);
 
 //* redis pub/sub용 클라이언트
-const pub = RedisClient.createPubSubClient(danceConfig.REDIS);
-export const pubRedisClient = new RedisUtil(pub);
+export const pubRedisClient = RedisClient.createPubSubClient(danceConfig.REDIS);
 
-const sub = RedisClient.createPubSubClient(danceConfig.REDIS);
-export const subRedisClient = new RedisUtil(sub);
+export const subRedisClient = RedisClient.createPubSubClient(danceConfig.REDIS);
