@@ -3,7 +3,7 @@ import { logger } from '../../utils/logger.utils.js';
 import { createNotification } from '../../utils/create.notification.js';
 import { GAME_MODE, GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
 import { createResponse } from '../../utils/create.response.js';
-import { redis } from '../../init/redis.js';
+import { pubRedisClient, redis } from '../../init/redis.js';
 
 class DanceGameManager {
   constructor() {
@@ -195,25 +195,29 @@ class DanceGameManager {
 
     //* 유저 위치 정보 삭제
     try {
-      const pipeline = redis.client.pipeline();
-      results.TeamRank.forEach((teamNumber, rank) => {
+      const updatePromises = results.TeamRank.forEach((teamNumber, rank) => {
         const teamResult = results.result[rank];
         const reward = REWARD[rank] || 0;
 
         teamResult.sessionId.forEach((id) => {
-          pipeline.hincrby(`${redis.prefix.BOARD_PLAYER_INFO}:${game.id}:${id}`, 'gold', reward);
-          pipeline.hdel(`${redis.prefix.LOCATION}:${id}`, 'dance');
+          redis.client.hincrby(
+            `${redis.prefix.BOARD_PLAYER_INFO}:${game.id}:${id}`,
+            'gold',
+            reward,
+          );
+          redis.client.hdel(`${redis.prefix.LOCATION}:${id}`, 'dance');
         });
       });
-      await pipeline.exec();
+
+      await Promise.all(updatePromises);
     } catch (error) {
-      logger.error(`[danceGameOverNoti] ===> redis pipeline error `, error);
+      logger.error(`[danceGameOverNoti] ===> redis error `, error);
     }
 
     //* boardGoldChannel에 메시지(boardId) 발행
-    const channel = redis.channel.BOARD_GOLD || 'boardGoldChannel';
+    const channel = pubRedisClient.channel.BOARD_GOLD || 'boardGoldChannel';
     const message = game.id || 'boardId';
-    await redis.client.publish(channel, message, (err, reply) => {
+    await pubRedisClient.publish(channel, message, (err, reply) => {
       if (err) {
         logger.error('[ DANCE: danceGameOverNoti ] publish err ==>> ', err);
       } else {
