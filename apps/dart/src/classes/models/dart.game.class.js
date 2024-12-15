@@ -46,6 +46,10 @@ class DartGame extends Game {
     return this.users.map((user) => user.sessionId);
   }
 
+  isValidUser(sessionId) {
+    return this.users.find((user) => user.sessionId === sessionId) ? true : false;
+  }
+
   getUser() {}
 
   getAllUsers() {

@@ -89,11 +89,9 @@ class DartGameManager {
   /**
    * * 게임 시작 Notification
    */
-  async makeMiniGameStartNoti(game) {
+  async makeMiniGameStartNoti(sessionIds) {
     // * 미니 게임 시작
-    logger.info(`[dropGameManager - dropMiniGameStartNoti]`);
-
-    const sessionIds = game.getAllSessionIds();
+    logger.info(`[DART: makeMiniGameStartNoti]`, sessionIds);
 
     const type = MESSAGE_TYPE.DART_MINI_GAME_START_NOTIFICATION;
     const payload = { startTime: Date.now() + 5000 };
@@ -145,6 +143,40 @@ class DartGameManager {
     const boardId = await redisUtil.getUserLocationField(sessionId, 'board');
     const sessionIds = await redisUtil.getBoardPlayers(boardId);
     return sessionIds;
+  }
+
+  async makeDartGameReadyNoti(sessionId) {
+    //
+    const result = {};
+    result.isAllReady = false;
+
+    result.boardId = await redisUtil.getUserLocationField(sessionId, 'board');
+
+    await redisUtil.setDartPlayerReady(result.boardId, sessionId);
+
+    const sessionIds = await this.getSessionIds(sessionId);
+    result.sessionIds = sessionIds;
+    let count = 0;
+    for (let i = 0; i < sessionIds.length; i++) {
+      const isReady = await redisUtil.getDartPlayerReady(result.boardId, sessionIds[i]);
+      if (isReady === '1') {
+        count++;
+      }
+    }
+
+    if (sessionIds.length === count) {
+      result.isAllReady = true;
+    }
+
+    const type = MESSAGE_TYPE.DART_GAME_READY_NOTIFICATION;
+    const payload = { sessionId };
+    const message = { type, payload };
+
+    logger.info(`[ DART: makeMiniGameStartNoti - message] ===>`, message);
+
+    result.buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+
+    return result;
   }
 } // end
 
