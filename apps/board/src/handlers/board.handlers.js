@@ -370,7 +370,18 @@ export const tilePenaltyRequestHandler = async ({ socket, payload }) => {
   let sessionIds = [sessionId];
 
   try {
-    const result = await boardManager.tilePenalty(sessionId, tile);
+    let tileReq = tile;
+    if (!tileReq) {
+      tileReq = 0;
+    }
+    logger.info(
+      '[ BOARD: tilePenaltyRequestHandler ] sessionId, tile, tileReq ===>>> ',
+      sessionId,
+      tile,
+      tileReq,
+    );
+
+    const result = await boardManager.tilePenalty(sessionId, tileReq);
 
     logger.info('[ BOARD: tilePenaltyRequestHandler ] result ===>>> ', result);
 
