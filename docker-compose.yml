@@ -1,141 +1,60 @@
 services:
   distributor:
-    build:
-      context: .
-      dockerfile: apps/distributor/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-      - USER_DB1_HOST=shd1495.store
-      - USER_DB1_PORT=3306
-      - USER_DB1_NAME=holy_poly_moly_user
-      - USER_DB1_USER=root
-      - USER_DB1_PASSWORD=qwerty7897
-    ports:
-      - '7010:7010'
-    networks:
-      - super-convergence
+    extends:
+      file: ./apps/distributor/docker-compose.yml
+      service: distributor
 
   gate:
-    build:
-      context: .
-      dockerfile: apps/gate/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-    ports:
-      - '7011:7011'
-    networks:
-      - super-convergence
-    depends_on:
-      - distributor
+    extends:
+      file: ./apps/gate/docker-compose.yml
+      service: gate
 
   auth:
-    build:
-      context: .
-      dockerfile: apps/auth/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-    ports:
-      - '7012:7012'
-    networks:
-      - super-convergence
-    depends_on:
-      - distributor
-      - gate
+    extends:
+      file: ./apps/auth/docker-compose.yml
+      service: auth
 
   lobby:
-    build:
-      context: .
-      dockerfile: apps/lobby/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-    ports:
-      - '7013:7013'
-    networks:
-      - super-convergence
-    depends_on:
-      - distributor
-      - gate
+    extends:
+      file: ./apps/lobby/docker-compose.yml
+      service: lobby
 
   room:
-    build:
-      context: .
-      dockerfile: apps/room/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-    ports:
-      - '7014:7014'
-    networks:
-      - super-convergence
-    depends_on:
-      - distributor
-      - gate
+    extends:
+      file: ./apps/room/docker-compose.yml
+      service: room
 
   board:
-    build:
-      context: .
-      dockerfile: apps/board/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-    ports:
-      - '7015:7015'
-    networks:
-      - super-convergence
-    depends_on:
-      - distributor
-      - gate
+    extends:
+      file: ./apps/board/docker-compose.yml
+      service: board
 
   ice:
-    build:
-      context: .
-      dockerfile: apps/ice/Dockerfile
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=myredispass
-      - SERVER_HOST=distributor
-    ports:
-      - '7016:7016'
-    networks:
-      - super-convergence
-    depends_on:
-      - distributor
-      - gate
+    extends:
+      file: ./apps/ice/docker-compose.yml
+      service: ice
 
-  redis:
-    hostname: redis
-    container_name: redis
-    image: redis:latest
-    command: redis-server --requirepass myredispass
-    ports: # 바인딩할 포트:내부 포트
-      - '6379:6379'
-    networks:
-      - super-convergence
+  dropper:
+    extends:
+      file: ./apps/dropper/docker-compose.yml
+      service: dropper
+
+  dance:
+    extends:
+      file: ./apps/dance/docker-compose.yml
+      service: dance
+
+  bomb:
+    extends:
+      file: ./apps/bomb/docker-compose.yml
+      service: bomb
+
+  dart:
+    extends:
+      file: ./apps/dart/docker-compose.yml
+      service: dart
 
 networks:
   super-convergence:
+    name: super-convergence
     driver: bridge

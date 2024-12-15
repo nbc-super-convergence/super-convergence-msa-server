@@ -1,0 +1,24 @@
+services:
+  dance:
+    image: super-convergence-msa-server-dance:${DOCKER_IMAGE_TAG}
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT1=${REDIS_PORT1}
+      - REDIS_PORT2=${REDIS_PORT2}
+      - REDIS_PORT3=${REDIS_PORT3}
+      - REDIS_PORT4=${REDIS_PORT4}
+      - REDIS_PORT5=${REDIS_PORT5}
+      - REDIS_PORT6=${REDIS_PORT6}
+      - REDIS_PUB_SUB=${REDIS_PUB_SUB}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=${DANCE_SERVER_HOST}
+      - DISTRIBUTOR_HOST=${DISTRIBUTOR_HOST}
+    ports:
+      - '7018:7018'
+    networks:
+      - super-convergence
+
+networks:
+  super-convergence:
+    external: true
