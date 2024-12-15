@@ -238,7 +238,7 @@ class redisTransaction {
           purchaseGold = -1;
         } else {
           // * 타일주인이 없음 : 10G
-          await await client.hset(
+          await client.hset(
             mapKey,
             tile,
             JSON.stringify({
@@ -257,7 +257,7 @@ class redisTransaction {
           logger.info(`골드가 부족함2 : ${playerInfo.gold}, ${purchaseGold}`);
           purchaseGold = -1;
         } else {
-          await await client.hset(
+          await client.hset(
             mapKey,
             tile,
             JSON.stringify({
@@ -267,11 +267,11 @@ class redisTransaction {
           );
         }
       }
-      await await client.sadd(historyKey, tile);
+      await client.sadd(historyKey, tile);
 
       const nowGold = Number(playerInfo.gold) - purchaseGold;
       const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
-      await await client.hset(boardPlayerInfoKey, 'gold', nowGold);
+      await client.hset(boardPlayerInfoKey, 'gold', nowGold);
 
       logger.info('[ REDIS - TRANSACTION ] nowGold ==>> ', nowGold);
     });
@@ -332,8 +332,8 @@ class redisTransaction {
         );
         console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
-        await await client.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
-        await await client.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+        await client.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
+        await client.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
       }
 
       // TODO: 페널티 이력 저장?
@@ -403,7 +403,7 @@ class redisTransaction {
       const boardPlayerCount = await this.client.scard(boardPlayerKey);
       // TODO:
       if (histCount < boardPlayerCount) {
-        await await client.zadd(dartHistKey, {
+        await client.zadd(dartHistKey, {
           score: dartData.distance,
           value: sessionId,
         });
@@ -415,7 +415,7 @@ class redisTransaction {
           location: JSON.stringify(dartData.location),
           power: dartData.power,
         };
-        await await client.hset(dartInfoKey, dartInfoData);
+        await client.hset(dartInfoKey, dartInfoData);
       } else {
         const boardPlayers = await this.client.smembers(boardPlayerKey);
         console.log('[ boardPlayers ] ====>> ', boardPlayers);
@@ -514,7 +514,7 @@ class redisTransaction {
       } else {
         // * 턴 + 1
         logger.info('[ turnEnd ] nowTurn type ===>> ', typeof nowTurn);
-        await await client.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
+        await client.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
         logger.info(' result rank ELSSS ===>> ', result.rank);
       }
     });
