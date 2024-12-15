@@ -17,6 +17,7 @@ export const REDIS_PORTS = {
   PORT4: process.env.REDIS_PORT4,
   PORT5: process.env.REDIS_PORT5,
   PORT6: process.env.REDIS_PORT6,
+  PUB_SUB: process.env.REDIS_PUB_SUB,
 };
 export const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
