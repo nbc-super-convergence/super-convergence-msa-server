@@ -82,6 +82,7 @@ message GamePacket {
         S2C_DiceGameNotification diceGameNotification = 79;
         C2S_TurnEndRequest turnEndRequest = 80;
         S2C_TurnEndNotification turnEndNotification = 81;
+        S2C_BoardGoldSyncNotification boardGoldSyncNotification = 82;
 
 
         // Post Game (91-100)

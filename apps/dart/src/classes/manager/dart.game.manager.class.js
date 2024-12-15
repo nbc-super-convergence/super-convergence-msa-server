@@ -127,7 +127,7 @@ class DartGameManager {
         data: {
           sessionIds,
           isOk: result.isOk,
-          result: result.diceGameDatas,
+          dartGameDatas: result.diceGameDatas,
         },
         failCode: FAIL_CODE.NONE_FAILCODE,
       };

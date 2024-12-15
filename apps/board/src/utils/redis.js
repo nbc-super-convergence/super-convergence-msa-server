@@ -19,7 +19,6 @@ const redisConfig = {
 };
 
 const redisClient = new RedisClient(redisConfig).getClient();
-
 export const redis = new RedisUtil(redisClient);
 
 //* redis pub/sub용 클라이언트
