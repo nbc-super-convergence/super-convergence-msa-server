@@ -343,13 +343,23 @@ class redisTransaction {
     result.playersInfo = [];
     const boardPlayersKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
     const playerSessionIds = await this.client.smembers(boardPlayersKey);
-    playerSessionIds.forEach(async (sId) => {
+
+    console.log('[ playerSessionIds ] boardPlayersKey ===>>> ', boardPlayersKey);
+    console.log('[ playerSessionIds ] playerSessionIds ===>>> ', playerSessionIds);
+
+    for (let i = 0; i < playerSessionIds.length; i++) {
+      const sId = playerSessionIds[i];
+
       const playerInfo = await this.client.hgetall(
         `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sId}`,
       );
+
       playerInfo.sessionId = sId;
+      console.log('[ playerSessionIds ] playerInfo ===>>> ', playerInfo);
       result.playersInfo.push(playerInfo);
-    });
+      console.log('[ playerSessionIds ] result.playersInfo ===>>> ', result.playersInfo);
+    }
+
     return result;
   }
 
