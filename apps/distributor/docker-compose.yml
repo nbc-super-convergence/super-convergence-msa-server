@@ -1,9 +1,9 @@
 services:
   distributor:
-    image: super-convergence-msa-server-distributor:latest
+    image: super-convergence-msa-server-distributor:${DOCKER_IMAGE_TAG}
     environment:
       - NODE_ENV=production
-      - SERVER_HOST=${SERVER_HOST}
+      - SERVER_HOST=${DISTRIBUTOR_HOST}
       - DISTRIBUTOR_HOST=${DISTRIBUTOR_HOST}
     ports:
       - '7010:7010'
@@ -12,5 +12,4 @@ services:
 
 networks:
   super-convergence:
-    name: super-convergence
-    driver: bridge
+    external: true
