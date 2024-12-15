@@ -1,8 +1,6 @@
 services:
   gate:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: super-convergence-msa-server-gate:latest
     environment:
       - NODE_ENV=production
       - REDIS_HOST=${REDIS_HOST}
@@ -17,4 +15,4 @@ services:
 
 networks:
   super-convergence:
-    driver: bridge
+    external: true
