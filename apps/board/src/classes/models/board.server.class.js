@@ -3,7 +3,7 @@ import { config } from '@repo/common/config';
 import { getHandlerByMessageType } from '../../handlers/index.js';
 import { deserialize, packetParser } from '@repo/common/utils';
 import { logger } from '../../utils/logger.utils.js';
-import { subRedisUtil } from '../../utils/redis.js';
+import { subRedisClient, redis } from '../../utils/redis.js';
 import boardManager from '../managers/board.manager.class.js';
 
 /**
@@ -15,9 +15,9 @@ class BoardServer extends TcpServer {
     super(name, host, port, types);
 
     // * 보드 골드 싱크 채널 구독
-    this.subScriber = subRedisUtil.client;
+    this.subScriber = subRedisClient;
 
-    this.subScriber.subscribe(subRedisUtil.channel.BOARD_GOLD, (err, count) => {
+    this.subScriber.subscribe(redis.channel.BOARD_GOLD, (err, count) => {
       if (err) {
         logger.error(`[ BOARD: Sbuscribe error] ==> `, err);
         return;
@@ -29,7 +29,7 @@ class BoardServer extends TcpServer {
     this.subScriber.on('message', async (channel, message) => {
       //
       let buffer;
-      if (channel === subRedisUtil.channel.BOARD_GOLD) {
+      if (channel === redis.channel.BOARD_GOLD) {
         // message : ${boardId}
 
         const boardId = message;

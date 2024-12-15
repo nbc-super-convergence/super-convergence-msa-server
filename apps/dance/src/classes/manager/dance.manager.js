@@ -215,7 +215,7 @@ class DanceGameManager {
     }
 
     //* boardGoldChannel에 메시지(boardId) 발행
-    const channel = pubRedisClient.channel.BOARD_GOLD || 'boardGoldChannel';
+    const channel = redis.channel.BOARD_GOLD || 'boardGoldChannel';
     const message = game.id || 'boardId';
     await pubRedisClient.publish(channel, message, (err, reply) => {
       if (err) {
