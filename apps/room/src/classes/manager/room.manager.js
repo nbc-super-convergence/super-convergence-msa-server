@@ -306,52 +306,53 @@ class RoomManager {
    */
   async kickUser(sessionId, targetSessionId) {
     try {
-      const { ownerNickname, ownerLocation, ownerRoomData } =
-        await RoomValidator.validateAll(sessionId);
-      const { targetNickname, targetLocation, targetRoomData } =
-        await RoomValidator.validateAll(targetSessionId);
+      const { nickname, location, roomData } = await RoomValidator.validateAll(sessionId);
+      const targetData = await RoomValidator.validateAll(targetSessionId);
 
       //* 대기방에 있는 유저가 맞는지 검증
       if (
-        (!ownerLocation?.room || !targetLocation?.room) &&
-        ownerLocation?.room === targetLocation?.room
+        (!location?.room || !targetData?.location?.room) &&
+        location?.room === targetData?.location?.room
       ) {
         logger.error('[ kickUser ] ====> user not in the room', {
-          ownerLocation: ownerLocation?.room,
-          targetLocation: targetLocation?.room,
+          ownerLocation: location?.room,
+          targetLocation: targetData?.location?.room,
         });
         return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       //* 유저 세션 검증
-      if (!ownerNickname || !targetNickname) {
-        logger.error('[ kickUser ] ====> user not found', { ownerNickname, targetNickname });
+      if (!nickname || !targetData?.nickname) {
+        logger.error('[ kickUser ] ====> user not found', {
+          ownerNickname: nickname,
+          targetNickname: targetData?.nickname,
+        });
         return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
       }
 
       //* 대기방이 있는지 검증
-      if (!ownerRoomData || !targetRoomData) {
+      if (!roomData || !targetData?.roomData) {
         logger.error('[ kickUser ] ====> room not found', {
-          ownerRoomData,
-          targetRoomData,
+          ownerRoomData: roomData,
+          targetRoomData: targetData?.roomData,
         });
         return ResponseHelper.fail(FAIL_CODE.ROOM_NOT_FOUND);
       }
 
-      const roomData = RoomDTO.fromRedis(ownerRoomData);
+      const room = RoomDTO.fromRedis(roomData);
 
       // * 방장이 맞는지 검증
-      if (roomData.ownerId !== sessionId) {
+      if (room.ownerId !== sessionId) {
         logger.error('[ kickUser ] ====> not the owner', { ownerId: roomData.ownerId, sessionId });
         return ResponseHelper.fail(FAIL_CODE.NOT_THE_OWNER);
       }
 
       //* 추방
-      const result = Room.kick(roomData, targetSessionId);
+      const result = Room.kick(room, targetSessionId);
       logger.info('[ kickUser ] ====> result', result);
 
       if (!result.success) return result;
-      await redis.updateRoomFields(ownerLocation?.room, RoomDTO.toRedis(result.data));
+      await redis.updateRoomFields(location?.room, RoomDTO.toRedis(result.data));
       await redis.deleteUserLocationField(targetSessionId, 'room');
 
       const responseData = await RoomDTO.toResponse(result.data);
