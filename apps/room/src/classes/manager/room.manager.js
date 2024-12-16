@@ -309,10 +309,13 @@ class RoomManager {
       const { nickname, location, roomData } = await RoomValidator.validateAll(sessionId);
       const targetData = await RoomValidator.validateAll(targetSessionId);
 
+      logger.info('[ kickUser ] ====> start', { nickname, location, roomData }, targetData);
+
       //* 대기방에 있는 유저가 맞는지 검증
       if (
-        (!location?.room || !targetData?.location?.room) &&
-        location?.room === targetData?.location?.room
+        !location?.room ||
+        !targetData?.location?.room ||
+        location?.room !== targetData?.location?.room
       ) {
         logger.error('[ kickUser ] ====> user not in the room', {
           ownerLocation: location?.room,
