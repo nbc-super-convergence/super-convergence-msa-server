@@ -83,6 +83,7 @@ class redisTransaction {
       });
       await client.expire(roomKey, this.expire);
       await client.sadd(lobbyRoomListKey, roomKey);
+      await client.expire(lobbyRoomListKey, this.expire);
       await client.hset(locationKey, 'room', room.roomId);
       await client.expire(locationKey, this.expire);
     });
@@ -102,7 +103,7 @@ class redisTransaction {
       await client.hset(roomKey, room);
       await client.expire(roomKey, this.expire);
       await client.hset(locationKey, 'room', roomId);
-      await client.expire(roomKey, this.expire);
+      await client.expire(locationKey, this.expire);
     });
   }
 
@@ -163,6 +164,7 @@ class redisTransaction {
           trophy: 0,
           tileLocation: 0, // TODO: 시작 위치?
         });
+        await client.expire(boardPlayerInfoKey, this.expire);
 
         const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
         // * 유저 위치정보 - 보드 저장
@@ -190,6 +192,7 @@ class redisTransaction {
       });
       await client.expire(userKey, this.expire);
       await client.sadd(loginKey, user.nickname);
+      await client.expire(loginKey, this.expire);
     });
   }
 
@@ -337,9 +340,8 @@ class redisTransaction {
         console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
         await client.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
-        await client.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
-
         await client.expire(penaltyPlayerInfoKey, this.expire);
+        await client.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
         await client.expire(ownerPlayerInfoKey, this.expire);
       }
 
@@ -428,6 +430,7 @@ class redisTransaction {
           score: dartData.distance,
           value: sessionId,
         });
+        await client.expire(dartHistKey, this.expire);
 
         const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${sessionId}`;
         const dartInfoData = {
@@ -537,6 +540,7 @@ class redisTransaction {
         // * 턴 + 1
         logger.info('[ turnEnd ] nowTurn type ===>> ', typeof nowTurn);
         await client.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
+        await client.expire(boardKey, this.expire);
         logger.info(' result rank ELSSS ===>> ', result.rank);
       }
     });

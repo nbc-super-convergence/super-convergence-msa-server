@@ -53,7 +53,7 @@ class RedisUtil {
       DART_PLAYER_READY: 'dartPlayerReady',
     };
 
-    this.expire = 60 * 60;
+    this.expire = 60 * 60 * 24;
 
     this.channel = {
       BOARD: 'boardChannel',
@@ -154,6 +154,7 @@ class RedisUtil {
   async createUserLogin(nickname) {
     const key = `${this.prefix.LOGIN}`;
     const result = await this.client.sadd(key, nickname);
+    await this.client.expire(key, this.expire);
     return result;
   }
 
@@ -355,6 +356,7 @@ class RedisUtil {
     });
     await this.client.expire(key, this.expire);
     await this.client.sadd(`${this.prefix.LOBBY_ROOM_LIST}:${room.lobbyId}`, key);
+    await this.client.expire(`${this.prefix.LOBBY_ROOM_LIST}:${room.lobbyId}`, this.expire);
   }
 
   /**
@@ -461,6 +463,7 @@ class RedisUtil {
 
     const playersKey = `${this.prefix.BOARD_PLAYERS}:${board.boardId}`;
     await this.client.sadd(playersKey, board.ownerId);
+    await this.client.expire(playersKey, this.expire);
 
     // pub
     const channel = this.channel.BOARD;
@@ -577,6 +580,7 @@ class RedisUtil {
   async updateBoardPlayerGold(boardId, sessionId, value) {
     const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
     const incGold = await this.client.hincrby(key, 'gold', value);
+    await this.client.expire(key, this.expire);
     if (incGold <= 0) {
       await this.client.hset(key, 'gold', 0);
     }
