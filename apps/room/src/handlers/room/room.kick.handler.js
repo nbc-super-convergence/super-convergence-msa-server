@@ -20,7 +20,7 @@ export const roomKickRequestHandler = async ({ socket, payload }) => {
 
       if (otherSessionIds.length > 0) {
         const notificationPacket = createNotification(
-          { room: result.data },
+          { room: result.data, targetSessionId: result.targetSessionId },
           MESSAGE_TYPE.ROOM_KICK_NOTIFICATION,
           otherSessionIds,
         );

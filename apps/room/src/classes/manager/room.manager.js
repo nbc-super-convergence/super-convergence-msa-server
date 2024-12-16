@@ -355,7 +355,7 @@ class RoomManager {
       await redis.deleteUserLocationField(targetSessionId, 'room');
 
       const responseData = await RoomDTO.toResponse(result.data);
-      return ResponseHelper.success(responseData);
+      return ResponseHelper.success(responseData, { targetSessionId });
     } catch (error) {
       logger.error('[ kickUser ] ====> unknown error', error);
       return ResponseHelper.fail();
