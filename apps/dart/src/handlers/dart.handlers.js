@@ -52,8 +52,8 @@ export const dartGameThrowRequestHandler = async ({ socket, payload }) => {
 
     logger.info('[ DART: dartGameThrowRequestHandler ] result ===>>> ', result);
 
-    // * 전체 NOTIFICATION
-    sessionIds = result.data.sessionIds;
+    // * 본인 제외 NOTIFICATION
+    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
     const notificationMessageType = MESSAGE_TYPE.DART_GAME_THROW_NOTIFICATION;
     const notification = {
       result: dartData,
@@ -88,9 +88,10 @@ export const dartPannelSyncRequestHandler = async ({ socket, payload }) => {
       location,
     );
 
-    const sessionIds = await dartGameManager.getSessionIds(sessionId);
+    let sessionIds = await dartGameManager.getSessionIds(sessionId);
 
-    // * 전체 NOTIFICATION
+    // * 본인 제외  NOTIFICATION
+    sessionIds = sessionIds.filter((sId) => sId !== sessionId);
     const notificationMessageType = MESSAGE_TYPE.DART_PANNEL_SYNC_NOTIFICATION;
     const notification = {
       sessionId,
@@ -122,9 +123,11 @@ export const dartSyncRequestHandler = async ({ socket, payload }) => {
 
     logger.info('[ DART: dartSyncRequestHandler ] sessionId, angle ===>>> ', sessionId, angle);
 
-    const sessionIds = await dartGameManager.getSessionIds(sessionId);
+    let sessionIds = await dartGameManager.getSessionIds(sessionId);
 
-    // * 전체 NOTIFICATION
+    // * 본인 제외  NOTIFICATION
+    sessionIds = sessionIds.filter((sId) => sId !== sessionId);
+
     const notificationMessageType = MESSAGE_TYPE.DART_SYNC_NOTIFICATION;
     const notification = {
       sessionId,
