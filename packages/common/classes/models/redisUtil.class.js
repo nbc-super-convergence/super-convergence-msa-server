@@ -50,6 +50,7 @@ class RedisUtil {
       BOARD_DART_HISTORY: 'boardDartHistory',
       BOARD_DART_INFO: 'boardDartInfo',
       LOCK: 'lock',
+      DART_PLAYER_READY: 'dartPlayerReady',
     };
 
     this.expire = 60 * 60;
@@ -537,6 +538,7 @@ class RedisUtil {
   async updateBoardPlayerInfo(boardId, sessionId, boardPlayerInfo) {
     const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
     await this.client.hset(key, boardPlayerInfo);
+    await this.client.expire(key, this.expire);
   }
 
   /**
