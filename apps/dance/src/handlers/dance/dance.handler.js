@@ -128,6 +128,9 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
   try {
     const { sessionId } = payload;
     logger.info('[ danceCloseSocketRequestHandler ] ====> start', { sessionId });
+    if (!sessionId) {
+      return;
+    }
 
     const location = await redis.getUserLocationField(sessionId, 'board');
     if (!location) {
