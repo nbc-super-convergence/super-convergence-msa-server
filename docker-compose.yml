@@ -3,56 +3,77 @@ services:
     extends:
       file: ./apps/distributor/docker-compose.yml
       service: distributor
-
+    volumes:
+      - ./logs:/app/logs
   gate:
     extends:
       file: ./apps/gate/docker-compose.yml
       service: gate
+    volumes:
+      - ./logs:/app/logs
 
   auth:
     extends:
       file: ./apps/auth/docker-compose.yml
       service: auth
+    volumes:
+      - ./logs:/app/logs
 
   lobby:
     extends:
       file: ./apps/lobby/docker-compose.yml
       service: lobby
+    volumes:
+      - ./logs:/app/logs
 
   room:
     extends:
       file: ./apps/room/docker-compose.yml
       service: room
+    volumes:
+      - ./logs:/app/logs
 
   board:
     extends:
       file: ./apps/board/docker-compose.yml
       service: board
+    volumes:
+      - ./logs:/app/logs
 
   ice:
     extends:
       file: ./apps/ice/docker-compose.yml
       service: ice
+    volumes:
+      - ./logs:/app/logs
 
   dropper:
     extends:
       file: ./apps/dropper/docker-compose.yml
       service: dropper
+    volumes:
+      - ./logs:/app/logs
 
   dance:
     extends:
       file: ./apps/dance/docker-compose.yml
       service: dance
+    volumes:
+      - ./logs:/app/logs
 
   bomb:
     extends:
       file: ./apps/bomb/docker-compose.yml
       service: bomb
+    volumes:
+      - ./logs:/app/logs
 
   dart:
     extends:
       file: ./apps/dart/docker-compose.yml
       service: dart
+    volumes:
+      - ./logs:/app/logs
 
 networks:
   super-convergence:
