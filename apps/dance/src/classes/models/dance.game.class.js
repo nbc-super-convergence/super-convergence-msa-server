@@ -336,6 +336,7 @@ class DanceGame extends Game {
   }
 
   handleTableComplete(sessionId, endTime) {
+    logger.info('[ handleTableComplete ] ====> start', { sessionId, endTime });
     if (!sessionId || !endTime) {
       logger.error('[ handleTableComplete ] ====> invalid params', { sessionId, endTime });
       return false;
@@ -356,6 +357,13 @@ class DanceGame extends Game {
     try {
       teamResult.score += 100;
       teamResult.endTime = endTime;
+
+      this.teamResults.set(user.teamNumber, teamResult);
+      logger.info('[ handleTableComplete ] ====> start', {
+        teamResult,
+        score: teamResult.score,
+        endTime: teamResult.endTime,
+      });
 
       const isTeamComplete = this.isTeamComplete(user.teamNumber);
       if (isTeamComplete) {
@@ -455,12 +463,15 @@ class DanceGame extends Game {
 
         //* 나간 팀원 팀 결과에서 제외
         const teamResult = this.teamResults.get(disconnectedUser.teamNumber);
+        logger.info('[ handleDisconnect ] ====> before teamResult', teamResult);
+
         if (teamResult) {
           this.teamResults.set(disconnectedUser.teamNumber, {
             sessionId: [teammate.sessionId],
             score: teamResult.score,
             endTime: teamResult.endTime,
           });
+          logger.info('[ handleDisconnect ] ====> after teamResult', teamResult);
         }
       } catch (error) {
         logger.error('[ handleDisconnect ] ====> error updating dancePool', { error });
