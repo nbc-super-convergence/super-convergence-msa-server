@@ -152,17 +152,23 @@ class DartGameManager {
 
     result.boardId = await redisUtil.getUserLocationField(sessionId, 'board');
 
+    logger.info('[ DART: makeDartGameReadyNoti ] boardId ===>> ', result.boardId);
+
     await redisUtil.setDartPlayerReady(result.boardId, sessionId);
 
     const sessionIds = await this.getSessionIds(sessionId);
+
     result.sessionIds = sessionIds;
+    logger.info('[ DART: makeDartGameReadyNoti ] sessionIds ===>> ', sessionIds);
     let count = 0;
     for (let i = 0; i < sessionIds.length; i++) {
       const isReady = await redisUtil.getDartPlayerReady(result.boardId, sessionIds[i]);
+      logger.info('[ DART: makeDartGameReadyNoti ] isReady ===>> ', isReady);
       if (isReady === '1') {
         count++;
       }
     }
+    logger.info('[ DART: makeDartGameReadyNoti ] count ===>> ', count);
 
     if (sessionIds.length === count) {
       result.isAllReady = true;
