@@ -1,0 +1,38 @@
+name: Depoly Service on develop Branch
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'apps/**'
+
+jobs:
+  deploy:
+    name: deploy-docker
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: ${{ fromJson(env.CHANGED_FOLDERS) }}
+    steps:
+      # 1. 변경된 폴더 찾기
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Get changed directories
+        id: get-changes
+        run: |
+          # Changed files
+          CHANGED_FOLDERS=$(git diff --name-only HEAD~1 HEAD | grep '^apps/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n")[:-1]')
+          echo "CHANGED_FOLDERS=$CHANGED_FOLDERS" >> $GITHUB_ENV
+
+      - name: excuting remote ssh commands
+        uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
+        with:
+          host: ${{ secrets.EC2_HOST }} # 인스턴스 IP
+          username: ${{ secrets.EC2_USER }} # 우분투 아이디
+          key: ${{ secrets.EC2_PRIVATE_KEY }} # ec2 instance pem key
+          port: ${{ secrets.EC2_SSH_PORT }} # 접속포트
+          script: | # 실행할 스크립트
+            cd super-convergence-msa-server
+            git pull origin develop

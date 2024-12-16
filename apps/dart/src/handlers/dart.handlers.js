@@ -15,6 +15,11 @@ export const dartGameReadyRequestHandler = async ({ socket, payload }) => {
     const result = await dartGameManager.makeDartGameReadyNoti(sessionId);
 
     // * 모든 유저 준비 완료
+    logger.info(
+      '[ DART: dartGameReadyRequestHandler ] isAllReady, result.sessionIds ===>>> ',
+      result.isAllReady,
+      result.sessionIds,
+    );
     if (result.isAllReady) {
       result.buffer = await dartGameManager.makeMiniGameStartNoti(result.sessionIds);
     }
