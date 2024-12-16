@@ -45,7 +45,8 @@ class BombGameManager {
 
   // 시작 준비 알림
   async bombMiniGameReadyNoti(game) {
-    logger.info(`[bombGameManager - bombMiniGameReadyNoti]`);
+    logger.info(`[bombGameManager - bombMiniGameReadyNoti] game.id ===>> `, game.id);
+    logger.info(`[bombGameManager - bombMiniGameReadyNoti] game.bombUser ===>> `, game.bombUser);
 
     game.setGameState(GAME_STATE.WAIT);
 
@@ -56,6 +57,7 @@ class BombGameManager {
     // 여기서 첫 폭탄유저 선정
     const bombUser = game.bombUserSelect();
     game.bombUserChange(bombUser);
+    logger.info(`[bombGameManager - bombMiniGameReadyNoti] bombUser ===>> `, bombUser);
     const message = bombMiniGameReadyNotification(users, bombUser);
 
     logger.info(`[bombMiniGameReadyNoti] ===>`, message);

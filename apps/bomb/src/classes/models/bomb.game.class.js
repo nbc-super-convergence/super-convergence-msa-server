@@ -177,6 +177,8 @@ class BombGame extends Game {
   }
 
   resetGame(users) {
+    logger.info('[ BOMB: resetGame() ] game.id ===>> ', this.id);
+
     this.timeoutManager.removeAllTimeoutById(this.id);
     this.bombUser = null;
     this.setGameState(GAME_STATE.END);
