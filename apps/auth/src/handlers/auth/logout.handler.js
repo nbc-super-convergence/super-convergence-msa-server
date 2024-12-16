@@ -84,6 +84,9 @@ export const logoutHandler = async ({ socket, payload }) => {
       await redis.deleteBoardPlayerInfo(userLocation['board'], sessionId);
       await redis.deleteBoardPlayers(userLocation['board'], sessionId);
 
+      // 타일 구매 정보 제거
+      await redis.deleteUserTileAll(userLocation['board'], sessionId);
+
       // 종료한 유저가 보드의 방장이었던 경우
       const boardOwner = await redis.getBoardGameField(userLocation['board'], 'ownerId');
       if (boardOwner === sessionId) {

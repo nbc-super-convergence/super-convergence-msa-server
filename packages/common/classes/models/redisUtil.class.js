@@ -590,6 +590,13 @@ class RedisUtil {
     await this.client.set(key, '1');
     await this.client.expire(key, this.expire);
   }
+
+  async deleteUserTileAll(boardId, sessionId) {
+    const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
+    const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
+    await this.client.del(mapKey);
+    await this.client.del(historyKey);
+  }
 }
 
 export default RedisUtil;
