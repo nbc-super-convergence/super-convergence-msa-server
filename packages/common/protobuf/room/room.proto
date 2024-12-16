@@ -83,4 +83,5 @@ message S2C_RoomKickResponse {
 
 message S2C_RoomKickNotification {
 	RoomData room = 1;
+    string targetSessionId = 2;
 }
