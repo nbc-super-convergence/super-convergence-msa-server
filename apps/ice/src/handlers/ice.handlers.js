@@ -168,6 +168,11 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     const { sessionId } = payload;
 
+    if (!(await redisUtil.getUserLocationField(sessionId, 'dropper'))) {
+      logger.info(`[ice Location not found]`);
+      return;
+    }
+
     logger.info(`iceCloseSocketRequestHandler payload`, payload);
 
     const gameId = sessionIds.get(sessionId);
