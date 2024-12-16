@@ -598,9 +598,15 @@ class RedisUtil {
   }
 
   async deleteUserTileAll(boardId, sessionId) {
-    const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
     const historyKey = `${this.prefix.BOARD_PURCHASE_TILE_HISTORY}:${boardId}:${sessionId}`;
-    await this.client.del(mapKey);
+    const mapKey = `${this.prefix.BOARD_PURCHASE_TILE_MAP}:${boardId}`;
+    const tileHistoryList = await this.client.smembers(historyKey);
+
+    for (let i = 0; i < tileHistoryList.length; i++) {
+      console.log('[ deleteUserTileAll ] sessionId, tile ', sessionId, tileHistoryList[i]);
+      await this.client.hdel(mapKey, tileHistoryList[i]);
+    }
+    //
     await this.client.del(historyKey);
   }
 }
