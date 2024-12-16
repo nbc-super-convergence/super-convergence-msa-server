@@ -306,23 +306,14 @@ class RoomManager {
    */
   async kickUser(sessionId, targetSessionId) {
     try {
+      //* 같은 유저인지 검증
+      if (sessionId === targetSessionId) {
+        logger.error('[ kickUser ] ====> cannot kick yourself', { sessionId });
+        return ResponseHelper.fail(FAIL_CODE.INVALID_REQUEST);
+      }
+
       const { nickname, location, roomData } = await RoomValidator.validateAll(sessionId);
       const targetData = await RoomValidator.validateAll(targetSessionId);
-
-      logger.info('[ kickUser ] ====> start', { nickname, location, roomData }, targetData);
-
-      //* 대기방에 있는 유저가 맞는지 검증
-      if (
-        !location?.room ||
-        !targetData?.location?.room ||
-        location?.room !== targetData?.location?.room
-      ) {
-        logger.error('[ kickUser ] ====> user not in the room', {
-          ownerLocation: location?.room,
-          targetLocation: targetData?.location?.room,
-        });
-        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
-      }
 
       //* 유저 세션 검증
       if (!nickname || !targetData?.nickname) {
@@ -331,6 +322,19 @@ class RoomManager {
           targetNickname: targetData?.nickname,
         });
         return ResponseHelper.fail(FAIL_CODE.USER_NOT_FOUND);
+      }
+
+      //* 대기방에 있는 유저가 맞는지 검증
+      if (
+        !location?.room ||
+        !targetData?.location?.room ||
+        location.room !== targetData.location.room
+      ) {
+        logger.error('[ kickUser ] ====> user not in the room', {
+          ownerLocation: location?.room,
+          targetLocation: targetData?.location?.room,
+        });
+        return ResponseHelper.fail(FAIL_CODE.USER_NOT_IN_ROOM);
       }
 
       //* 대기방이 있는지 검증
@@ -355,8 +359,10 @@ class RoomManager {
       logger.info('[ kickUser ] ====> result', result);
 
       if (!result.success) return result;
-      await redis.updateRoomFields(location?.room, RoomDTO.toRedis(result.data));
-      await redis.deleteUserLocationField(targetSessionId, 'room');
+      await Promise.all([
+        redis.updateRoomFields(location.room, RoomDTO.toRedis(result.data)),
+        redis.deleteUserLocationField(targetSessionId, 'room'),
+      ]);
 
       const responseData = await RoomDTO.toResponse(result.data);
       return ResponseHelper.success(responseData, { targetSessionId });
