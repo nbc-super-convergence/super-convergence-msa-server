@@ -115,18 +115,27 @@ class BombGame extends Game {
   }
 
   bombUserDeath(socket, survivor) {
+    logger.info('[ BOMB: bombUserDeath ] survivor ===>> ', survivor);
+    logger.info('[ BOMB: bombUserDeath ] this.bombUser ===>> ', this.bombUser);
     const targetUser = this.getUserToSessionId(this.bombUser);
-    targetUser.boom();
-    targetUser.ranking(survivor.length);
-    const nextBombUser = this.bombUserSelect();
+    logger.info('[ BOMB: bombUserDeath ] targetUser ===>> ', targetUser);
 
-    logger.info(`[BombGame - Game.class , bombUserDeath = nextBombUser >>> ]`, nextBombUser);
+    if (targetUser) {
+      targetUser.boom();
+      targetUser.ranking(survivor.length);
 
-    this.bombUserChange(nextBombUser);
-    const message = bombPlayerDeathNotification(targetUser.sessionId, nextBombUser);
-    const sessionIds = this.getAllSessionIds();
-    const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
-    socket.write(buffer);
+      const nextBombUser = this.bombUserSelect();
+
+      logger.info(`[BombGame - Game.class , bombUserDeath = nextBombUser >>> ]`, nextBombUser);
+
+      this.bombUserChange(nextBombUser);
+      const message = bombPlayerDeathNotification(targetUser.sessionId, nextBombUser);
+      const sessionIds = this.getAllSessionIds();
+      const buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
+      socket.write(buffer);
+    } else {
+      logger.info('[ BOMB: bombUserDeath ] ELSE ===>> ', this.bombUser, survivor);
+    }
   }
 
   async bombGameEnd(socket, survivor) {
