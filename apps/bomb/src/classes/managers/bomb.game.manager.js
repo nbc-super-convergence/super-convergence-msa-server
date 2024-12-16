@@ -58,6 +58,8 @@ class BombGameManager {
     const bombUser = game.bombUserSelect();
     game.bombUserChange(bombUser);
     logger.info(`[bombGameManager - bombMiniGameReadyNoti] bombUser ===>> `, bombUser);
+    logger.info(`[bombGameManager - bombMiniGameReadyNoti] sessionIds ===>> `, sessionIds);
+    logger.info(`[bombGameManager - bombMiniGameReadyNoti] users ===>> `, users);
     const message = bombMiniGameReadyNotification(users, bombUser);
 
     logger.info(`[bombMiniGameReadyNoti] ===>`, message);
