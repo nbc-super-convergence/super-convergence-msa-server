@@ -109,6 +109,11 @@ export const dropCloseSocketRequestHandler = async ({ socket, payload }) => {
 
     const { sessionId } = payload;
 
+    if (!(await redisUtil.getUserLocationField(sessionId, 'dropper'))) {
+      logger.info(`[dropper Location not found]`);
+      return;
+    }
+
     logger.info(`[dropCloseSocketRequestHandler - payload]`, payload);
 
     const gameId = sessionIds.get(sessionId);
