@@ -103,7 +103,7 @@ class redisTransaction {
       await client.hset(roomKey, room);
       await client.expire(roomKey, this.expire);
       await client.hset(locationKey, 'room', roomId);
-      await client.expire(roomKey, this.expire);
+      await client.expire(locationKey, this.expire);
     });
   }
 

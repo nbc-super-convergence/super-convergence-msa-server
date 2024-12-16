@@ -50,6 +50,7 @@ class RedisUtil {
       BOARD_DART_HISTORY: 'boardDartHistory',
       BOARD_DART_INFO: 'boardDartInfo',
       LOCK: 'lock',
+      DART_PLAYER_READY: 'dartPlayerReady',
     };
 
     this.expire = 60 * 60 * 24;
