@@ -569,7 +569,7 @@ class BoardManager {
     }
     logger.info('[ BOARD: makeBoardPlayersGoldSyncNoti ] payload ===>>> ', payload);
 
-    const buffer = serializeForGate(type, payload, 0, sessionIds);
+    const buffer = serializeForGate(type, { playersInfo: payload }, 0, sessionIds);
     return buffer;
   }
 } //* class end
