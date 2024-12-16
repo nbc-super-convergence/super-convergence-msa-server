@@ -151,17 +151,19 @@ class LobbyManager {
       }
 
       //* Promise.all을 사용하여 병렬로 유저 데이터 조회
-      const nicknamePromises = users.map(async (sessionId) => {
-        try {
-          return await redis.getUserToSessionfield(sessionId, 'nickname');
-        } catch (error) {
-          logger.error('[ getUserList ] ====> redis error', {
-            error,
-            sessionId,
-          });
-          return null;
-        }
-      });
+      const nicknamePromises = users
+        .map(async (sessionId) => {
+          try {
+            return await redis.getUserToSessionfield(sessionId, 'nickname');
+          } catch (error) {
+            logger.error('[ getUserList ] ====> redis error', {
+              error,
+              sessionId,
+            });
+            return null;
+          }
+        })
+        .filter((nickname) => nickname !== null);
 
       const nicknames = await Promise.all(nicknamePromises);
 
