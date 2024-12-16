@@ -83,6 +83,7 @@ class redisTransaction {
       });
       await client.expire(roomKey, this.expire);
       await client.sadd(lobbyRoomListKey, roomKey);
+      await client.expire(lobbyRoomListKey, this.expire);
       await client.hset(locationKey, 'room', room.roomId);
       await client.expire(locationKey, this.expire);
     });
@@ -163,6 +164,7 @@ class redisTransaction {
           trophy: 0,
           tileLocation: 0, // TODO: 시작 위치?
         });
+        await client.expire(boardPlayerInfoKey, this.expire);
 
         const locationKey = `${this.prefix.LOCATION}:${sessionId}`;
         // * 유저 위치정보 - 보드 저장
@@ -190,6 +192,7 @@ class redisTransaction {
       });
       await client.expire(userKey, this.expire);
       await client.sadd(loginKey, user.nickname);
+      await client.expire(loginKey, this.expire);
     });
   }
 
@@ -246,6 +249,7 @@ class redisTransaction {
               gold: purchaseGold,
             }),
           );
+          await client.expire(mapKey, this.expire);
         }
       } else {
         // * 타일주인이 있음 : 구매가 * 1.5
@@ -265,13 +269,16 @@ class redisTransaction {
               gold: purchaseGold,
             }),
           );
+          await client.expire(mapKey, this.expire);
         }
       }
       await client.sadd(historyKey, tile);
+      await client.expire(historyKey, this.expire);
 
       const nowGold = Number(playerInfo.gold) - purchaseGold;
       const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
       await client.hset(boardPlayerInfoKey, 'gold', nowGold);
+      await client.expire(boardPlayerInfoKey, this.expire);
 
       logger.info('[ REDIS - TRANSACTION ] nowGold ==>> ', nowGold);
     });
@@ -333,7 +340,9 @@ class redisTransaction {
         console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
         await client.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
+        await client.expire(penaltyPlayerInfoKey, this.expire);
         await client.hset(ownerPlayerInfoKey, 'gold', ownerPlayerGold);
+        await client.expire(ownerPlayerInfoKey, this.expire);
       }
 
       // TODO: 페널티 이력 저장?
@@ -421,6 +430,7 @@ class redisTransaction {
           score: dartData.distance,
           value: sessionId,
         });
+        await client.expire(dartHistKey, this.expire);
 
         const dartInfoKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}:${sessionId}`;
         const dartInfoData = {
@@ -430,6 +440,7 @@ class redisTransaction {
           power: dartData.power,
         };
         await client.hset(dartInfoKey, dartInfoData);
+        await client.expire(dartInfoKey, this.expire);
       } else {
         const boardPlayers = await this.client.smembers(boardPlayerKey);
         console.log('[ boardPlayers ] ====>> ', boardPlayers);
@@ -529,6 +540,7 @@ class redisTransaction {
         // * 턴 + 1
         logger.info('[ turnEnd ] nowTurn type ===>> ', typeof nowTurn);
         await client.hset(boardKey, 'nowTurn', Number(nowTurn) + 1);
+        await client.expire(boardKey, this.expire);
         logger.info(' result rank ELSSS ===>> ', result.rank);
       }
     });
