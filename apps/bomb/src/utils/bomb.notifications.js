@@ -77,7 +77,10 @@ export const bombGameOverNotification = (users) => {
   const type = MESSAGE_TYPE.BOMB_GAME_OVER_NOTIFICATION;
 
   // ranks 배열 생성
-  const ranks = users.map((user) => {
+  // * 유저를 오름차순으로 정렬
+  const sortedUsers = users.sort((a, b) => a.rank - b.rank);
+
+  const ranks = sortedUsers.map((user) => {
     return { sessionId: user.sessionId, rank: user.rank };
   });
 
