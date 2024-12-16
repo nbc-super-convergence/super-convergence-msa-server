@@ -1,7 +1,7 @@
 import DanceGame from '../models/dance.game.class.js';
 import { logger } from '../../utils/logger.utils.js';
 import { createNotification } from '../../utils/create.notification.js';
-import { GAME_MODE, GAME_STATE, MESSAGE_TYPE } from '../../utils/constants.js';
+import { GAME_MODE, MESSAGE_TYPE } from '../../utils/constants.js';
 import { createResponse } from '../../utils/create.response.js';
 import { pubRedisClient, redis } from '../../init/redis.js';
 
@@ -195,21 +195,29 @@ class DanceGameManager {
 
     //* 유저 위치 정보 삭제
     try {
-      const updatePromises = results.TeamRank.forEach((teamNumber, rank) => {
+      const updatePromises = [];
+
+      results.TeamRank.forEach((teamNumber, rank) => {
         const teamResult = results.result[rank];
         const reward = REWARD[rank] || 0;
 
         teamResult.sessionId.forEach((id) => {
-          redis.client.hincrby(
-            `${redis.prefix.BOARD_PLAYER_INFO}:${game.id}:${id}`,
-            'gold',
-            reward,
-          );
-          redis.client.hdel(`${redis.prefix.LOCATION}:${id}`, 'dance');
+          if (id) {
+            updatePromises.push(
+              redis.client.hincrby(
+                `${redis.prefix.BOARD_PLAYER_INFO}:${game.id}:${id}`,
+                'gold',
+                reward,
+              ),
+            );
+            updatePromises.push(redis.client.hdel(`${redis.prefix.LOCATION}:${id}`, 'dance'));
+          }
         });
       });
 
-      await Promise.all(updatePromises);
+      if (updatePromises.length > 0) {
+        await Promise.all(updatePromises);
+      }
     } catch (error) {
       logger.error(`[danceGameOverNoti] ===> redis error `, error);
     }
