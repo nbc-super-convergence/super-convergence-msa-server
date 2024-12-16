@@ -35,10 +35,11 @@ class BoardServer extends TcpServer {
         const boardId = message;
 
         buffer = await boardManager.makeBoardPlayersGoldSyncNoti(boardId);
+
+        // TODO: 나중에 수정하기 (2 : Gate 서버)
+        const seq = '2';
+        this._socketMap[seq].socket.write(buffer);
       }
-      // TODO: 나중에 수정하기 (2 : Gate 서버)
-      const seq = '2';
-      this._socketMap[seq].socket.write(buffer);
     });
   }
 

@@ -514,7 +514,9 @@ export const turnEndRequestHandler = async ({ socket, payload }) => {
       // * 나머지 NOTIFICATION [ 턴 종료 ]
       sessionIds = result.data.sessionIds;
       const notificationMessageType = MESSAGE_TYPE.GAME_END_NOTIFICATION;
-      const notification = {};
+      const notification = {
+        rank: result.data.rank,
+      };
       const notificationPacket = serializeForGate(
         notificationMessageType,
         notification,

@@ -556,8 +556,14 @@ class BoardManager {
 
     for (let i = 0; i < sessionIds.length; i++) {
       const sessionId = sessionIds[i];
-      const boardPlayerData = await redis.getBoardPlayerinfo(boardId, sessionId);
-      boardPlayerData.sessionId = sessionId;
+      const redisBoardPlayerData = await redis.getBoardPlayerinfo(boardId, sessionId);
+
+      const boardPlayerData = {
+        sessionId,
+        gold: Number(redisBoardPlayerData.gold),
+        trophy: Number(redisBoardPlayerData.trophy),
+        tileLocation: Number(redisBoardPlayerData.tileLocation),
+      };
 
       payload.push(boardPlayerData);
     }
