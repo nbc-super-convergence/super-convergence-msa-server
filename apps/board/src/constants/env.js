@@ -21,3 +21,7 @@ export const DISTRIBUTOR_HOST = process.env.DISTRIBUTOR_HOST || 'localhost';
 
 // [ TEST ] 미니게임 테스트용
 export const SELECT_MINI_GAME = process.env.SELECT_MINI_GAME || 'ALL';
+
+// LOGSTASH SERVER
+export const LOGSTASH_HOST = process.env.LOGSTASH_HOST || 'localhost';
+export const LOGSTASH_PORT = process.env.LOGSTASH_PORT || 50011;
