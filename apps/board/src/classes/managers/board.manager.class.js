@@ -194,11 +194,9 @@ class BoardManager {
         isPurchased = false;
       }
 
-      const others = sessionIds.filter((sId) => sId !== sessionId);
-      logger.info('[ BOARD: purchaseTileInBoard ] others ===>> ', others);
-      for (let i = 0; i < others.length; i++) {
-        const info = await redis.getBoardPlayerinfo(boardId, others[i]);
-        info.sessionId = others[i];
+      for (let i = 0; i < sessionIds.length; i++) {
+        const info = await redis.getBoardPlayerinfo(boardId, sessionIds[i]);
+        info.sessionId = sessionIds[i];
         playersInfo.push(info);
       }
 
