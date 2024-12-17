@@ -39,9 +39,7 @@ class dropperGame extends Game {
       const slot = this.startPosition[key].pos;
       const rotation = this.startPosition[key].rot;
 
-      if (!sessionIds.get(userId)) {
-        sessionIds.set(userId, gameId);
-      }
+      sessionIds.set(userId, gameId);
 
       const newUser = new dropperUser(gameId, userId, slot, rotation);
 

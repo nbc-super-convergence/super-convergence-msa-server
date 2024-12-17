@@ -28,9 +28,7 @@ class iceGame extends Game {
       const position = this.startPosition[key].pos;
       const rotation = this.startPosition[key].rot;
 
-      if (!sessionIds.get(userId)) {
-        sessionIds.set(userId, gameId);
-      }
+      sessionIds.set(userId, gameId);
 
       const newUser = new iceUser(gameId, userId, position, rotation);
 
