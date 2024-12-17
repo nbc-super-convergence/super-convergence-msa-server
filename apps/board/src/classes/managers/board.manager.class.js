@@ -512,12 +512,13 @@ class BoardManager {
 
       logger.info('[ BOARD: turnEnd ] result ==>> ', result);
 
-      if (result.isGameOver) {
+      if (result.isGameOver || sessionIds.length < 2) {
         // * 대기방 초기화
         const userLocation = await redis.getUserLocation(sessionId);
         const roomData = await redis.getRoom(userLocation.room);
         await redis.updateRoomField(roomData.roomId, 'state', 0);
         await redis.updateRoomField(roomData.roomId, 'readyUsers', '[]');
+        result.isGameOver = true;
       }
 
       return {

@@ -510,7 +510,7 @@ export const turnEndRequestHandler = async ({ socket, payload }) => {
     logger.info('[ BOARD: turnEndRequestHandler ] result ==>> ', result);
 
     // * 한명만 남은 경우에도 게임 종료
-    if (result.data.isGameOver || result.data.sessionIds.length < 2) {
+    if (result.data.isGameOver) {
       // * 전체 NOTI [ 게임종료 ]
       // * 나머지 NOTIFICATION [ 턴 종료 ]
       sessionIds = result.data.sessionIds;

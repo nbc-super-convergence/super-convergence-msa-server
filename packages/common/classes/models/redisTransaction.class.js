@@ -254,6 +254,7 @@ class redisTransaction {
       } else {
         // * 타일주인이 있음 : 구매가 * 1.5
         const purchasingPrice = JSON.parse(tileOwner).gold;
+        const ownerSessionId = JSON.parse(tileOwner).sessionId;
         purchaseGold = Math.floor(purchasingPrice * 1.5);
 
         // * 골드가 부족하면 리턴 -1
@@ -270,11 +271,19 @@ class redisTransaction {
             }),
           );
           await client.expire(mapKey, this.expire);
+
+          // * 타일 판매, 골드 증가
+          const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${ownerSessionId}`;
+          const ownerPlayerInfo = await this.redisUtil.getBoardPlayerinfo(boardId, ownerSessionId);
+
+          const ownerGold = Number(ownerPlayerInfo.gold) + purchaseGold;
+          await client.hset(ownerPlayerInfoKey, 'gold', ownerGold);
         }
       }
       await client.sadd(historyKey, tile);
       await client.expire(historyKey, this.expire);
 
+      // * 타일 구매, 골드 감소
       const nowGold = Number(playerInfo.gold) - purchaseGold;
       const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
       await client.hset(boardPlayerInfoKey, 'gold', nowGold);
