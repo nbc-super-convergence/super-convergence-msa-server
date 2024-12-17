@@ -12,18 +12,6 @@ const PROJECT_NAME = NAMES.PROJECT;
 const logDir = 'logs'; // logs 디렉토리 하위에 로그 파일 저장
 const { combine, timestamp, label, printf } = winston.format;
 
-const createLogStash = (host, port) => {
-  const logstashTransport = new LogstashTransport({
-    host: host, // Logstash의 IP 주소
-    port: port, // Logstash에서 수신할 포트
-    protocol: 'tcp', // 전송 프로토콜
-    level: 'info', // 로그 레벨
-    // 필요한 경우 추가 옵션 설정
-  });
-  console.log('ASAAAAAAAAAAAAAAA', host, port);
-  return logstashTransport;
-};
-
 // Define log format
 const logFormat = printf(({ level, message, label, timestamp, ...meta }) => {
   const extraArgs = meta[Symbol.for('splat')] || [];
@@ -139,4 +127,4 @@ const createLogger = (serviceName, host, port) => {
   });
 };
 
-export { logger, createLogger, createLogStash };
+export { logger, createLogger };
