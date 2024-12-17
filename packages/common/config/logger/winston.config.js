@@ -2,6 +2,7 @@ import winston from 'winston';
 import winstonDaily from 'winston-daily-rotate-file';
 import util from 'util';
 import { config } from '../config.js';
+import LogstashTransport from 'winston-logstash/lib/winston-logstash-latest.js';
 
 const NAMES = {
   SERVER: '',
@@ -10,6 +11,18 @@ const NAMES = {
 const PROJECT_NAME = NAMES.PROJECT;
 const logDir = 'logs'; // logs 디렉토리 하위에 로그 파일 저장
 const { combine, timestamp, label, printf } = winston.format;
+
+const createLogStash = (host, port) => {
+  const logstashTransport = new LogstashTransport({
+    host: host, // Logstash의 IP 주소
+    port: port, // Logstash에서 수신할 포트
+    protocol: 'tcp', // 전송 프로토콜
+    level: 'info', // 로그 레벨
+    // 필요한 경우 추가 옵션 설정
+  });
+  console.log('ASAAAAAAAAAAAAAAA', host, port);
+  return logstashTransport;
+};
 
 // Define log format
 const logFormat = printf(({ level, message, label, timestamp, ...meta }) => {
@@ -81,7 +94,7 @@ const logger = winston.createLogger({
  * @param {String} serviceName 서비스명
  * @returns
  */
-const createLogger = (serviceName) => {
+const createLogger = (serviceName, host, port) => {
   return winston.createLogger({
     format: combine(
       timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -108,6 +121,7 @@ const createLogger = (serviceName) => {
         zippedArchive: true,
       }),
       new winston.transports.Console(), // 콘솔에 로그 출력
+      new LogstashTransport({ host: host, port: port }), // Logstash로 로그 전송
     ],
     //* uncaughtException 발생시 파일 설정
     exceptionHandlers: [
@@ -120,8 +134,9 @@ const createLogger = (serviceName) => {
         zippedArchive: true,
       }),
       new winston.transports.Console(), // 콘솔에 로그 출력
+      new LogstashTransport({ host: host, port: port }), // Logstash로 로그 전송
     ],
   });
 };
 
-export { logger, createLogger };
+export { logger, createLogger, createLogStash };
