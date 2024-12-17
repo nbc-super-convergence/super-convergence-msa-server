@@ -90,6 +90,16 @@ class Room {
 
       roomData.users.add(sessionId);
 
+      //* 모든 유저의 준비 상태 체크
+      const allUsersReady = Array.from(roomData.users.keys())
+        .filter((id) => id !== roomData.ownerId)
+        .every((id) => roomData.readyUsers.has(id));
+
+      if (!allUsersReady) {
+        roomData.state = ROOM_STATE.WAIT;
+        logger.info('[ join ] ====> state change', roomData.state);
+      }
+
       logger.info('[ join ] ====> success');
 
       return ResponseHelper.success(roomData);
