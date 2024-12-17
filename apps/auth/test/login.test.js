@@ -1,7 +1,6 @@
 import net from 'net';
 import { deserialize, packetParser, serialize } from '@repo/common/utils';
 import { loadProtos } from '@repo/common/load.protos';
-import { getPayloadNameByMessageType } from '@repo/common/handlers';
 import { config } from '@repo/common/config';
 
 // 테스트 코드를 작성해 주세요.
@@ -92,7 +91,7 @@ const runClient = async () => {
         // deserialized
         const { messageType, version, sequence, offset, length } = deserialize(client.buffer);
 
-        const payloadType = getPayloadNameByMessageType(messageType);
+        const payloadType = 'loginResponse';
 
         if (client.buffer.length >= length) {
           try {

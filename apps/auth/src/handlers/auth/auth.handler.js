@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { loginValidation, registerValidation } from '../../utils/auth.utils.js';
 import { config } from '@repo/common/config';
 import bcrypt from 'bcrypt';
+import { logger } from '../../utils/logger.utils.js';
 
 /**
  * 회원가입 핸들러
@@ -16,6 +17,8 @@ export const registerRequestHandler = async ({ socket, payload }) => {
 
   const checkExistId = await findUserId(loginId);
   const resultFailcode = await registerValidation(registerPayload, checkExistId);
+
+  logger.info(`[ AUTH: registerRequestHandler ]  request ID ===>>> ${loginId}`);
 
   try {
     let packet = {
@@ -34,8 +37,9 @@ export const registerRequestHandler = async ({ socket, payload }) => {
       payload.sequence,
     ]);
     socket.write(registerResponse);
+    logger.info(`[ AUTH: registerRequestHandler ]  Success register  ===>>> ${loginId}`);
   } catch (error) {
-    console.error(`[ registerRequestHandler ] error =>>> `, error);
+    logger.error(`[ AUTH: registerRequestHandler ]  error =>>> `, error);
   } finally {
     await redis.deleteLockKey('register', loginId);
   }
@@ -58,6 +62,8 @@ export const loginRequestHandler = async ({ socket, payload }) => {
       failCode: resultFailcode,
     };
 
+    logger.info(`[ AUTH: loginRequestHandler ]  request ID  ===>>> ${loginId}`);
+
     // 로그인 처리
     if (packet.failCode === config.FAIL_CODE.NONE_FAILCODE) {
       const sessionId = uuidv4();
@@ -75,7 +81,8 @@ export const loginRequestHandler = async ({ socket, payload }) => {
       payload.sequence,
     ]);
     socket.write(loginResponse);
+    logger.info(`[ AUTH: loginRequestHandler ]  login Success  ===>>> ${loginId}`);
   } catch (error) {
-    console.error(` [ loginRequestHandler ] error =>>> `, error);
+    logger.info(`[ AUTH: loginRequestHandler ]  Catch error  ===>>> ${error}`);
   }
 };

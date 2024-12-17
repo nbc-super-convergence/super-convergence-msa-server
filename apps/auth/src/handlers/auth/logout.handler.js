@@ -1,6 +1,7 @@
 import { serializeForGate } from '@repo/common/utils';
 import { redis } from '../../redis.js';
 import { MESSAGE_TYPE } from '../../constants/header.js';
+import { logger } from '../../utils/logger.utils.js';
 
 /**
  *  로그아웃 핸들러
@@ -14,6 +15,8 @@ export const logoutHandler = async ({ socket, payload }) => {
     let notificationTarget = [];
     const nickname = await redis.getUserToSessionfield(sessionId, 'nickname');
     const userLocation = await redis.getUserLocation(sessionId);
+
+    logger.info(`[ AUTH: logoutHandler ]  logout Session ===>>> ${sessionId}`);
 
     // 로비의 세션  [ lobby_room_list, lobby_users ]
     if (userLocation['lobby']) {
