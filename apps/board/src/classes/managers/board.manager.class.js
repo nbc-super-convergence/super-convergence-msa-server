@@ -49,7 +49,7 @@ class BoardManager {
           boardId: uuidv4(),
           roomId: userLocation.room,
           ownerId: sessionId,
-          turn: turn,
+          turn: 40, // TODO: 추후 변경, turnEnd에서 매번1씩 오름
           users: roomData.users,
           state: BOARD_STATE.WAITING,
         };
