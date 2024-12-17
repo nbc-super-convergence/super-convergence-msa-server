@@ -42,6 +42,16 @@ class BoardManager {
       const roomData = await redis.getRoom(userLocation.room);
       logger.info('[ BOARD: gameStartRequestHandler ] roomData ===>>> ', roomData);
 
+      // * 방의 상태가 준비(1)가 아니면 거절
+      if (Number(roomData.state) !== 1) {
+        logger.info('[ BOARD: gameStartRequestHandler ] roomData.state ===>>> ', roomData.state);
+        logger.error(
+          '[ BOARD: gameStartRequestHandler ] 방 상태가 준비가 아닌데, 시작 요청이 들어옴  ===>>> ',
+          roomData,
+        );
+        return { success: false, data: null, failCode: FAIL_CODE.INVALID_ROOM_STATE };
+      }
+
       // * 방장만 시작 요청 가능
       if (roomData.ownerId === sessionId) {
         // const playerNumber = Math.floor(Math.random() * 4);
@@ -89,7 +99,7 @@ class BoardManager {
         return { success: true, data: data, failCode: 0 };
       } else {
         logger.error('방장만 게임시작 요청을 할 수 있습니다. : sessionId ==>> ', sessionId);
-        return { success: false, data: null, failCode: FAIL_CODE.INVALID_REQUEST };
+        return { success: false, data: null, failCode: FAIL_CODE.NOT_THE_OWNER };
       }
     } catch (e) {
       logger.error('[ BOARD : createBoard ] ERRROR ==>> ', e);
