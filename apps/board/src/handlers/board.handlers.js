@@ -180,6 +180,20 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
   try {
     const result = await boardManager.purchaseTileInBoard(sessionId, tile);
 
+    // * RESPONSE
+    sessionIds = [sessionId];
+    const responseMessageType = MESSAGE_TYPE.PURCHASE_TILE_RESPONSE;
+    const response = {
+      success: result.success,
+      isPurchased: result.isPurchased,
+      tile: result.data.tile,
+      playersInfo: result.data.playersInfo,
+      purchaseGold: result.data.purchaseGold,
+      failCode: result.failCode,
+    };
+    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
+    socket.write(responsePacket);
+
     if (result.isPurchased) {
       // * 나머지 NOTIFICATION
       sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
@@ -187,7 +201,7 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
       const notification = {
         sessionId: sessionId,
         tile: result.data.tile,
-        playerInfo: result.data.playerInfo,
+        playersInfo: result.data.playersInfo,
         purchaseGold: result.data.purchaseGold,
       };
 
@@ -199,20 +213,6 @@ export const purchaseTileRequestHandler = async ({ socket, payload }) => {
       );
       socket.write(notificationPacket);
     }
-
-    // * RESPONSE
-    sessionIds = [sessionId];
-    const responseMessageType = MESSAGE_TYPE.PURCHASE_TILE_RESPONSE;
-    const response = {
-      success: result.success,
-      isPurchased: result.isPurchased,
-      tile: result.data.tile,
-      playerInfo: result.data.playerInfo,
-      purchaseGold: result.data.purchaseGold,
-      failCode: result.failCode,
-    };
-    const responsePacket = serializeForGate(responseMessageType, response, 0, sessionIds);
-    socket.write(responsePacket);
   } catch (err) {
     logger.error('[ BOARD: purchaseTileRequestHandler ] ERROR ==>> ', err);
     handleError(socket, MESSAGE_TYPE.PURCHASE_TILE_RESPONSE, sessionIds, err);
