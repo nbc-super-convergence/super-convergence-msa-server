@@ -118,7 +118,7 @@ class iceGame extends Game {
     this.intervalManager.addInterval(
       'changeMapTimer',
       () => {
-        if (changeMapCount >= 2) {
+        if (changeMapCount >= 3) {
           this.intervalManager.removeInterval('changeMapTimer', 'changeMap');
           return;
         }
@@ -158,13 +158,15 @@ class iceGame extends Game {
         }
 
         logger.info(`[iceGameTimer] ===> 게임 종료`);
+
         let aliveUsers = this.getAliveUsers();
 
         // * 살아있는 체력 순으로 내림차순 정렬 후, rank
         aliveUsers = aliveUsers.sort((a, b) => b.hp - a.hp);
+
         aliveUsers.forEach((user, index) => (user.rank = index + 1));
 
-        logger.info(`iceGameTimer`, aliveUsers);
+        logger.info(`[iceGameTimer - rankedUsers]`, aliveUsers);
 
         this.handleGameEnd(socket);
 
