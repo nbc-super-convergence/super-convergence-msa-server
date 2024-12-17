@@ -160,7 +160,6 @@ class LobbyManager {
               error,
               sessionId,
             });
-            return null;
           }
         })
         .filter((nickname) => nickname !== null);
@@ -169,7 +168,7 @@ class LobbyManager {
 
       logger.info('[ getUserList ] ====> success', { nicknames });
 
-      return ResponseHelper.success(nicknames);
+      return ResponseHelper.success(nicknames.filter((nickname) => nickname !== null));
     } catch (error) {
       logger.error('[ getUserList ] ====> unknown error', { error });
       return ResponseHelper.fail();
