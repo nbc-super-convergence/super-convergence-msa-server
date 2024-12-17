@@ -83,48 +83,92 @@ const logger = winston.createLogger({
  * @returns
  */
 const createLogger = (serviceName, host, port) => {
-  return winston.createLogger({
-    format: combine(
-      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      label({ label: serviceName }), // 어플리케이션 이름
-      logFormat,
-    ),
-    transports: [
-      // info 레벨 로그를 저장할 파일 설정
-      new winstonDaily({
-        level: 'info', //* info 레벨 로그를 저장할 파일 설정 (info: 2 보다 높은 error: 0 와 warn: 1 로그들도 자동 포함해서 저장)
-        datePattern: 'YYYY-MM-DD',
-        dirname: logDir,
-        filename: `${serviceName}_%DATE%.log`,
-        maxFiles: 30, // 30일치 로그 파일 저장
-        zippedArchive: true,
-      }),
-      // error 레벨 로그를 저장할 파일 설정
-      new winstonDaily({
-        level: 'error',
-        datePattern: 'YYYY-MM-DD',
-        dirname: logDir + '/error', // error.log 파일은 /logs/error 하위에 저장
-        filename: `${serviceName}_%DATE%.error.log`,
-        maxFiles: 30,
-        zippedArchive: true,
-      }),
-      new winston.transports.Console(), // 콘솔에 로그 출력
-      new LogstashTransport({ host: host, port: port }), // Logstash로 로그 전송
-    ],
-    //* uncaughtException 발생시 파일 설정
-    exceptionHandlers: [
-      new winstonDaily({
-        level: 'error',
-        datePattern: 'YYYY-MM-DD',
-        dirname: logDir,
-        filename: `${serviceName}_%DATE%.exception.log`,
-        maxFiles: 30,
-        zippedArchive: true,
-      }),
-      new winston.transports.Console(), // 콘솔에 로그 출력
-      new LogstashTransport({ host: host, port: port }), // Logstash로 로그 전송
-    ],
-  });
+  console.log(
+    '[ winston.config   ] createLogger - serviceName, host, port ===>> ',
+    serviceName,
+    host,
+    port,
+  );
+
+  // * INFO
+  const winstonInfoTransports = [
+    // info 레벨 로그를 저장할 파일 설정
+    new winstonDaily({
+      level: 'info', //* info 레벨 로그를 저장할 파일 설정 (info: 2 보다 높은 error: 0 와 warn: 1 로그들도 자동 포함해서 저장)
+      datePattern: 'YYYY-MM-DD',
+      dirname: logDir,
+      filename: `${serviceName}_%DATE%.log`,
+      maxFiles: 30, // 30일치 로그 파일 저장
+      zippedArchive: true,
+    }),
+    // error 레벨 로그를 저장할 파일 설정
+    new winstonDaily({
+      level: 'error',
+      datePattern: 'YYYY-MM-DD',
+      dirname: logDir + '/error', // error.log 파일은 /logs/error 하위에 저장
+      filename: `${serviceName}_%DATE%.error.log`,
+      maxFiles: 30,
+      zippedArchive: true,
+    }),
+    new winston.transports.Console(), // 콘솔에 로그 출력
+  ];
+
+  const winstonExceptionHandlers = [
+    new winstonDaily({
+      level: 'error',
+      datePattern: 'YYYY-MM-DD',
+      dirname: logDir,
+      filename: `${serviceName}_%DATE%.exception.log`,
+      maxFiles: 30,
+      zippedArchive: true,
+    }),
+    new winston.transports.Console(), // 콘솔에 로그 출력
+  ];
+
+  try {
+    const logstashTransport = new LogstashTransport({
+      host: host,
+      port: port,
+      handleExceptions: true,
+      silent: true,
+      max_connect_retries: 5,
+      format: combine(winston.format.json()),
+    }); // Logstash로 로그 전송
+
+    console.log(
+      '[ winston.config   ] logstashTransport - host, port, logstashTransport ===>> ',
+      host,
+      port,
+      logstashTransport,
+    );
+
+    // * INFO
+    winstonInfoTransports.push(logstashTransport);
+    // * EXCEPTION
+    winstonExceptionHandlers.push(logstashTransport);
+  } catch (error) {
+    console.error(
+      '[ winston.config   ] logstashTransport - host, port, error ===>> ',
+      host,
+      port,
+      error,
+    );
+  }
+
+  return winston
+    .createLogger({
+      format: combine(
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        label({ label: serviceName }), // 어플리케이션 이름
+        logFormat,
+      ),
+      transports: winstonInfoTransports,
+      //* uncaughtException 발생시 파일 설정
+      exceptionHandler: winstonExceptionHandlers,
+    })
+    .on('error', (error) => {
+      console.error(' [ winston.confg - error ] ===>>> ', error);
+    });
 };
 
 export { logger, createLogger };
