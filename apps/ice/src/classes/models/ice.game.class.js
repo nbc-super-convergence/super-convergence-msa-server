@@ -161,12 +161,22 @@ class iceGame extends Game {
 
         let aliveUsers = this.getAliveUsers();
 
-        // * 살아있는 체력 순으로 내림차순 정렬 후, rank
-        aliveUsers = aliveUsers.sort((a, b) => b.hp - a.hp);
+        // * 내림차순 정렬 후, rank
+        aliveUsers.sort((a, b) => b.hp - a.hp);
 
-        aliveUsers.forEach((user, index) => (user.rank = index + 1));
+        let rank = aliveUsers.length;
+        let previousHp = aliveUsers[0].hp;
 
-        logger.info(`[iceGameTimer - rankedUsers]`, aliveUsers);
+        aliveUsers.forEach((user, index) => {
+          if (user.hp !== previousHp) {
+            rank--;
+          }
+
+          user.rank = rank;
+          previousHp = user.hp;
+        });
+
+        logger.info(`[iceGameTimer - aliveUsers]`, aliveUsers);
 
         this.handleGameEnd(socket);
 
