@@ -129,10 +129,8 @@ const createLogger = (serviceName, host, port) => {
     const logstashTransport = new LogstashTransport({
       host: host,
       port: port,
-      handleExceptions: true,
-      silent: true,
-      max_connect_retries: 5,
-      format: combine(winston.format.json()),
+      max_connect_retries: -1,
+      retry_interval: 60000,
     }); // Logstash로 로그 전송
 
     console.log(
