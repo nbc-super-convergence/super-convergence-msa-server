@@ -1,3 +1,4 @@
+import { logger } from '../../config/index.js';
 import redisTransaction from './redisTransaction.class.js';
 
 /**
@@ -579,6 +580,10 @@ class RedisUtil {
    */
   async updateBoardPlayerGold(boardId, sessionId, value) {
     const key = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
+    if (!value) {
+      logger.error('[ redisUtils - updateBoardPlayerGold ] IF - value, key ===> ', value, key);
+      value = 0;
+    }
     const incGold = await this.client.hincrby(key, 'gold', value);
     await this.client.expire(key, this.expire);
     if (incGold <= 0) {
