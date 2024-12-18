@@ -220,6 +220,10 @@ class iceGame extends Game {
   async handleGameEnd(socket) {
     // * 게임 종료
     logger.info(`[handleGameEnd] ===> 게임 종료`);
+
+    //? 여전히 sync를 받는 버그가 발생하여 게임 상태를 먼저 처리 중으로 변경
+    this.setGameState(GAME_STATE.END_PROGRESS);
+
     // 전체 유저 조회
     const users = this.getAllUser();
 
@@ -269,8 +273,8 @@ class iceGame extends Game {
   reset() {
     // * 게임 내 정보 리셋
     this.map = iceMap;
-    this.setGameState(GAME_STATE.WAIT);
 
+    this.setGameState(GAME_STATE.WAIT);
     this.intervalManager.clearAll();
   }
 }
