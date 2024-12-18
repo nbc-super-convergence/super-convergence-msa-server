@@ -127,6 +127,13 @@ class iceGameManager {
     // * 미니 게임 시작
     logger.info(`[iceGameManager - iceMiniGameStartNoti]`);
 
+    // * 시작전 위치 초기화
+    const users = game.users;
+
+    users.forEach((user) => {
+      user.resetInfo();
+    });
+
     const sessionIds = game.getAllSessionIds();
 
     const message = iceMiniGameStartNotification();
