@@ -192,14 +192,10 @@ class iceGame extends Game {
     // ! interval 추가
     this.intervalManager.addInterval(
       'gameOverInterval',
-      () => {
+      async () => {
         const users = this.getAliveUsers();
 
         logger.info(`[checkGameOverInterval - user.length] ===> ` + users.length);
-
-        for (let user of users) {
-          logger.info(`[checkGameOverInterval - user.rank] ===> ` + user.rank);
-        }
 
         if (this.isOneAlive()) {
           logger.info(`[checkGameOverInterval] ===> 게임 종료`);
@@ -207,9 +203,12 @@ class iceGame extends Game {
 
           if (user) {
             user.rank = 1;
+
+            // * 랭크를 먼저 부여하고 하는데 이유를 모르겠음
+            logger.info(`[checkGameOverInterval - user.rank] ===> ` + user.rank);
           }
 
-          this.handleGameEnd(socket);
+          await this.handleGameEnd(socket);
         }
       },
       1000,
@@ -227,6 +226,8 @@ class iceGame extends Game {
     // 전체 유저 조회
     const users = this.getAllUser();
 
+    logger.info(`[gameEnd - user.sessionId]` + users);
+
     const sessionIds = this.getAllSessionIds();
 
     // ! 레디스로 골드 업데이트
@@ -237,7 +238,7 @@ class iceGame extends Game {
 
       logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
 
-      const updateGold = calculateGoldByRank(users[key].rank);
+      const updateGold = await calculateGoldByRank(users[key].rank);
 
       logger.info(`[gameEnd - playerInfos.gold]:` + updateGold);
 

@@ -1,4 +1,4 @@
-export const calculateGoldByRank = (rank) => {
+export const calculateGoldByRank = async (rank) => {
   switch (rank) {
     case 1:
       return 20;

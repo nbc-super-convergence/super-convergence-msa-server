@@ -222,7 +222,7 @@ class dropperGame extends Game {
   checkGameOverInterval(socket) {
     this.intervalManager.addInterval(
       'checkGameOver',
-      () => {
+      async () => {
         if (this.stage === 9 || this.isOneAlive()) {
           const aliveUsers = this.getAliveUsers();
 
@@ -241,7 +241,7 @@ class dropperGame extends Game {
           }
 
           //! 타임아웃 추가하면 4초동안 interval 4번도는 버그 생김
-          this.handleGameEnd(socket);
+          await this.handleGameEnd(socket);
         }
       },
       1000,
@@ -267,7 +267,7 @@ class dropperGame extends Game {
 
       logger.info(`[gameEnd - playerInfos.gold]:` + playerInfos.gold);
 
-      const updateGold = calculateGoldByRank(users[key].rank);
+      const updateGold = await calculateGoldByRank(users[key].rank);
 
       logger.info(`[gameEnd - playerInfos.gold]:` + updateGold);
 
