@@ -12,7 +12,7 @@ class DistributorServer extends TcpServer {
   }
 
   _onCreate = (socket) => {
-    console.log('[ _onCreate ] ', socket.remoteAddress, socket.remotePort);
+    // console.log('[ _onCreate ] ', socket.remoteAddress, socket.remotePort);
     this.sendInfo(socket);
   };
 
@@ -22,9 +22,9 @@ class DistributorServer extends TcpServer {
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
-        `\n@@ messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
-      );
+      // console.log(
+      //   `\n@@ messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
+      // );
 
       if (socket.buffer.length >= length) {
         //

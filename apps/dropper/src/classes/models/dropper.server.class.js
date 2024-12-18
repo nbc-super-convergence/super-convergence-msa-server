@@ -56,12 +56,12 @@ class DropperServer extends TcpServer {
 
   _onData = (socket) => async (data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
-    console.log(' [ _onData ]  data ', data);
+    logger.info(' [ _onData ]  data ', data);
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
+      logger.info(
         `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
@@ -76,7 +76,7 @@ class DropperServer extends TcpServer {
 
           await handler({ socket, payload });
 
-          console.log(' [ Dropper_onData ] payload ====>> ', payload);
+          logger.info(' [ Dropper_onData ] payload ====>> ', payload);
         } catch (error) {
           logger.error('[ Dropper: _onData ] ERROR ====>> ', error);
         }

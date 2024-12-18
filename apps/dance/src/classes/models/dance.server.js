@@ -96,7 +96,7 @@ class DanceServer extends TcpServer {
           //* 패킷 파싱
           const packet = socket.buffer.subarray(offset, length);
           const payload = packetParser(messageType, packet);
-          console.log(' [ Dance_onData ] payload ====>> ', payload);
+          logger.info(' [ Dance_onData ] payload ====>> ', payload);
 
           //* payload가 null이면 처리 중단
           if (!payload) {

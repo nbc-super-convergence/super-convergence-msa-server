@@ -150,8 +150,6 @@ class redisTransaction {
 
       const users = JSON.parse(board.users);
       users.forEach(async (sessionId) => {
-        console.log('[ createBoardGame : for ] sessionId ===> ', sessionId);
-
         // * 보드 플레이어 목록 저장
         await client.sadd(playersKey, sessionId);
         await client.expire(playersKey, this.expire);
@@ -325,12 +323,8 @@ class redisTransaction {
 
       //
       let pennaltyPlayerGold = await this.client.hget(penaltyPlayerInfoKey, 'gold');
-      console.log(
-        '[ redisTransaction - tilePenalty ] pennaltyPlayerGold ==>> ',
-        pennaltyPlayerGold,
-      );
+
       let ownerPlayerGold = await this.client.hget(ownerPlayerInfoKey, 'gold');
-      console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
       // * 소지 골드는 0이하로 떨어지지 않는다
       if (pennaltyPlayerGold > 0) {
@@ -340,13 +334,6 @@ class redisTransaction {
 
         pennaltyPlayerGold = Number(pennaltyPlayerGold) - penalty;
         ownerPlayerGold = Number(ownerPlayerGold) + penalty;
-
-        console.log('[ redisTransaction - tilePenalty ] penalty ==>> ', penalty);
-        console.log(
-          '[ redisTransaction - tilePenalty ] pennaltyPlayerGold ==>> ',
-          pennaltyPlayerGold,
-        );
-        console.log('[ redisTransaction - tilePenalty ] ownerPlayerGold ==>> ', ownerPlayerGold);
 
         await client.hset(penaltyPlayerInfoKey, 'gold', pennaltyPlayerGold);
         await client.expire(penaltyPlayerInfoKey, this.expire);
@@ -362,9 +349,6 @@ class redisTransaction {
     const boardPlayersKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;
     const playerSessionIds = await this.client.smembers(boardPlayersKey);
 
-    console.log('[ playerSessionIds ] boardPlayersKey ===>>> ', boardPlayersKey);
-    console.log('[ playerSessionIds ] playerSessionIds ===>>> ', playerSessionIds);
-
     for (let i = 0; i < playerSessionIds.length; i++) {
       const sId = playerSessionIds[i];
 
@@ -373,9 +357,7 @@ class redisTransaction {
       );
 
       playerInfo.sessionId = sId;
-      console.log('[ playerSessionIds ] playerInfo ===>>> ', playerInfo);
       result.playersInfo.push(playerInfo);
-      console.log('[ playerSessionIds ] result.playersInfo ===>>> ', result.playersInfo);
     }
 
     return result;
@@ -452,7 +434,6 @@ class redisTransaction {
         await client.expire(dartInfoKey, this.expire);
       } else {
         const boardPlayers = await this.client.smembers(boardPlayerKey);
-        console.log('[ boardPlayers ] ====>> ', boardPlayers);
 
         result.isOk = true;
         for (let i = 0; i < boardPlayers.length; i++) {

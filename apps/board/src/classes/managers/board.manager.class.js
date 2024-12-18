@@ -74,7 +74,7 @@ class BoardManager {
           const channel = redis.channel.BOARD;
           const message = board.boardId + ':' + board.users;
           await pubRedisClient.publish(channel, message);
-          console.log(`[${channel}] Channel Notification Sent: [${message}]`);
+          logger.info(`[${channel}] Channel Notification Sent: [${message}]`);
         }
 
         const users = JSON.parse(roomData.users);

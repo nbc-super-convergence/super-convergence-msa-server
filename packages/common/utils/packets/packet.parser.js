@@ -20,11 +20,11 @@ export const packetParser = (messageType, data) => {
       return null;
     }
 
-    console.log('[ packetParser ] decodedGamePacket ===>> ', decodedGamePacket);
+    // console.log('[ packetParser ] decodedGamePacket ===>> ', decodedGamePacket);
 
     const payload = decodedGamePacket[fieldName];
 
-    console.log('[ packetParser ] payload ===>> ', payload);
+    // console.log('[ packetParser ] payload ===>> ', payload);
 
     return payload;
   } catch (e) {

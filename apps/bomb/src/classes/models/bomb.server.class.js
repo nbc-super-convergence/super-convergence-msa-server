@@ -28,17 +28,17 @@ class BombServer extends TcpServer {
         //* `${boardId}:${users}`
         const [boardId, users] = message.split(':');
 
-        console.log('BombGameManager', BombGameManager);
+        logger.info('BombGameManager', BombGameManager);
 
         await BombGameManager.addGame(boardId, JSON.parse(users));
       } else {
-        console.log(`[bombChannel - message]`, message);
+        logger.info(`[bombChannel - message]`, message);
         const game = await BombGameManager.getGameBySessionId(message);
-        console.log(`[bombChannel - game]`, game);
+        logger.info(`[bombChannel - game]`, game);
 
         for (let user of game.users) {
-          console.log(`[bombChannel - user]`, user);
-          console.log(`[bombChannel - sessionId]`, user.sessionId);
+          logger.info(`[bombChannel - user]`, user);
+          logger.info(`[bombChannel - sessionId]`, user.sessionId);
           await redisUtil.createUserLocation(user.sessionId, 'bomb', game.id);
         }
 
@@ -54,12 +54,12 @@ class BombServer extends TcpServer {
 
   _onData = (socket) => async (data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
-    console.log(' [ _onData ]  data ', data);
+    logger.info(' [ _onData ]  data ', data);
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
+      logger.info(
         `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
@@ -74,7 +74,7 @@ class BombServer extends TcpServer {
 
           await handler({ socket, payload });
 
-          console.log(' [ BombServer _onData ] payload ====>> ', payload);
+          logger.info(' [ BombServer _onData ] payload ====>> ', payload);
         } catch (error) {
           logger.error('[ BombServer: _onData ] ERROR ====>> ', error);
         }

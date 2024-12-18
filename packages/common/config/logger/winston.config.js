@@ -61,7 +61,7 @@ const logger = winston.createLogger({
       maxFiles: 30,
       zippedArchive: true,
     }),
-    new winston.transports.Console(), // 콘솔에 로그 출력
+    // new winston.transports.Console(), // 콘솔에 로그 출력
   ],
   //* uncaughtException 발생시 파일 설정
   exceptionHandlers: [
@@ -73,7 +73,7 @@ const logger = winston.createLogger({
       maxFiles: 30,
       zippedArchive: true,
     }),
-    new winston.transports.Console(), // 콘솔에 로그 출력
+    // new winston.transports.Console(), // 콘솔에 로그 출력
   ],
 });
 
@@ -110,7 +110,7 @@ const createLogger = (serviceName, host, port) => {
       maxFiles: 30,
       zippedArchive: true,
     }),
-    new winston.transports.Console(), // 콘솔에 로그 출력
+    // new winston.transports.Console(), // 콘솔에 로그 출력
   ];
 
   const winstonExceptionHandlers = [
@@ -122,7 +122,7 @@ const createLogger = (serviceName, host, port) => {
       maxFiles: 30,
       zippedArchive: true,
     }),
-    new winston.transports.Console(), // 콘솔에 로그 출력
+    // new winston.transports.Console(), // 콘솔에 로그 출력
   ];
 
   try {
@@ -140,10 +140,11 @@ const createLogger = (serviceName, host, port) => {
       logstashTransport,
     );
 
+    // ! 2024.12.18, 22:45 : 서버 부하 문제로 주석 처리, 파일을 가져가는 방식으로 변경 예정
     // * INFO
-    winstonInfoTransports.push(logstashTransport);
+    // winstonInfoTransports.push(logstashTransport);
     // * EXCEPTION
-    winstonExceptionHandlers.push(logstashTransport);
+    // winstonExceptionHandlers.push(logstashTransport);
   } catch (error) {
     console.error(
       '[ winston.config   ] logstashTransport - host, port, error ===>> ',
