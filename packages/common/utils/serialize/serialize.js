@@ -40,12 +40,12 @@ export const serialize = (messageType, data, sequence) => {
   const gameMessage = protoMessages.game.GamePacket;
 
   const field = FIELD_NAME[messageType];
-  console.log('field name:', field);
+  // console.log('field name:', field);
 
   const payload = gameMessage.encode({ [field]: data }).finish();
   const payloadLength = payload.length;
 
-  console.log('  [ serialize ] payload ===>>> ', payload);
+  // console.log('  [ serialize ] payload ===>>> ', payload);
 
   //* payload 길이 쓰기
   buffer.writeUInt32BE(payloadLength, offset);
@@ -95,12 +95,12 @@ export const serializeForGate = (messageType, data, sequence, sessionIds) => {
   const gameMessage = protoMessages.game.GamePacket;
 
   const field = FIELD_NAME[messageType];
-  console.log('  [ serializeForGate ] field name ===>>>', field);
-  console.log('  [ serializeForGate ] data ===>>>:', data);
+  // console.log('  [ serializeForGate ] field name ===>>>', field);
+  // console.log('  [ serializeForGate ] data ===>>>:', data);
 
   const payload = gameMessage.encode({ [field]: data }).finish();
 
-  console.log('  [ serializeForGate ] payload ===>>> ', payload);
+  // console.log('  [ serializeForGate ] payload ===>>> ', payload);
 
   //* gate패킷으로 다시 쓰기
   const gateMessage = protoMessages.gate.GatePacket;
@@ -109,7 +109,7 @@ export const serializeForGate = (messageType, data, sequence, sessionIds) => {
     gamePacket: payload,
   };
 
-  console.log('gatePacket', gatePacket);
+  // console.log('gatePacket', gatePacket);
   const gatePayload = gateMessage.encode(gatePacket).finish();
   const payloadLength = gatePayload.length;
 

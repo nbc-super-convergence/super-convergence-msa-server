@@ -30,13 +30,13 @@ class IceServer extends TcpServer {
 
         await iceGameManager.addGame(boardId, JSON.parse(users));
       } else {
-        console.log(`[iceChannel - message]`, message);
+        logger.info(`[iceChannel - message]`, message);
         const game = await iceGameManager.getGameBySessionId(message);
-        console.log(`[iceChannel - game]`, game);
+        logger.info(`[iceChannel - game]`, game);
 
         for (let user of game.users) {
-          console.log(`[iceChannel - user]`, user);
-          console.log(`[iceChannel - sessionId]`, user.sessionId);
+          logger.info(`[iceChannel - user]`, user);
+          logger.info(`[iceChannel - sessionId]`, user.sessionId);
           await redisUtil.createUserLocation(user.sessionId, 'ice', game.id);
         }
 
@@ -52,12 +52,12 @@ class IceServer extends TcpServer {
 
   _onData = (socket) => async (data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
-    console.log(' [ _onData ]  data ', data);
+    logger.info(' [ _onData ]  data ', data);
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-      console.log(
+      logger.info(
         `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
       );
 
@@ -72,7 +72,7 @@ class IceServer extends TcpServer {
 
           await handler({ socket, payload });
 
-          console.log(' [ IceServer _onData ] payload ====>> ', payload);
+          logger.info(' [ IceServer _onData ] payload ====>> ', payload);
         } catch (error) {
           logger.error('[ Ice: _onData ] ERROR ====>> ', error);
         }

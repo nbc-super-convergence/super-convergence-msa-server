@@ -68,8 +68,8 @@ class DartGameManager {
     const sessionIds = game.getAllSessionIds();
     const users = game.getAllUsers();
 
-    console.log(' [ DART: makeMiniGameReadyNoti ] sessionIds ===>> ', sessionIds);
-    console.log(' [ DART: makeMiniGameReadyNoti ] users ===>> ', users);
+    logger.info(' [ DART: makeMiniGameReadyNoti ] sessionIds ===>> ', sessionIds);
+    logger.info(' [ DART: makeMiniGameReadyNoti ] users ===>> ', users);
 
     const type = MESSAGE_TYPE.DART_MINI_GAME_READY_NOTIFICATION;
     const payload = {

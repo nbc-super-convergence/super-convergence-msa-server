@@ -6,15 +6,15 @@ import { getHandlerByMessageType } from '../../handlers/index.js';
 class AuthServer extends TcpServer {
   _onData = (socket) => async (data) => {
     socket.buffer = Buffer.concat([socket.buffer, data]);
-    console.log(' [ _onData ]  data ', data);
+    // console.log(' [ _onData ]  data ', data);
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       try {
         //
         const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
-        console.log(
-          `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
-        );
+        // console.log(
+        //   `\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
+        // );
 
         if (socket.buffer.length >= length) {
           const packet = socket.buffer.subarray(offset, length);
@@ -23,7 +23,7 @@ class AuthServer extends TcpServer {
           const payload = packetParser(messageType, packet);
           payload.sequence = String(sequence);
 
-          console.log(' [ AuthServer _onData ] payload ====>> ', payload);
+          // console.log(' [ AuthServer _onData ] payload ====>> ', payload);
 
           const handler = getHandlerByMessageType(messageType);
           await handler({ socket, payload });

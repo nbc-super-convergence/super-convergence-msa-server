@@ -25,7 +25,7 @@ class RoomServer extends TcpServer {
           //* 패킷 파싱
           const packet = socket.buffer.subarray(offset, length);
           const payload = packetParser(messageType, packet);
-          console.log(' [ Room_onData ] payload ====>> ', payload);
+          logger.info(' [ Room_onData ] payload ====>> ', payload);
 
           const handler = getHandlerByMessageType(messageType);
           if (!handler) {
