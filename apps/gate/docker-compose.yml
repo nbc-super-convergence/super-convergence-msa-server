@@ -2,6 +2,7 @@ services:
   gate:
     image: super-convergence-msa-server-gate:${DOCKER_IMAGE_TAG}
     environment:
+      - TZ=Asia/Seoul
       - NODE_ENV=production
       - SERVER_HOST=${GATE_SERVER_HOST}
       - DISTRIBUTOR_HOST=${DISTRIBUTOR_HOST}
