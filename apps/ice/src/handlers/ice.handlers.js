@@ -92,9 +92,9 @@ export const icePlayerSyncRequestHandler = async ({ socket, payload }) => {
       );
     }
 
-    // * user 사망 확인 && 게임 시작상태 확인
-    if (user.isDead() && game.state !== GAME_STATE.START) {
-      logger.info(`[icePlayerSyncRequestHandler - user.isDead && Game is not Start]`);
+    // * user 사망 확인 || 게임 시작상태 확인
+    if (user.isDead() || game.state !== GAME_STATE.START) {
+      logger.info(`[icePlayerSyncRequestHandler - user.isDead or Game is not Start]`);
       return;
     }
 
@@ -146,8 +146,8 @@ export const icePlayerDamageRequestHandler = async ({ socket, payload }) => {
       );
     }
 
-    if (user.isDead() && game.state !== GAME_STATE.START) {
-      logger.info(`[icePlayerDamageRequestHandler - user.isDead && Game is not Start]`);
+    if (user.isDead() || game.state !== GAME_STATE.START) {
+      logger.info(`[icePlayerDamageRequestHandler - user.isDead or Game is not Start]`);
       return;
     }
 
@@ -240,7 +240,7 @@ export const iceCloseSocketRequestHandler = async ({ socket, payload }) => {
       game.intervalManager.clearAll();
     }
 
-    if (game.state === GAME_STATE.WAIT && game.isAllReady()) {
+    if (game.state !== GAME_STATE.START && game.isAllReady()) {
       logger.info(`[iceCloseSocketRequestHandler - game]`, game);
       logger.info(`[iceCloseSocketRequestHandler - game.users]`, game.users);
       const buffer = await iceGameManager.iceMiniGameStartNoti(game);
