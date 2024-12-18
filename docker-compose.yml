@@ -5,12 +5,15 @@ services:
       service: distributor
     volumes:
       - ./logs:/app/logs
+    restart: always
+
   gate:
     extends:
       file: ./apps/gate/docker-compose.yml
       service: gate
     volumes:
       - ./logs:/app/logs
+    restart: always
 
   auth:
     extends:
@@ -18,6 +21,10 @@ services:
       service: auth
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   lobby:
     extends:
@@ -25,6 +32,10 @@ services:
       service: lobby
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   room:
     extends:
@@ -32,6 +43,10 @@ services:
       service: room
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   board:
     extends:
@@ -39,6 +54,10 @@ services:
       service: board
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   ice:
     extends:
@@ -46,6 +65,10 @@ services:
       service: ice
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   dropper:
     extends:
@@ -53,6 +76,10 @@ services:
       service: dropper
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   dance:
     extends:
@@ -60,6 +87,10 @@ services:
       service: dance
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   bomb:
     extends:
@@ -67,6 +98,10 @@ services:
       service: bomb
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
   dart:
     extends:
@@ -74,6 +109,10 @@ services:
       service: dart
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - distributor
+      - gate
+    restart: always
 
 networks:
   super-convergence:
