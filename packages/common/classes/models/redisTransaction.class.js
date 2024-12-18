@@ -276,7 +276,7 @@ class redisTransaction {
           const ownerPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${ownerSessionId}`;
           const ownerPlayerInfo = await this.redisUtil.getBoardPlayerinfo(boardId, ownerSessionId);
 
-          const ownerGold = Number(ownerPlayerInfo.gold) + purchaseGold;
+          const ownerGold = Number(ownerPlayerInfo.gold) + Number(purchaseGold);
           await client.hset(ownerPlayerInfoKey, 'gold', ownerGold);
         }
       }
@@ -284,7 +284,7 @@ class redisTransaction {
       await client.expire(historyKey, this.expire);
 
       // * 타일 구매, 골드 감소
-      const nowGold = Number(playerInfo.gold) - purchaseGold;
+      const nowGold = Number(playerInfo.gold) - Number(purchaseGold);
       const boardPlayerInfoKey = `${this.prefix.BOARD_PLAYER_INFO}:${boardId}:${sessionId}`;
       await client.hset(boardPlayerInfoKey, 'gold', nowGold);
       await client.expire(boardPlayerInfoKey, this.expire);
