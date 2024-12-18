@@ -2,6 +2,7 @@ services:
   bomb:
     image: super-convergence-msa-server-bomb:${DOCKER_IMAGE_TAG}
     environment:
+      - TZ=Asia/Seoul
       - NODE_ENV=production
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT1=${REDIS_PORT1}
