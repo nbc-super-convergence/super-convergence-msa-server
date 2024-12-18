@@ -4,28 +4,12 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - 'apps/**'
 
 jobs:
   deploy:
     name: deploy-docker
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        folder: ${{ fromJson(env.CHANGED_FOLDERS) }}
     steps:
-      # 1. 변경된 폴더 찾기
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Get changed directories
-        id: get-changes
-        run: |
-          # Changed files
-          CHANGED_FOLDERS=$(git diff --name-only HEAD~1 HEAD | grep '^apps/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n")[:-1]')
-          echo "CHANGED_FOLDERS=$CHANGED_FOLDERS" >> $GITHUB_ENV
-
       - name: excuting remote ssh commands
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
         with:
@@ -36,3 +20,8 @@ jobs:
           script: | # 실행할 스크립트
             cd super-convergence-msa-server
             git pull origin develop
+            yarn install
+            yarn build --concurrency=1
+            docker compose -f docker-compose-build.yml build
+            docker-compose down
+            docker-compose up -d
