@@ -10,6 +10,7 @@ filebeat.inputs:
       - /app/logs/*.log
     fields:
       service: filebeat
+    ignore_older: 24h # 24시간 지난 로그는 전송하지 않음
 
 # Output to logstash
 output.logstash:
@@ -27,4 +28,4 @@ logging.files:
   permissions: 0644
 
 # Filebeat 데이터를 영구 저장
-path.data: /usr/share/filebeat/data
+path.data: /filebeat/data

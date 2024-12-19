@@ -12,3 +12,6 @@ apps/logs
 logs
 
 .env
+
+#filebeat
+apps/filebeat/data

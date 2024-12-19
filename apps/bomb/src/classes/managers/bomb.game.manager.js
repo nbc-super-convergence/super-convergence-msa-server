@@ -1,4 +1,3 @@
-import { logger } from '@repo/common/config';
 import BombGame from '../models/bomb.game.class.js';
 import { serializeForGate } from '@repo/common/utils';
 import {
@@ -9,6 +8,7 @@ import {
   bombPlayerSyncNotification,
 } from '../../utils/bomb.notifications.js';
 import { GAME_STATE } from '../../constants/game.js';
+import { logger } from '../../utils/logger.utils.js';
 
 class BombGameManager {
   constructor() {
