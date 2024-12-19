@@ -4,6 +4,7 @@ import {
   dartGameReadyRequestHandler,
   dartGameThrowRequestHandler,
   dartPannelSyncRequestHandler,
+  dartPointRequestHandler,
   dartSyncRequestHandler,
 } from './dart.handlers.js';
 
@@ -14,6 +15,7 @@ const handlers = {
   [MESSAGE_TYPE.DART_PANNEL_SYNC_REQUEST]: { handler: dartPannelSyncRequestHandler },
   [MESSAGE_TYPE.DART_SYNC_REQUEST]: { handler: dartSyncRequestHandler },
   [MESSAGE_TYPE.CLOSE_SOCKET_REQUEST]: { handler: dartCloseSocketRequestHandler },
+  [MESSAGE_TYPE.DART_POINT_REQUEST]: { handler: dartPointRequestHandler },
 };
 
 export const getHandlerByMessageType = (messageType) => {

@@ -159,4 +159,6 @@ export const FIELD_NAME = {
   609: 'dartPannelSyncNotification',
   610: 'dartSyncRequest',
   611: 'dartSyncNotification',
+  612: 'dartPointRequest',
+  613: 'dartPointNotification',
 };

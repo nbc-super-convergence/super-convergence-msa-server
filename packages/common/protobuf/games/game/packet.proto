@@ -157,6 +157,8 @@ message GamePacket {
         S2C_DartPannelSyncNotification dartPannelSyncNotification = 609;
         C2S_DartSyncRequest dartSyncRequest = 610;
         S2C_DartSyncNotification dartSyncNotification = 611;
+        C2S_DartPointRequest dartPointRequest = 612;
+        S2C_DartPointNotification dartPointNotification = 613;
 
     }
 }

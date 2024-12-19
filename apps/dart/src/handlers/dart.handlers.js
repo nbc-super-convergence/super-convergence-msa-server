@@ -48,12 +48,13 @@ export const dartGameThrowRequestHandler = async ({ socket, payload }) => {
     };
 
     // TODO: 변경 예정, 일단은 안씀
-    const result = await dartGameManager.dartThrow(sessionId, dartData);
+    // const result = await dartGameManager.dartThrow(sessionId, dartData);
 
-    logger.info('[ DART: dartGameThrowRequestHandler ] result ===>>> ', result);
+    // logger.info('[ DART: dartGameThrowRequestHandler ] result ===>>> ', result);
+    sessionIds = await dartGameManager.getSessionIds(sessionId);
 
-    // * 본인 제외 NOTIFICATION
-    sessionIds = result.data.sessionIds.filter((sId) => sId !== sessionId);
+    // * 본인 제외  NOTIFICATION
+    sessionIds = sessionIds.filter((sId) => sId !== sessionId);
     const notificationMessageType = MESSAGE_TYPE.DART_GAME_THROW_NOTIFICATION;
     const notification = {
       result: dartData,
@@ -104,6 +105,11 @@ export const dartPannelSyncRequestHandler = async ({ socket, payload }) => {
       sessionIds,
     );
     socket.write(notificationPacket);
+    logger.info(
+      '[ DART: dartPannelSyncRequestHandler ] notification, sessionIds ===>>> ',
+      notification,
+      sessionIds,
+    );
   } catch (error) {
     logger.error('[ DART: dartPannelSyncRequestHandler ] ', error);
   }
@@ -139,9 +145,71 @@ export const dartSyncRequestHandler = async ({ socket, payload }) => {
       0,
       sessionIds,
     );
+
     socket.write(notificationPacket);
+    logger.info(
+      '[ DART: dartSyncRequestHandler ] notification, sessionIds ===>>> ',
+      notification,
+      sessionIds,
+    );
   } catch (error) {
     logger.error('[ DART: dartSyncRequestHandler ] ', error);
+  }
+};
+
+//DART_POINT_REQUEST
+export const dartPointRequestHandler = async ({ socket, payload }) => {
+  try {
+    const { sessionId, point } = payload;
+    logger.info('[ DART: dartPointRequestHandler ] sessionId,point ==>> ', sessionId, point);
+
+    const result = await dartGameManager.dartPoint(sessionId, Number(point));
+
+    let sessionIds = await dartGameManager.getSessionIds(sessionId);
+    // * 본인 제외  NOTIFICATION
+    sessionIds = sessionIds.filter((sId) => sId !== sessionId);
+    const notificationMessageType = MESSAGE_TYPE.DART_SYNC_NOTIFICATION;
+    const notification = {
+      sessionId,
+      point,
+    };
+    const notificationPacket = serializeForGate(
+      notificationMessageType,
+      notification,
+      0,
+      sessionIds,
+    );
+    socket.write(notificationPacket);
+    logger.info(
+      '[ DART: dartPointRequestHandler ] notification, sessionIds ===>>> ',
+      notification,
+      sessionIds,
+    );
+
+    // * 모든 턴 종료, 게임 끝
+    if (result.isGameOver) {
+      // * 전체한테 Noti
+      sessionIds = await dartGameManager.getSessionIds(sessionId);
+      const notificationMessageType = MESSAGE_TYPE.DART_GAME_OVER_NOTIFICATION;
+      const notification = {
+        ranks: result.ranks,
+        endTime: 0,
+      };
+      const notificationPacket = serializeForGate(
+        notificationMessageType,
+        notification,
+        0,
+        sessionIds,
+      );
+      socket.write(notificationPacket);
+      logger.info(
+        '[ DART: dartPointRequestHandler ] notification, sessionIds ===>>> ',
+        notification,
+        sessionIds,
+      );
+    }
+  } catch (error) {
+    logger.error('[ DART: dartPointRequestHandler ] ', error);
   }
 };
 
