@@ -81,6 +81,17 @@ message C2S_DartSyncRequest {
 }
 
 message S2C_DartSyncNotification {
-  string sessionId = 1;
+    string sessionId = 1;
 	Vector angle = 2;
+}
+
+// 다트 점수 결과 패킷 
+message C2S_DartPointRequest {      
+    string sessionId = 1; 
+    int32 point = 2; 
+}
+
+message S2C_DartPointNotification {
+    string sessionId = 1; 
+    int32 point = 2; 
 }
