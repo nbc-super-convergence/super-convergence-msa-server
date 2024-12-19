@@ -1,0 +1,30 @@
+# filebeat.yml
+
+# Filebeat configuration
+
+# Filebeat inputs
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/*.log
+    fields:
+      service: filebeat
+
+# Output to logstash
+output.logstash:
+  hosts: ['${ELK_SERVER}']
+  index: 'logs-%{+yyyy.MM.dd}' # 로그를 저장할 인덱스 이름
+  protocol: 'tcp'
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /filebeat/log # Filebeat의 로그 파일 경로
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# Filebeat 데이터를 영구 저장
+path.data: /usr/share/filebeat/data
