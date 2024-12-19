@@ -17,7 +17,7 @@ export const serialize = (messageType, data, sequence) => {
   const buffer = Buffer.alloc(PACKET.TOTAL_LENGTH + versionLength);
   let offset = 0;
 
-  console.log('Encoding data:', data);
+  // console.log('Encoding data:', data);
 
   //* messageType 쓰기
   buffer.writeUInt16BE(messageType, offset);
@@ -72,7 +72,7 @@ export const serializeForGate = (messageType, data, sequence, sessionIds) => {
   const buffer = Buffer.alloc(PACKET.TOTAL_LENGTH + versionLength);
   let offset = 0;
 
-  console.log('Encoding data:', data);
+  // console.log('Encoding data:', data);
 
   //* messageType 쓰기
   buffer.writeUInt16BE(messageType, offset);

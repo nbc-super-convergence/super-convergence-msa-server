@@ -1,5 +1,6 @@
 import AuthServer from './classes/models/auth.server.class.js';
 import { SERVER_HOST, DISTRIBUTOR_HOST } from './constants/env.js';
+import { logger } from './utils/logger.utils.js';
 
 const SERVER_NAME = 'auth';
 const SERVER_PORT = 7012;
@@ -9,5 +10,5 @@ await server.start();
 
 server.connectToDistributor(DISTRIBUTOR_HOST, 7010, (data) => {
   // Distributor 연결
-  console.log('Distributor Notification', data);
+  logger.info('Distributor Notification', data);
 });

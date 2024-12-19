@@ -45,7 +45,7 @@ export const packetParserForGate = (messageType, data) => {
     const gateMessage = protoMessages.gate.GatePacket;
     const decodedGatePacket = gateMessage.decode(data);
 
-    console.log('[ packetParserForGate ] decodedGatePacket  ===>>> \n', decodedGatePacket);
+    // console.log('[ packetParserForGate ] decodedGatePacket  ===>>> \n', decodedGatePacket);
 
     return { ...decodedGatePacket };
   } catch (e) {
