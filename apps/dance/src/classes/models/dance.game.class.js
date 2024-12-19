@@ -152,7 +152,7 @@ class DanceGame extends Game {
 
   startGameTimer(socket) {
     if (!socket) {
-      logger.error('[ startGameTimer ] ====> sockt is undefined', { socket });
+      logger.error('[ startGameTimer ] ====> socket is undefined', { socket });
       return null;
     }
 
@@ -167,6 +167,8 @@ class DanceGame extends Game {
           const gameOverBuffer = await danceGameManager.danceGameOverNoti(this);
           if (!socket.destroyed) {
             socket.write(gameOverBuffer);
+
+            this.shuffleTeams();
           }
         }
       } catch (error) {
@@ -514,6 +516,47 @@ class DanceGame extends Game {
         endTime: 0,
       });
     });
+  }
+
+  shuffleTeams() {
+    if (this.users.size > 3) {
+      //* 유저 배열을 랜덤하게 섞기
+      const users = this.getAllSessionIds();
+      const shuffledUsers = users
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+
+      //* 섞인 순서대로 2:2 팀 재배정
+      shuffledUsers.forEach((user, idx) => {
+        const teamNumber = idx < 2 ? 1 : 2;
+        const danceUser = this.getUser(user);
+        if (danceUser) {
+          danceUser.teamNumber = teamNumber;
+        }
+      });
+
+      this.mode = GAME_MODE.TEAM;
+
+      //* teamResults 재설정
+      this.teamResults.clear();
+      [1, 2].forEach((teamNumber) => {
+        const teamUsers = Array.from(this.users.values())
+          .filter((user) => user.teamNumber === teamNumber)
+          .map((user) => user.sessionId);
+
+        this.teamResults.set(teamNumber, {
+          sessionId: teamUsers,
+          score: 0,
+          endTime: 0,
+        });
+      });
+
+      logger.info('[ shuffleTeams ] Teams have been shuffled', {
+        team1: this.teamResults.get(1),
+        team2: this.teamResults.get(2),
+      });
+    }
   }
 }
 
