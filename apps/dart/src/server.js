@@ -1,6 +1,7 @@
 import { SERVER_HOST, DISTRIBUTOR_HOST } from './constants/env.js';
 import { MESSAGE_TYPE } from '@repo/common/header';
 import DartServer from './classes/models/dart.server.class.js';
+import { logger } from './utils/logger.utils.js';
 
 const SERVER_NAME = 'dart';
 const SERVER_PORT = 7020;
@@ -13,5 +14,5 @@ await server.start();
 
 server.connectToDistributor(DISTRIBUTOR_HOST, 7010, (data) => {
   // Distributor 연결
-  console.log('Distributor Notification', data);
+  logger.info('Distributor Notification', data);
 });

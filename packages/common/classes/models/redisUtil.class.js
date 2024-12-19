@@ -324,7 +324,6 @@ class RedisUtil {
 
       //* null 값 필터링
       const validRooms = rooms.filter((room) => room !== null);
-      console.log('[ getRoomsByLobby ] ====> found rooms:', validRooms.length);
 
       return validRooms;
     } catch (error) {
@@ -470,7 +469,7 @@ class RedisUtil {
     const channel = this.channel.BOARD;
     const message = board.boardId;
     await this.client.publish(channel, message);
-    console.log(`[${channel}] Channel Notification Sent: [${message}]`);
+    // console.log(`[${channel}] Channel Notification Sent: [${message}]`);
   }
 
   async getBoardGameField(boardId, field) {
@@ -608,7 +607,7 @@ class RedisUtil {
     const tileHistoryList = await this.client.smembers(historyKey);
 
     for (let i = 0; i < tileHistoryList.length; i++) {
-      console.log('[ deleteUserTileAll ] sessionId, tile ', sessionId, tileHistoryList[i]);
+      // console.log('[ deleteUserTileAll ] sessionId, tile ', sessionId, tileHistoryList[i]);
       await this.client.hdel(mapKey, tileHistoryList[i]);
     }
     //
