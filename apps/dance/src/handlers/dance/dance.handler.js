@@ -118,6 +118,8 @@ export const danceTableCompleteRequestHandler = async ({ socket, payload }) => {
 
       const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
       socket.write(gameOverBuffer);
+
+      game.shuffleTeams();
     }
   } catch (error) {
     logger.error('[ danceTableCompleteRequestHandler ] ====> error', { sessionId, error });
@@ -160,6 +162,8 @@ export const danceCloseSocketRequestHandler = async ({ socket, payload }) => {
 
       const gameOverBuffer = await danceGameManager.danceGameOverNoti(game);
       socket.write(gameOverBuffer);
+
+      game.shuffleTeams();
     }
 
     logger.info('[ danceCloseSocketRequestHandler ] ====> PrepareCheck', {
