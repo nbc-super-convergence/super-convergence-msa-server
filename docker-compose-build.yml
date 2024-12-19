@@ -64,3 +64,9 @@ services:
       context: .
       dockerfile: apps/dart/Dockerfile
     image: super-convergence-msa-server-dart:${DOCKER_IMAGE_TAG}
+
+  filebeat:
+    build:
+      context: .
+      dockerfile: apps/filebeat/Dockerfile
+    image: super-convergence-msa-server-filebeat:${FILEBEAT_IMAGE_TAG}
