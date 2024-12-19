@@ -406,7 +406,7 @@ class redisTransaction {
     await this.execute(async (client) => {
       // BOARD_DART_HISTORY
       const dartHistKey = `${this.prefix.BOARD_DART_HISTORY}:${boardId}`;
-      const histCount = await this.client.zrange(dartHistKey, 0, -1).length;
+      const histCount = (await this.client.zrange(dartHistKey, 0, -1).length) || 1;
 
       // BOARD_PLAYERS
       const boardPlayerKey = `${this.prefix.BOARD_PLAYERS}:${boardId}`;

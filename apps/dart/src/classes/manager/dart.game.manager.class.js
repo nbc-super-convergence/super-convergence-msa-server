@@ -106,6 +106,7 @@ class DartGameManager {
 
   /**
    * 다트 던지기
+   * TODO: 안쓰게 되면 제거
    * @param {String} sessionId
    * @param {Object} dartData
    */
@@ -168,7 +169,6 @@ class DartGameManager {
         count++;
       }
     }
-    logger.info('[ DART: makeDartGameReadyNoti ] count ===>> ', count);
 
     if (sessionIds.length === count) {
       result.isAllReady = true;
@@ -178,10 +178,46 @@ class DartGameManager {
     const payload = { sessionId };
     const message = { type, payload };
 
-    logger.info(`[ DART: makeMiniGameStartNoti - message] ===>`, message);
+    logger.info(`[ DART: makeMiniGameStartNoti - message,result ] ===>`, message, result);
 
     result.buffer = serializeForGate(message.type, message.payload, 0, sessionIds);
 
+    return result;
+  }
+
+  /**
+   * 다트 점수 결과
+   * @param {String} sessionId
+   * @param {Number} point
+   */
+  async dartPoint(sessionId, point) {
+    const result = {};
+    result.isGameOver = false;
+
+    const boardId = await redisUtil.getUserLocationField(sessionId, 'board');
+    await redisUtil.addDartPoint(boardId, sessionId, point);
+
+    const nowTurn = 1;
+    const LAST_TURN = 9;
+    if (nowTurn >= LAST_TURN) {
+      result.isGameOver = true;
+      result.ranks = [];
+
+      const sessionIds = await this.getSessionIds(sessionId);
+      for (let i = 0; i < sessionIds; i++) {
+        const sId = sessionIds[i];
+
+        const setResult = await redisUtil.getDartPoint(boardId, sessionId);
+
+        const rank = {
+          sessionId: sId,
+          rank: Number(setResult.rank),
+          totalPoint: Number(setResult.score),
+        };
+
+        result.ranks.push(rank);
+      }
+    } // isGameOver
     return result;
   }
 } // end

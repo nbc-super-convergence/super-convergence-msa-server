@@ -52,6 +52,7 @@ class RedisUtil {
       BOARD_DART_INFO: 'boardDartInfo',
       LOCK: 'lock',
       DART_PLAYER_READY: 'dartPlayerReady',
+      DART_POINT: 'dartPoint',
     };
 
     this.expire = 60 * 60 * 24;
@@ -612,6 +613,33 @@ class RedisUtil {
     }
     //
     await this.client.del(historyKey);
+  }
+
+  /**
+   * 다트 점수 누적
+   * @param {String} boardId
+   * @param {String} sessionId
+   * @param {Number} point
+   */
+  async addDartPoint(boardId, sessionId, point) {
+    const dartPointKey = `${this.prefix.DART_POINT}:${boardId}:${sessionId}`;
+    await this.client.zadd(dartPointKey, { score: point, value: sessionId });
+    await this.client.expire(dartPointKey, this.expire);
+  }
+
+  /**
+   * 다트 점수 리스트 조회
+   * @param {String*} boardId
+   * @param {String} sessionId
+   * @returns
+   */
+  async getDartPoint(boardId, sessionId) {
+    const dartPointKey = `${this.prefix.DART_POINT}:${boardId}:${sessionId}`;
+
+    const rank = await this.client.zrank(dartPointKey, sessionId);
+    const score = await this.client.zscore(dartPointKey, sessionId);
+
+    return { rank, score };
   }
 }
 
