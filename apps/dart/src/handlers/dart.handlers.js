@@ -104,6 +104,11 @@ export const dartPannelSyncRequestHandler = async ({ socket, payload }) => {
       sessionIds,
     );
     socket.write(notificationPacket);
+    logger.info(
+      '[ DART: dartPannelSyncRequestHandler ] notification, sessionIds ===>>> ',
+      notification,
+      sessionIds,
+    );
   } catch (error) {
     logger.error('[ DART: dartPannelSyncRequestHandler ] ', error);
   }
@@ -139,7 +144,13 @@ export const dartSyncRequestHandler = async ({ socket, payload }) => {
       0,
       sessionIds,
     );
+
     socket.write(notificationPacket);
+    logger.info(
+      '[ DART: dartSyncRequestHandler ] notification, sessionIds ===>>> ',
+      notification,
+      sessionIds,
+    );
   } catch (error) {
     logger.error('[ DART: dartSyncRequestHandler ] ', error);
   }
