@@ -179,19 +179,12 @@ class DanceGameManager {
     const sessionIds = game.getAllSessionIds();
     logger.info(`[danceGameOverNoti] ===> sessionIds `, sessionIds);
 
-    let REWARD;
-    if (game.mode == GAME_MODE.INDIVIDUAL) {
-      REWARD = {
-        0: 20, //* 1등
-        1: 10, //* 2등
-        2: 5, //* 3등
-      };
-    } else {
-      REWARD = {
-        0: 15, //* 1등
-        1: 5, //* 2등
-      };
-    }
+    const REWARD = {
+      0: 20, //* 1등
+      1: 10, //* 2등
+      2: 5, //* 3등
+      3: 1, //* 4등
+    };
 
     //* 유저 위치 정보 삭제
     try {
