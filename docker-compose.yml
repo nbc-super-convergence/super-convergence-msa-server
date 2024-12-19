@@ -114,6 +114,15 @@ services:
       - gate
     restart: always
 
+  filebeat:
+    extends:
+      file: ./apps/filebeat/docker-compose.yml
+      service: filebeat
+    volumes:
+      - ./logs:/app/logs
+    restart: always
+
+
 networks:
   super-convergence:
     name: super-convergence

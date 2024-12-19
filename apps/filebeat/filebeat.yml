@@ -1,0 +1,27 @@
+# filebeat.yml
+
+# Filebeat configuration
+
+# Filebeat inputs
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/*.log
+    fields:
+      service: filebeat
+
+# Output to logstash
+output.logstash:
+  hosts: ['poelani.shop:50011']
+  index: 'logs-%{+yyyy.MM.dd}' # 로그를 저장할 인덱스 이름
+  protocol: 'tcp'
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /app/logs # Filebeat의 로그 파일 경로
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
