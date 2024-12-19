@@ -2,7 +2,6 @@ import winston from 'winston';
 import winstonDaily from 'winston-daily-rotate-file';
 import util from 'util';
 import { config } from '../config.js';
-// import LogstashTransport from 'winston-logstash/lib/winston-logstash-latest.js';
 
 const NAMES = {
   SERVER: '',
@@ -125,33 +124,6 @@ const createLogger = (serviceName, host, port) => {
     // new winston.transports.Console(), // 콘솔에 로그 출력
   ];
 
-  // try {
-  // const logstashTransport = new LogstashTransport({
-  //   host: host,
-  //   port: port,
-  //   max_connect_retries: -1,
-  //   retry_interval: 60000,
-  // }); // Logstash로 로그 전송
-  // console.log(
-  //   '[ winston.config   ] logstashTransport - host, port, logstashTransport ===>> ',
-  //   host,
-  //   port,
-  //   logstashTransport,
-  // );
-  // ! 2024.12.18, 22:45 : 서버 부하 문제로 주석 처리, 파일을 가져가는 방식으로 변경 예정
-  // * INFO
-  // winstonInfoTransports.push(logstashTransport);
-  // * EXCEPTION
-  // winstonExceptionHandlers.push(logstashTransport);
-  // } catch (error) {
-  //   console.error(
-  //     '[ winston.config   ] logstashTransport - host, port, error ===>> ',
-  //     host,
-  //     port,
-  //     error,
-  //   );
-  // }
-
   return winston
     .createLogger({
       format: combine(
@@ -160,7 +132,7 @@ const createLogger = (serviceName, host, port) => {
         logFormat,
       ),
       transports: winstonInfoTransports,
-      //* uncaughtException 발생시 파일 설정
+      //* uncaughtException 발생시 파일  설정
       exceptionHandler: winstonExceptionHandlers,
     })
     .on('error', (error) => {
