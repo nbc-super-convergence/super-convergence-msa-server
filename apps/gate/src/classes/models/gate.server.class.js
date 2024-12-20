@@ -33,6 +33,14 @@ class GateServer extends TcpServer {
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
+
+      // TODO: buffer.toString()
+      // TODO: console.dir(buffer, { depth: null, maxArrayLength: null });
+      const hexOutput = Array.from(socket.buffer)
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join(' ');
+      logger.info(`[전체 출력 - HEX]`, hexOutput);
+
       const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
       logger.info(
         `[ GATE :_onData ]\n messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,

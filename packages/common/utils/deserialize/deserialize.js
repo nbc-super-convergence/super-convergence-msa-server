@@ -1,11 +1,10 @@
-import { config } from "../../config/config.js";
+import { config } from '../../config/config.js';
 
 export const deserialize = (buffer) => {
   const messageType = buffer.readUintBE(0, config.PACKET.MESSAGE_TYPE_LENGTH);
-
   const versionLength = buffer.readUintBE(
     config.PACKET.MESSAGE_TYPE_LENGTH,
-    config.PACKET.VERSION_LENGTH
+    config.PACKET.VERSION_LENGTH,
   );
 
   let offset = config.PACKET.MESSAGE_TYPE_LENGTH + config.PACKET.VERSION_LENGTH;
