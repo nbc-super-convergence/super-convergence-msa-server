@@ -1,4 +1,4 @@
-name: Depoly Service on develop Branch
+name: Deploy Service on develop Branch
 
 on:
   push:
