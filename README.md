@@ -145,6 +145,7 @@
 
 - [팀 노션](https://teamsparta.notion.site/b7495c3ce1f041368af4c5b286481c82)
 - [팀 브로셔](https://www.notion.so/teamsparta/HOLY-POLY-MOLY-91e6d37a87e046dda24622ff514f0ec4#0f653df848e84acd9f96ee90d8659c90)
+- [클라이언트](https://github.com/nbc-super-convergence/Unity_super-convergence)
 
 ## 👨‍👩‍👧‍👦 팀원
 
