@@ -4,7 +4,7 @@
 
 ## 게임 링크
 
-- [itch.io](https://super-convergence.itch.io/holypolymoly)
+[![itch](https://github.com/user-attachments/assets/7ff2c030-379c-4e31-8e1f-45f0e78da567)](https://super-convergence.itch.io/holypolymoly)
 
 ## 프로젝트 소개
 <img width="495" alt="스크린샷 2024-12-20 오전 11 54 51" src="https://github.com/user-attachments/assets/512a2dc1-3f43-4740-99d7-66a9a1567e70" />
