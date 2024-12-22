@@ -1,18 +1,18 @@
-# Holy Poly Moly
+# 🎲 Holy Poly Moly 🎲
+## 🔗 게임 링크
+<a href="https://super-convergence.itch.io/holypolymoly">
+  <img src="https://github.com/user-attachments/assets/7ff2c030-379c-4e31-8e1f-45f0e78da567" alt="itch" width="200">
+</a>
+
+## 🎤 프로젝트 소개
+<img width="495" alt="스크린샷 2024-12-20 오전 11 54 51" src="https://github.com/user-attachments/assets/512a2dc1-3f43-4740-99d7-66a9a1567e70" />
 
 프로젝트 제작 기간 : 2024.11.13(수) ~ 2024.12.23.(월)
 
-## 게임 링크
+🎮 **게임 소개**
+- **Holy Poly Moly**는 2 ~ 4인의 플레이어가 온라인으로 즐기는 **👨‍👨‍👦‍👦멀티플레이 파티 게임**입니다!
 
-[![itch](https://github.com/user-attachments/assets/7ff2c030-379c-4e31-8e1f-45f0e78da567)](https://super-convergence.itch.io/holypolymoly)
-
-## 프로젝트 소개
-<img width="495" alt="스크린샷 2024-12-20 오전 11 54 51" src="https://github.com/user-attachments/assets/512a2dc1-3f43-4740-99d7-66a9a1567e70" />
-
-**게임 소개**
-- **Holy Poly Moly**는 2 ~ 4인의 플레이어가 온라인으로 즐기는 **멀티플레이 파티 게임**입니다!
-
-- 보드게임 판 위에서 주사위를 굴리고, 땅을 사고, 친구의 땅과 코인을 빼앗으며 ****미니게임에서 **우정 파괴 대전**을 펼쳐보세요.
+- 보드게임 판 위에서 **🎲주사위**를 굴리고, **🗾땅**을 사고, 친구의 땅과 코인을 **빼앗으며** 미니게임에서 **우정 파괴 대전**을 펼쳐보세요.
 
 💥 **미니게임 라인업** 💥
 
@@ -22,14 +22,7 @@
 - 🧊 **미끌미끌 얼음판**: 끝까지 버텨라! 빙판 위의 서바이벌 전쟁!
 
 🎮 지금 친구들을 초대하고, **최고의 파티 게임**을 경험해보세요! ✨
-
-#### 워크플로우
-![워크프로우](https://github.com/user-attachments/assets/4c66843d-f623-4cb6-8c94-960ee2297f27)
-
-#### 게임플로우
-![게임플로우](https://github.com/user-attachments/assets/cc8b1949-59e8-4b9a-ba0f-befb0c772b76)
-
-#### 게임 진행 설명
+#### 📃 게임 진행 설명
 ```
 1️⃣ 게임은 보드 게임과 미니 게임 크게 두 가지로 나누어집니다.
 
@@ -61,7 +54,7 @@
 총 보유 코인으로 랭킹을 정하게 됩니다.
 ```
 
-## 프로젝트 목표
+## 🎯 프로젝트 목표
 **실시간 멀티 플레이**
 
 - 안정적인 네트워크 연결 유지와 사용자 간의 상호작용이 즉각 반영되는 게임 환경
@@ -83,16 +76,24 @@
 
 - 자동화된 배포 프로세스를 통해 **개발 효율성**과 **개발 편의성**를 위해 **Docker, Docker-Compose**와 **Github Action**을 활용
 
- 클라이언트와 협업 경험
+ **클라이언트와 협업 경험**
 
 - **클라이언트와 협업**을 통해 클라이언트와 서버 간 통합 테스트를 경험하고 실시간 데이터 동기화와 네트워크 프로토콜 설계를 위한 요구사항 협의 등을 진행하면서 의사소통 능력을 함양하고 협업 경험을 해보는 것.
 
-## 서비스 아키텍처
+## 🗺️서비스 아키텍처
 
 ![image](https://github.com/user-attachments/assets/24d99974-b5c2-4298-a828-1f906cecfd46)
 
+## 🌊 플로우
 
-## 주요 콘텐츠
+#### 워크플로우
+![워크프로우](https://github.com/user-attachments/assets/4c66843d-f623-4cb6-8c94-960ee2297f27)
+
+#### 게임플로우
+![게임플로우](https://github.com/user-attachments/assets/cc8b1949-59e8-4b9a-ba0f-befb0c772b76)
+
+
+## 💻 주요 콘텐츠
 
 - [회원가입/로그인](https://www.notion.so/teamsparta/1622dc3ef5148177831bc97048c4b882?pvs=4)
 - [로비](https://www.notion.so/teamsparta/1622dc3ef51481869060fbc41c79b071?pvs=4)
@@ -100,14 +101,14 @@
 - [보드게임](https://www.notion.so/teamsparta/1622dc3ef51481f1b6fdd486ed7c7509?pvs=4)
 - [미니게임](https://www.notion.so/teamsparta/1622dc3ef51481acad1dedef56c86f91?pvs=4)
 
-## 시연 영상
-- [Holy Poly Moly 시연 영상](https://www.notion.so/teamsparta/HOLY-POLY-MOLY-91e6d37a87e046dda24622ff514f0ec4?pvs=4#0645da59b00b451f8266b9d0fb151c7e)
+## 📹 시연 영상
+- [Holy Poly Moly 시연 영상](https://www.youtube.com/watch?v=q831XY0uWjg)
 
-## 프로젝트 로직
+## 🧩 프로젝트 로직
 - [게이트 및 Distributor](https://www.notion.so/teamsparta/Distributor-1622dc3ef514813ea758f2888875f57e?pvs=25)
 - [서비스 서버](https://www.notion.so/teamsparta/1622dc3ef51481fdb8d4fd1215587084?pvs=25)
 
-## 기술 기록
+## 📚 기술 기록
 
 - [서비스 아키텍처 - MSA(Micro Service Architecture)](https://www.notion.so/teamsparta/Service-Architecture-MSA-Micro-Service-Architecture-1622dc3ef5148101b9dcf786047465e5?pvs=25)
 - [모노레포 - Turborepo](https://www.notion.so/teamsparta/Monorepo-Turborepo-1622dc3ef514819d9c38ffb3cfef3faa?pvs=25)
@@ -116,7 +117,7 @@
 - [서버 모니터링 - Grafana & Prometheus](https://www.notion.so/teamsparta/Server-Monitoring-Grafana-Prometheus-1622dc3ef5148125a916c929c1fab2dd?pvs=25)
 - [CI/CD - Docker & Docker Compose + Github Actions](https://www.notion.so/teamsparta/CI-CD-Docker-Docker-Compose-Github-Actions-1622dc3ef514814dad02ff787242d6cc?pvs=25)
 
-## 트러블 슈팅
+## 🚨 트러블 슈팅
 
 - [빌드된 파일로 서비스 실행 시 protobuf를 찾지 못하는 문제](https://www.notion.so/teamsparta/protobuf-1622dc3ef514819ab269c518020997a6?pvs=25)
 - [ESBuild로 빌드된 파일 실행시 CJS 사용 문제](https://www.notion.so/teamsparta/esbuild-CJS-1622dc3ef5148153ba19c98d45974865?pvs=25)
@@ -124,28 +125,28 @@
 - [Redis Cluster 단일 노드 사용 불가능 문제](https://www.notion.so/teamsparta/Redis-1622dc3ef51481d6b031d3e16a99fe81?pvs=25)
 - [로그 수집 문제](https://www.notion.so/teamsparta/1622dc3ef5148197a269dc5968fd668b?pvs=25)
 
-## 기술 스택
+## 🧱 기술 스택
 
-![기술 스택](https://github.com/user-attachments/assets/a1cc9506-cb52-4159-8ff5-50c7740e4c11)
+![기술 스택](https://github.com/user-attachments/assets/d739431c-ff94-492a-8942-7db26eb6f850)
 
-## 기술적 의사 결정
+## 🧠 기술적 의사 결정
 
 - [Server](https://www.notion.so/teamsparta/Server-1622dc3ef514811db224e8a8e0dae8e6?pvs=4)
 - [Database](https://www.notion.so/teamsparta/Database-1622dc3ef514810d9670eb33e7293734?pvs=4)
 - [CI/CD](https://www.notion.so/teamsparta/CI-CD-1622dc3ef51481068053eb917711b82c?pvs=4)
 - [Monitoring](https://www.notion.so/teamsparta/Monitoring-1622dc3ef51481e3a429f0b957790eb9?pvs=4)
 
-## 기획 / 게임 데이터 저장 및 관리
+## 💾 기획 / 게임 데이터 저장 및 관리
 
 - [패킷 명세서](https://www.notion.so/teamsparta/1622dc3ef5148182b495dc46e574d327?pvs=4)
 - [Database 저장 데이터](https://www.notion.so/teamsparta/Database-1622dc3ef51481dbace6d3da6046422e?pvs=4)
 
-## 관련 링크
+## 🔗 관련 링크
 
 - [팀 노션](https://teamsparta.notion.site/b7495c3ce1f041368af4c5b286481c82)
 - [팀 브로셔](https://www.notion.so/teamsparta/HOLY-POLY-MOLY-91e6d37a87e046dda24622ff514f0ec4#0f653df848e84acd9f96ee90d8659c90)
 
-## 팀원
+## 👨‍👩‍👧‍👦 팀원
 
 **서버 팀원**
 
