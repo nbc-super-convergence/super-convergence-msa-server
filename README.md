@@ -149,19 +149,19 @@
 
 **서버 팀원**
 
-| **역할** | **이름** | e-mail | github | **기술 블로그** |
-| --- | --- | --- | --- | --- |
-| 리더 | 전봉준 | contact.bong92@gmail.com | https://github.com/devbong92 | https://velog.io/@vamuzz |
-| 부리더 | 조웅상 | dndtkd2@gmail.com | https://github.com/P-lani | https://p-lani.tistory.com/ |
-| 팀원 | 김민재 | ghi00345@naver.com | https://github.com/KonnoYuuki2 | https://velog.io/@ghi00345/posts |
-| 팀원 | 박지영 | sky3004ro@naver.com | https://github.com/shd1495 | https://velog.io/@zkzkdh451/posts |
+| **역할** | **이름** | github | **기술 블로그** |
+| --- | --- | --- | --- |
+| 리더 | 전봉준 | https://github.com/devbong92 | https://velog.io/@vamuzz |
+| 부리더 | 조웅상 | https://github.com/P-lani | https://p-lani.tistory.com/ |
+| 팀원 | 김민재 | https://github.com/KonnoYuuki2 | https://velog.io/@ghi00345/posts |
+| 팀원 | 박지영 | https://github.com/shd1495 | https://velog.io/@zkzkdh451/posts |
 
 **클라이언트 팀원**
 
-| **역할** | **이름** | e-mail | github | **기술 블로그** |
-| --- | --- | --- | --- | --- |
-| 리더 | 정승연 | sjeong888@gmail.com | https://github.com/Charen523 | https://better-constructor123.tistory.com/ |
-| 팀원 | 손효재 | son95214@gmail.com | https://github.com/NFUE2 | https://son95214.tistory.com/ |
-| 팀원 | 박인수 | pisis9292@gmail.com | https://github.com/ParkInsu456 | https://ottoman1444.tistory.com/ |
-| 팀원 | 탁혁재 | gurwo63@naver.com | https://github.com/RCO8 | https://hjstory9821.tistory.com/ |
-| 팀원 | 이강혁 |  | https://github.com/Euronia12 |  |
+| **역할** | **이름** | github | **기술 블로그** |
+| --- | --- | --- | --- |
+| 리더 | 정승연 | https://github.com/Charen523 | https://better-constructor123.tistory.com/ |
+| 팀원 | 손효재 | https://github.com/NFUE2 | https://son95214.tistory.com/ |
+| 팀원 | 박인수 | https://github.com/ParkInsu456 | https://ottoman1444.tistory.com/ |
+| 팀원 | 탁혁재 | https://github.com/RCO8 | https://hjstory9821.tistory.com/ |
+| 팀원 | 이강혁 | https://github.com/Euronia12 |  |
