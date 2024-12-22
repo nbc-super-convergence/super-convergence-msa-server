@@ -60,5 +60,5 @@ jobs:
               echo "done service: $service"
             done
 
-            # none 도커 이미지 삭제 
-            docker rmi $(docker images -f "dangling=true" -q)
+            # none 도커 이미지 삭제
+            # docker rmi $(docker images -f "dangling=true" -q)
