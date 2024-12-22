@@ -1,0 +1,30 @@
+services:
+  auth:
+    image: super-convergence-msa-server-auth:${DOCKER_IMAGE_TAG}
+    environment:
+      - TZ=Asia/Seoul
+      - NODE_ENV=production
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT1=${REDIS_PORT1}
+      - REDIS_PORT2=${REDIS_PORT2}
+      - REDIS_PORT3=${REDIS_PORT3}
+      - REDIS_PORT4=${REDIS_PORT4}
+      - REDIS_PORT5=${REDIS_PORT5}
+      - REDIS_PORT6=${REDIS_PORT6}
+      - REDIS_PUB_SUB=${REDIS_PUB_SUB}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_HOST=${AUTH_SERVER_HOST}
+      - DISTRIBUTOR_HOST=${DISTRIBUTOR_HOST}
+      - USER_DB1_HOST=${USER_DB1_HOST}
+      - USER_DB1_PORT=${USER_DB1_PORT}
+      - USER_DB1_NAME=${USER_DB1_NAME}
+      - USER_DB1_USER=${USER_DB1_USER}
+      - USER_DB1_PASSWORD=${USER_DB1_PASSWORD}
+    ports:
+      - '7012:7012'
+    networks:
+      - super-convergence
+
+networks:
+  super-convergence:
+    external: true

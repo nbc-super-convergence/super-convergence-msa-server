@@ -8,8 +8,73 @@ message Vector {
     float z = 3; 
 }
 
+message UserData {
+    string sessionId = 1;
+    string nickname = 2;
+}
+
+message RoomData {
+    string roomId = 1;
+    string ownerId = 2;
+    string roomName = 3;
+    string lobbyId = 4;
+    RoomStateType state = 5;
+    repeated UserData users = 6;
+    int32 maxUser = 7;
+    repeated string readyUsers = 8;
+}
+
+enum RoomStateType  {
+	  WAIT = 0;
+	  PREPARE = 1;
+	  BOARD = 2;
+    MINI = 3;
+}
+
+enum GlobalFailCode {
+    NONE_FAILCODE = 0;
+    UNKNOWN_ERROR = 1;
+    INVALID_REQUEST = 2;
+    AUTHENTICATION_FAILED = 3;
+   
+    // 100 ~ 199 AUTH SERVER ERROR
+    ID_OR_PASSWORD_MISS = 100;
+    NOT_MATCH_PASSWORD_CONFIRM = 101;
+    ALREADY_EXIST_ID = 102;
+    ALREADY_LOGGED_IN_ID = 103;
+    VALIDAION_ERROR = 104;
+    ALREADY_EXIST_NICKNAME = 105;
+
+    // 200 ~ 299 LOBBY SERVER ERROR
+    USER_NOT_FOUND = 200;
+    ALREADY_IN_LOBBY = 201;
+    USER_NOT_IN_LOBBY = 202;
+    LOBBY_USER_LIST_ERROR = 203;
+    WRONG_LOBBY = 204;
+
+    // 300 ~ 399 ROOM SERVER ERROR
+    ROOM_NOT_FOUND = 300;
+    USER_ALREADY_IN_ROOM = 301;
+    USER_NOT_IN_ROOM = 302;
+    INVALID_ROOM_STATE = 303;
+    OWNER_CANNOT_READY = 304;
+    ROOM_IS_FULL = 305;
+
+    // 400 ~ 499 BOARD SERVER ERROR
+
+    // 500 ~ 599 ICE SERVER ERROR
+    GAME_NOT_FOUND = 500;
+    USER_IN_GAME_NOT_FOUND = 501;
+}
+
 enum State {
     IDLE = 0;
     MOVE = 1;
     DIE = 2;
+    DANCE_UP = 3;
+    DANCE_DOWN = 4;
+    DANCE_LEFT = 5;
+    DANCE_RIGHT = 6;
+    DANCE_FAIL = 7;
+    DANCE_WAIT = 8;
 }

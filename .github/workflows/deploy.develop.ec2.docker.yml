@@ -1,0 +1,64 @@
+name: Deploy Service on develop Branch
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: deploy-docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          files: |
+            apps/*/src/**
+            apps/*/Dockerfile
+
+      - name: Get affected services
+        id: get-services
+        run: |
+          SERVICES=""
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ $file == apps/* ]]; then
+              SERVICE=$(echo $file | cut -d'/' -f2)
+              if [[ ! $SERVICES =~ $SERVICE ]]; then
+                SERVICES="$SERVICES $SERVICE"
+              fi
+            fi
+          done
+          echo "affected_services=${SERVICES}" >> $GITHUB_OUTPUT
+
+      - name: excuting remote ssh commands
+        uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
+        with:
+          host: ${{ secrets.EC2_HOST }} # 인스턴스 IP
+          username: ${{ secrets.EC2_USER }} # 우분투 아이디
+          key: ${{ secrets.EC2_PRIVATE_KEY }} # ec2 instance pem key
+          port: ${{ secrets.EC2_SSH_PORT }} # 접속포트
+          script: | # 실행할 스크립트
+            cd super-convergence-msa-server
+            git pull origin develop
+
+            # 프로젝트 빌드 
+            yarn install
+            yarn build --concurrency=1
+
+            # 변경된 서비스만 도커 이미지 생성 
+            for service in ${{ steps.get-services.outputs.affected_services }}; do
+              echo "Rebuilding service: $service"
+              docker-compose down $service
+              docker compose -f docker-compose-build.yml build --no-cache $service
+              docker-compose up -d $service
+              echo "done service: $service"
+            done
+
+            # none 도커 이미지 삭제
+            # docker rmi $(docker images -f "dangling=true" -q)

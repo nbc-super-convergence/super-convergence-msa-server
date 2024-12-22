@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
 
 jobs:
   deploy:
@@ -22,7 +19,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }} # ec2 instance pem key
           port: ${{ secrets.EC2_SSH_PORT }} # 접속포트
           script: | # 실행할 스크립트
-            cd test-actions
+            cd super-convergence-msa-server
             git pull origin develop
             yarn install
             yarn build --concurrency=1

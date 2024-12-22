@@ -1,0 +1,38 @@
+syntax = 'proto3';
+
+package auth;
+import '../common.proto';
+
+// * [ Auth ] 
+// 
+
+message C2S_RegisterRequest {
+    string loginId = 1;            
+    string password = 2;
+    string passwordConfirm = 3;
+    string nickname = 4;           
+}
+
+message S2C_RegisterResponse {
+    bool success = 1;
+	GlobalFailCode failCode = 2;
+}
+
+message C2S_LoginRequest {
+    string loginId = 1;
+    string password = 2;
+}
+
+message S2C_LoginResponse {
+    bool success = 1;
+    string sessionId = 2;
+    GlobalFailCode failCode = 3;
+}
+
+message C2S_LoggoutRequest {
+    string sessionId = 1;
+}
+
+message S2C_CloseSocketNotification {
+    string sessionId = 1;
+}

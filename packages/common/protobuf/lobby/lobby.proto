@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package lobby;
+
+message C2S_LobbyJoinRequest {
+    string sessionId = 1;
+}
+
+message S2C_LobbyJoinResponse {
+    bool success = 1;
+    UserData user = 2;
+    GlobalFailCode failCode = 3;
+}
+
+message C2S_LobbyLeaveRequest {
+    string sessionId = 1; 
+}
+
+message S2C_LobbyLeaveResponse {
+    bool success = 1;
+    GlobalFailCode failCode = 2;
+}
+
+message C2S_LobbyUserListRequest {
+    string sessionId = 1;
+}
+
+message S2C_LobbyUserListResponse {
+    bool success = 1;
+    repeated string userList = 2;
+    GlobalFailCode failCode = 3;
+}
+
+message C2S_LobbyUserDetailRequest {
+    string sessionId = 1;
+    string targetSessionId = 2; 
+}
+
+message S2C_LobbyUserDetailResponse {
+    bool success = 1;
+    UserData user = 2;
+    GlobalFailCode failCode = 3;
+}
+

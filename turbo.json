@@ -14,13 +14,17 @@
       "dependsOn": ["start:distributor"],
       "cache": false
     },
-    "start:ice": {
+    "start": {
       "dependsOn": ["start:gate"],
       "cache": false
     },
     "dev": {
       "cache": false,
       "persistent": true
+    }
+    ,
+    "cache": {
+      "cache": false
     }
   }
 }

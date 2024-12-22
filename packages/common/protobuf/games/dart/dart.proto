@@ -1,0 +1,97 @@
+syntax = 'proto3';
+
+package dart;
+import '../../common.proto';
+
+message S2C_DartMiniGameReadyNotification {
+    repeated startPlayers players = 1;
+
+    message startPlayers {
+        string sessionId = 1; 
+        Vector position = 2; 
+        float rotation = 3;
+    } 
+}
+
+// 미니게임 레디 판넬 - 준비 
+message C2S_DartGameReadyRequest {
+    string sessionId = 1;
+}
+
+message S2C_DartGameReadyNotification {
+    string sessionId = 1;
+}
+
+message S2C_DartMiniGameStartNotification {
+    int64 startTime = 1; 
+}
+
+// 다트게임 데이터 
+message DartGameData {
+	string sessionId = 1;
+	int32 rank = 2; 
+	float distance = 3;
+	Vector angle = 4;
+	Vector location = 5;
+	float power = 6;
+}
+
+// 미니게임 - 던지기 요청
+message C2S_DartGameThrowRequest{
+    string sessionId = 1;
+	float distance = 2;
+	Vector angle = 3;
+	Vector location = 4;
+	float power = 5;
+}
+
+// 미니게임 - 던지기 알림 
+message S2C_DartGameThrowNotification {
+	DartGameData result = 1;
+}
+
+// 미니게임 종료 
+message S2C_DartGameOverNotification {
+   repeated Rank ranks = 1;
+    int64 endTime = 2; 
+
+    message Rank {
+        string sessionId = 1;
+        int32 rank = 2; 
+        int32 totalPoint = 3;
+    }
+}
+
+
+// 다트판 싱크 패킷
+message C2S_DartPannelSyncRequest {
+	string sessionId = 1;
+	Vector location = 2;
+}
+
+message S2C_DartPannelSyncNotification {
+  string sessionId = 1;
+	Vector location = 2;
+}
+
+// 다트 싱크 패킷 
+message C2S_DartSyncRequest {
+	string sessionId = 1;
+	Vector angle = 2;
+}
+
+message S2C_DartSyncNotification {
+    string sessionId = 1;
+	Vector angle = 2;
+}
+
+// 다트 점수 결과 패킷 
+message C2S_DartPointRequest {      
+    string sessionId = 1; 
+    int32 point = 2; 
+}
+
+message S2C_DartPointNotification {
+    string sessionId = 1; 
+    int32 point = 2; 
+}

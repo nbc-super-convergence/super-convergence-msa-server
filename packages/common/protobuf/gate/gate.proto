@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package gate;
+
+message GatePacket {
+    repeated string sessionIds = 1;
+    bytes gamePacket = 2; 
+}
+
+message S2S_CloseSocketRequest {
+    string sessionId = 1;
+}

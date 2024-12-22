@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package board;
+
+import '../common.proto';
+
+message BoardPlayerData {
+	string sessionId = 1;
+	int32 gold = 2;
+	int32 trophy = 3;
+	int32 tileLocation = 4;
+}
+
+message C2S_GameStartRequest {
+    string sessionId = 1;
+	int32 turn = 2;
+}
+
+message S2C_GameStartNotification {
+    bool success = 1;
+    repeated PlayerData players = 2;
+	GlobalFailCode failCode = 3;
+    
+    message PlayerData {
+        string sessionId = 1;
+        string nickname = 2;
+        int32 position = 3;
+    }
+}
+
+message C2S_RollDiceRequest {
+	string sessionId = 1;
+}
+
+message S2C_RollDiceResponse {
+  	bool success = 1;
+	int32 diceResult = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message S2C_RollDiceNotification {
+	string sessionId = 1;
+	int32 diceResult = 2;
+}
+
+message C2S_MovePlayerBoardRequest {
+	string sessionId = 1;
+	Vector targetPoint = 2;
+	float rotation = 3; 
+}
+
+message  S2C_MovePlayerBoardResponse {
+  	bool success = 1;
+	GlobalFailCode failCode = 2;
+}
+
+message  S2C_MovePlayerBoardNotification {
+	string sessionId = 1;
+	Vector targetPoint = 2;
+	float rotation = 3;
+}
+
+message S2C_GameEndNotification {
+  	repeated Rank rank = 1;
+	
+	message Rank {
+        string sessionId = 1;
+        int32 rank = 2; 
+		int32 tileCount = 3;
+		int32 gold = 4;
+    }
+}
+
+message C2S_BackToTheRoomRequest {
+	string sessionId = 1;
+}
+
+message S2C_BackToTheRoomResponse {
+	bool success = 1;
+	RoomData room = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message S2C_BackToTheRoomNotification {
+	string sessionId = 1;
+}
+
+message C2S_StartMiniGameRequest {
+    string sessionId = 1;
+}
+
+// 
+
+message C2S_PurchaseTileRequest {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
+message S2C_PurchaseTileResponse {
+  	bool success = 1;
+	bool isPurchased = 2;
+	int32 tile = 3;
+	repeated BoardPlayerData playersInfo = 4; 
+	int32 purchaseGold = 5;
+	GlobalFailCode failCode = 6;
+}
+
+message S2C_PurchaseTileNotification {
+	string sessionId = 1;
+	int32 tile = 2;
+	repeated BoardPlayerData playersInfo = 3; 
+	int32 purchaseGold = 4;
+}
+
+message  C2S_PurchaseTrophyRequest {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
+message  S2C_PurchaseTrophyResponse {
+  	bool success = 1;
+	int32 nextTile = 2;
+  	BoardPlayerData playerInfo = 3; 
+	GlobalFailCode failCode = 4;
+}
+
+message  S2C_PurchaseTrophyNotification {
+	string sessionId = 1;
+	int32 beforeTile = 2;
+	int32 nextTile = 3;
+	repeated BoardPlayerData playersInfo = 4;
+}
+
+message  C2S_TilePenaltyRequest {
+	string sessionId = 1;
+	int32 tile = 2;
+}
+
+message  S2C_TilePenaltyResponse {
+  	bool success = 1;
+  	repeated BoardPlayerData playersInfo = 2;
+	GlobalFailCode failCode = 3;
+}
+
+message  S2C_TilePenaltyNotification {
+	string sessionId = 1;
+	int32 tile = 2;
+	repeated BoardPlayerData playersInfo = 3;
+}
+
+message S2C_BoardGoldSyncNotification {
+	repeated BoardPlayerData playersInfo = 1;
+}
+
+
+
+message DiceGameData {
+	string sessionId = 1;
+	int32 value = 2;
+	int32 rank = 3; 
+	float distance = 4;
+	Vector angle = 5;
+	Vector location = 6;
+	float power = 7;
+}
+
+message C2S_DiceGameRequest{
+    string sessionId = 1;
+	float distance = 2;
+	Vector angle = 3;
+	Vector location = 4;
+	float power = 5;
+}
+
+message S2C_DiceGameResponse{
+    bool success = 1;
+  	GlobalFailCode failCode = 2;
+}
+
+message S2C_DiceGameNotification {
+	repeated DiceGameData result = 1;
+}
+
+
+message C2S_TurnEndRequest{
+	string sessionId = 1;
+}
+
+message S2C_TurnEndNotification{
+
+}

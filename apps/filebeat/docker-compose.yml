@@ -1,0 +1,17 @@
+services:
+  filebeat:
+    image: super-convergence-msa-server-filebeat:${FILEBEAT_IMAGE_TAG}
+    user: root
+
+    environment:
+      - TZ=Asia/Seoul
+      - ELK_SERVER=${ELK_SERVER}
+    ports:
+      - '7021:7021'
+    networks:
+      - super-convergence
+
+networks:
+  super-convergence:
+    external: true
+

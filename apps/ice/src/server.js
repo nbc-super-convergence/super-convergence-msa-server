@@ -1,11 +1,18 @@
-import IceServer from "./classes/models/ice.server.class.js";
+import { MESSAGE_TYPE } from '@repo/common/header';
+import IceServer from './classes/models/ice.server.class.js';
+import { SERVER_HOST, DISTRIBUTOR_HOST } from './constants/env.js';
+import { logger } from './utils/logger.utils.js';
 
-const SERVER_NAME = "ice";
-const SERVER_PORT = 5561;
-const server = new IceServer(SERVER_NAME, SERVER_PORT, [1, 2, 3, 4, 5]);
+const SERVER_NAME = 'ice';
+const SERVER_PORT = 7016;
+
+const iceMessages = Object.values(MESSAGE_TYPE).filter((value) => value >= 201 && value <= 211);
+
+const server = new IceServer(SERVER_NAME, SERVER_HOST, SERVER_PORT, iceMessages);
 
 await server.start();
-server.connectToDistributor("127.0.0.1", 9000, (data) => {
+
+server.connectToDistributor(DISTRIBUTOR_HOST, 7010, (data) => {
   // Distributor 연결
-  console.log("Distributor Notification", data);
+  logger.info('Distributor Notification', data);
 });

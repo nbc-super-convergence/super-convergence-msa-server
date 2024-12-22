@@ -1,0 +1,55 @@
+syntax = 'proto3';
+
+package dropper;
+import '../../common.proto';
+
+message S2C_DropMiniGameReadyNotification {
+        repeated startPlayers players = 1;
+
+        message startPlayers { 
+            string sessionId = 1; 
+            int32 slot = 2; 
+        } 
+    }
+
+    message C2S_DropGameReadyRequest {
+        string sessionId = 1;
+    }
+
+    message S2C_DropGameReadyNotification {
+        string sessionId = 1;
+    }
+
+    message S2C_DropMiniGameStartNotification {
+        int64 startTime = 1; 
+    }
+
+    message C2S_DropPlayerSyncRequest {
+        string sessionId = 1;
+        int32 slot = 2; 
+        float rotation = 3;
+        State state = 4;
+    }
+
+    message S2C_DropPlayerSyncNotification { 
+        string sessionId = 1;
+        int32 slot = 2;
+        float rotation = 3;
+        State state = 4;
+    }
+
+    message S2C_DropPlayerDeathNotification {
+        string sessionId = 1;
+    }
+
+    message S2C_DropLevelStartNotification {
+    }
+
+    message S2C_DropLevelEndNotification {
+        repeated int32 holes = 1;
+    }
+
+    message S2C_DropGameOverNotification {
+        repeated Rank ranks = 1;
+        int64 endTime = 2; 
+    }

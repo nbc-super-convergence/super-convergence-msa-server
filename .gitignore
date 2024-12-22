@@ -9,3 +9,9 @@ apps/*/dist
 # logs 
 apps/*/logs
 apps/logs
+logs
+
+.env
+
+#filebeat
+apps/filebeat/data

@@ -1,0 +1,101 @@
+syntax = 'proto3';
+
+package dance;
+import '../../common.proto';
+
+message DancePool {
+    int32 teamNumber = 1;
+    repeated DanceTable danceTables = 2;
+}
+
+message DanceTable {
+    repeated DanceCommand commands = 1;   // 방향키 커맨드 목록
+}
+
+message DanceCommand {
+    Direction direction = 1;
+    string targetSessionId = 2;           // 입력해야 하는 플레이어
+}
+
+message PlayerInfo {
+    string sessionId = 1; 
+    int32 teamNumber = 2;                 // 개인전: 각 유저에게 부여, 팀전: 팀별로 부여
+}
+
+message TeamResult {
+    repeated string sessionId = 1;        // 팀원의 세션 ID
+    int32 score = 2;                      // 팀 점수
+    int64 endTime = 3;                    // 춤표 완료할 때 마다 시간 갱신
+}
+
+enum Direction {
+    UP = 0;                               // 입력 방향의 각도
+    DOWN = 180;
+    LEFT = 90;
+    RIGHT = 270;
+}
+
+enum GameEndReason {
+    TIME_OVER = 0;                        // 시간 끝
+    COMPLETE = 1;                         // 모든 테이블 완료
+}
+
+message S2C_DanceMiniGameReadyNotification {
+    repeated PlayerInfo players = 1;
+}
+
+message C2S_DanceReadyRequest {
+    string sessionId = 1;
+}
+
+message S2C_DanceReadyNotification {
+    string sessionId = 1;
+}
+
+message S2C_DanceStartNotification {
+    int64 startTime = 1;                  // 게임 시작 시간
+}
+
+message C2S_DanceTableCreateRequest {
+    string sessionId = 1;                 // 방장 세션 ID
+    repeated DancePool dancePools = 2;    // 생성된 춤표들
+}
+
+message S2C_DanceTableNotification {
+    repeated DancePool dancePools = 1;    // 생성된 춤표들
+}
+
+message C2S_DanceKeyPressRequest {
+    string sessionId = 1;
+    Direction pressKey = 2;               // 눌린 키
+}
+
+message S2C_DanceKeyPressResponse {
+    bool success = 1;                     // 요청 성공 여부
+    bool correct = 2;                     // 올바른 입력이었는지
+    State state = 3;                      // 애니메이션
+    GlobalFailCode failCode = 4;
+}
+
+message S2C_DanceKeyPressNotification {
+    int32 teamNumber = 1;                 // 입력한 플레이어
+    bool correct = 2;                     // 올바른 입력이었는지
+    State state = 3;                      // 애니메이션
+}
+
+message S2C_DanceGameOverNotification {
+    repeated int32 TeamRank = 1;          // 팀 등수
+    repeated TeamResult result = 2;       // 팀별 게임 결과
+    GameEndReason reason = 3;             // 게임 종료 이유 1. 시간 끝 2. 모든 테이블 완료
+    int64 endTime = 4;                    // 게임 끝난 시간
+}
+
+message S2C_DanceCloseSocketNotification {
+    string disconnectedSessionId = 1;     // 나간 유저
+    string replacementSessionId = 2;      // 대신 입력할 유저
+}
+
+message C2S_DanceTableCompleteRequest {
+    string sessionId = 1;                 // 테이블을 완료한 유저의 세션 ID
+    int64 endTime = 2;                    // 테이블을 완료한 시간
+}

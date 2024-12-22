@@ -1,0 +1,72 @@
+services:
+  distributor:
+    build:
+      context: .
+      dockerfile: apps/distributor/Dockerfile
+    image: super-convergence-msa-server-distributor:${DOCKER_IMAGE_TAG}
+
+  gate:
+    build:
+      context: .
+      dockerfile: apps/gate/Dockerfile
+    image: super-convergence-msa-server-gate:${DOCKER_IMAGE_TAG}
+
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    image: super-convergence-msa-server-auth:${DOCKER_IMAGE_TAG}
+
+  lobby:
+    build:
+      context: .
+      dockerfile: apps/lobby/Dockerfile
+    image: super-convergence-msa-server-lobby:${DOCKER_IMAGE_TAG}
+
+  room:
+    build:
+      context: .
+      dockerfile: apps/room/Dockerfile
+    image: super-convergence-msa-server-room:${DOCKER_IMAGE_TAG}
+
+  board:
+    build:
+      context: .
+      dockerfile: apps/board/Dockerfile
+    image: super-convergence-msa-server-board:${DOCKER_IMAGE_TAG}
+
+  ice:
+    build:
+      context: .
+      dockerfile: apps/ice/Dockerfile
+    image: super-convergence-msa-server-ice:${DOCKER_IMAGE_TAG}
+
+  dropper:
+    build:
+      context: .
+      dockerfile: apps/dropper/Dockerfile
+    image: super-convergence-msa-server-dropper:${DOCKER_IMAGE_TAG}
+
+  dance:
+    build:
+      context: .
+      dockerfile: apps/dance/Dockerfile
+    image: super-convergence-msa-server-dance:${DOCKER_IMAGE_TAG}
+
+  bomb:
+    build:
+      context: .
+      dockerfile: apps/bomb/Dockerfile
+    image: super-convergence-msa-server-bomb:${DOCKER_IMAGE_TAG}
+
+  dart:
+    build:
+      context: .
+      dockerfile: apps/dart/Dockerfile
+    image: super-convergence-msa-server-dart:${DOCKER_IMAGE_TAG}
+
+  filebeat:
+    build:
+      context: .
+      dockerfile: apps/filebeat/Dockerfile
+    image: super-convergence-msa-server-filebeat:${FILEBEAT_IMAGE_TAG}

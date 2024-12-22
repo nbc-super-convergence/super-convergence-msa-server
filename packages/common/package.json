@@ -11,16 +11,21 @@
     "build": "yarn"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
     "protobufjs": "^7.4.0",
+    "uuid": "^11.0.3",
     "winston": "^3.11.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "winston-logstash": "^1.2.1"
+
   },
   "exports": {
     "./utils": "./utils/index.js",
     "./classes": "./classes/index.js",
     "./config": "./config/index.js",
     "./header": "./constants/header.js",
-    "./handlers": "./handlers/index.js",
+    "./failcodes": "./constants/failcodes.js",
     "./load.protos": "./init/load.protos.js",
     "./protobuf": "./protobuf"
   },
@@ -29,7 +34,6 @@
     "classes/**/*",
     "config/**/*",
     "constants/**/*",
-    "handlers/**/*",
     "init/**/*",
     "protobuf/**/*.proto"
   ]

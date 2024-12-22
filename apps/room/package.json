@@ -1,0 +1,15 @@
+{
+  "name": "room",
+  "private": true,
+  "main": "src/server.js",
+  "license": "MIT",
+  "type": "module",
+  "version": "1.0.0",
+  "dependencies": {
+    "@repo/common": "*"
+  },
+  "scripts": {
+    "build": "yarn && node build.js",
+    "start": "node dist/server.js"
+  }
+}

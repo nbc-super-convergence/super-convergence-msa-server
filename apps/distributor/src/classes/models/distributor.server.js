@@ -1,21 +1,18 @@
-import { TcpServer } from "@repo/common/classes";
-import { config } from "@repo/common/config";
-import {
-  createServerInfoNotification,
-  deserialize,
-  packetParser,
-} from "@repo/common/utils";
+import { TcpServer } from '@repo/common/classes';
+import { config } from '@repo/common/config';
+import { createServerInfoNotification, deserialize, packetParser } from '@repo/common/utils';
+import { SERVER_HOST } from '../../constants/env.js';
 
 class DistributorServer extends TcpServer {
   //
   _map = {};
 
   constructor() {
-    super("distributor", 9000, []);
+    super('distributor', SERVER_HOST, 7010, []);
   }
 
   _onCreate = (socket) => {
-    console.log("[ _onCreate ] ", socket.remoteAddress, socket.remotePort);
+    // console.log('[ _onCreate ] ', socket.remoteAddress, socket.remotePort);
     this.sendInfo(socket);
   };
 
@@ -24,12 +21,10 @@ class DistributorServer extends TcpServer {
 
     while (socket.buffer.length >= config.PACKET.TOTAL_LENGTH) {
       //
-      const { messageType, version, sequence, offset, length } = deserialize(
-        socket.buffer
-      );
-      console.log(
-        `\n@@ messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`
-      );
+      const { messageType, version, sequence, offset, length } = deserialize(socket.buffer);
+      // console.log(
+      //   `\n@@ messageType : ${messageType}, \n version : ${version}, \n sequence : ${sequence}, \n offset : ${offset}, \n length : ${length}`,
+      // );
 
       if (socket.buffer.length >= length) {
         //
@@ -37,12 +32,12 @@ class DistributorServer extends TcpServer {
         socket.buffer = socket.buffer.subarray(length);
 
         const payload = packetParser(messageType, packet);
-        console.log(" [ distributor _onData ] payload ====>> ", payload);
+        console.log(' [ distributor _onData ] payload ====>> ', payload);
 
         for (let i = 0; i < payload.params.length; i++) {
           const param = payload.params[i];
 
-          const key = param.name + "_" + param.number;
+          const key = param.name + '_' + param.number;
           // 서버정보 매핑
           // socket.remoteAddress, socket.remotePort
           this._map[key] = {
@@ -65,27 +60,27 @@ class DistributorServer extends TcpServer {
     //
   };
 
-
-  /** 
+  /**
    * Distributor Server 는 Server 끼리만 연결
    */
 
-    _onEnd = (socket) => () => {
-
-  const shutdownServer = Object.values(this._map).find((server) => server.socket === socket);
-    const key = shutdownServer.name + "_" + shutdownServer.number;
-    delete this._map[key]
-    console.log(`${shutdownServer.name} 서버가 종료되었습니다. `)
-
-    this.sendInfo();
+  _onEnd = (socket) => () => {
+    const shutdownServer = Object.values(this._map).find((server) => server.socket === socket);
+    console.log('[ _onEnd ] shutdownServer ===>>> ', shutdownServer);
+    if (shutdownServer) {
+      const key = shutdownServer.name + '_' + shutdownServer.number;
+      delete this._map[key];
+      console.log(`${shutdownServer.name} 서버가 종료되었습니다. `);
+      this.sendInfo();
+    }
   };
 
-    _onError = (socket) => (err) => {
+  _onError = (socket) => (err) => {
     if (err.code === 'ECONNRESET') {
-       this._onEnd(socket)();
+      this._onEnd(socket)();
       return;
     }
-    console.error(" [ _onError ]  소켓 오류가 발생하였습니다. ", err);
+    console.error(' [ _onError ]  소켓 오류가 발생하였습니다. ', err);
   };
 
   sendInfo(socket) {
@@ -93,8 +88,8 @@ class DistributorServer extends TcpServer {
       {
         name: this.context.name,
         number: 1,
-        host: "localhost",
-        port: this.context.port + "",
+        host: SERVER_HOST,
+        port: this.context.port + '',
         types: this.context.types,
       },
     ];
@@ -111,7 +106,7 @@ class DistributorServer extends TcpServer {
       });
     }
 
-    console.log("[ distributor sendInfo ] params ===>>> ", params);
+    console.log('[ distributor sendInfo ] params ===>>> ', params);
 
     const packet = createServerInfoNotification(params, ++this._sequence);
 

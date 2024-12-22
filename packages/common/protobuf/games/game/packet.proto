@@ -1,29 +1,164 @@
 syntax = "proto3";
 
 package game;
+
 import '../ice/ice.proto';
 import '../../distributor/packet.proto';
+import '../../auth/auth.proto';
+import '../../lobby/lobby.proto';
+import '../../room/room.proto';
+import '../../board/board.proto';
+import '../../gate/gate.proto';
+import '../dance/dance.proto';
+import '../bomb/bomb.proto';
+import '../dropper/dropper.proto';
+import '../dart/dart.proto';
 
 message GamePacket {
     oneof payload {
+        // Auth (1~8)
+        C2S_RegisterRequest registerRequest = 1;
+        S2C_RegisterResponse registerResponse = 2;
+        C2S_LoginRequest loginRequest = 3;
+        S2C_LoginResponse loginResponse = 4;
+        C2S_LoggoutRequest logoutRequest = 5;
+        S2C_CloseSocketNotification closeSocketNotification = 8;
+        // Gate 
+        S2S_CloseSocketRequest closeSocketRequest = 9;
+        // distributor noti (10)
+        S2S_ServerInfoNotification serverInfoNotification = 10;
 
-        // * 빙판 게임 Request
-        C2S_IceJoinRequest iceJoinRequest = 1;
-        C2S_IceStartRequest iceStartRequest = 2;
-        C2S_IcePlayerMoveRequest icePlayerMoveRequest = 3; 
-        
-        // * 빙판 게임 Notification
-        S2C_IceMoveNotification iceMoveNotification = 4;
-        S2C_IcePlayerSpawnNotification icePlayerSpawnNotification = 5;
-        S2C_IceStartNotification iceStartNotification = 6;
-        S2C_IcePlayersStateSyncNotification icePlayersStateSyncNotification = 7;
-        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 8;
-        S2C_IceMapStateSyncNotification iceMapStateSyncNotification = 9;
-        S2C_IceOverNotification iceOverNotification = 10;
-        S2C_IcePlayerMoveNotification icePlayerMoveNotification = 11;
+        // Lobby (11-30)
+        C2S_LobbyJoinRequest lobbyJoinRequest = 11;
+        S2C_LobbyJoinResponse lobbyJoinResponse = 12;
+        C2S_LobbyLeaveRequest lobbyLeaveRequest = 13;
+        S2C_LobbyLeaveResponse lobbyLeaveResponse = 14;
+        C2S_LobbyUserListRequest lobbyUserListRequest = 15;
+        S2C_LobbyUserListResponse lobbyUserListResponse = 16;
+        C2S_LobbyUserDetailRequest lobbyUserDetailRequest = 17;
+        S2C_LobbyUserDetailResponse lobbyUserDetailResponse = 18;
 
+        // Room (31-50)
+        C2S_RoomListRequest roomListRequest = 31;
+        S2C_RoomListResponse roomListResponse = 32;
+        C2S_CreateRoomRequest createRoomRequest = 33;
+        S2C_CreateRoomResponse createRoomResponse = 34;
+        C2S_JoinRoomRequest joinRoomRequest = 35;
+        S2C_JoinRoomResponse joinRoomResponse = 36;
+        S2C_JoinRoomNotification joinRoomNotification = 37;
+        C2S_LeaveRoomRequest leaveRoomRequest = 38;
+        S2C_LeaveRoomResponse leaveRoomResponse = 39;
+        S2C_LeaveRoomNotification leaveRoomNotification = 40;
+        C2S_GamePrepareRequest gamePrepareRequest = 41;
+        S2C_GamePrepareResponse gamePrepareResponse = 42;
+        S2C_GamePrepareNotification gamePrepareNotification = 43;
+        C2S_RoomKickRequest roomKickRequest = 44;
+        S2C_RoomKickResponse roomKickResponse = 45;
+        S2C_RoomKickNotification roomKickNotification = 46;
+
+        // Game start (51-60)
+        C2S_GameStartRequest gameStartRequest = 51;
+        S2C_GameStartNotification gameStartNotification = 52;
+
+        // Game Play (61-90)
+        C2S_RollDiceRequest rollDiceRequest = 61;
+        S2C_RollDiceResponse rollDiceResponse = 62;
+        S2C_RollDiceNotification rollDiceNotification = 63;
+        C2S_MovePlayerBoardRequest movePlayerBoardRequest = 64;
+        S2C_MovePlayerBoardResponse movePlayerBoardResponse = 65;
+        S2C_MovePlayerBoardNotification movePlayerBoardNotification = 66;
+        C2S_PurchaseTileRequest purchaseTileRequest = 67;
+        S2C_PurchaseTileResponse purchaseTileResponse = 68;
+        S2C_PurchaseTileNotification purchaseTileNotification = 69;
+        S2C_GameEndNotification gameEndNotification = 70;
+        C2S_PurchaseTrophyRequest purchaseTrophyRequest = 71;
+        S2C_PurchaseTrophyResponse purchaseTrophyResponse = 72;
+        S2C_PurchaseTrophyNotification purchaseTrophyNotification = 73;
+        C2S_TilePenaltyRequest tilePenaltyRequest = 74;
+        S2C_TilePenaltyResponse tilePenaltyResponse = 75;
+        S2C_TilePenaltyNotification tilePenaltyNotification = 76;
+        C2S_DiceGameRequest diceGameRequest = 77;
+        S2C_DiceGameResponse diceGameResponse = 78;
+        S2C_DiceGameNotification diceGameNotification = 79;
+        C2S_TurnEndRequest turnEndRequest = 80;
+        S2C_TurnEndNotification turnEndNotification = 81;
+        S2C_BoardGoldSyncNotification boardGoldSyncNotification = 82;
+
+
+        // Post Game (91-100)
+        C2S_BackToTheRoomRequest backToTheRoomRequest = 91;
+        S2C_BackToTheRoomResponse backToTheRoomResponse = 92;
+        S2C_BackToTheRoomNotification backToTheRoomNotification = 93;
         
-        // * S2S
-        S2S_ServerInfoNotification serverInfoNotification = 20;
+
+        // Mini Game (101-110)
+        C2S_StartMiniGameRequest startMiniGameRequest = 101;
+
+        // ice  (201)
+        S2C_IceMiniGameReadyNotification iceMiniGameReadyNotification = 201;
+        C2S_IceGameReadyRequest iceGameReadyRequest = 202; 
+        S2C_IceGameReadyNotification iceGameReadyNotification = 203;
+        S2C_IceMiniGameStartNotification iceMiniGameStartNotification = 204;
+        C2S_IcePlayerSyncRequest icePlayerSyncRequest = 205;
+        S2C_IcePlayerSyncNotification icePlayerSyncNotification = 206;
+        C2S_IcePlayerDamageRequest icePlayerDamageRequest = 207;
+        S2C_IcePlayerDamageNotification icePlayerDamageNotification = 208;
+        S2C_IcePlayerDeathNotification icePlayerDeathNotification = 209;
+        S2C_IceGameOverNotification iceGameOverNotification = 210;
+        S2C_IceMapSyncNotification iceMapSyncNotification = 211;
+
+        // drop (301)
+        S2C_DropMiniGameReadyNotification dropMiniGameReadyNotification = 301;
+        C2S_DropGameReadyRequest dropGameReadyRequest = 302;
+        S2C_DropGameReadyNotification dropGameReadyNotification = 303;
+        S2C_DropMiniGameStartNotification dropMiniGameStartNotification = 304;
+        C2S_DropPlayerSyncRequest dropPlayerSyncRequest = 305;
+        S2C_DropPlayerSyncNotification dropPlayerSyncNotification = 306;
+        S2C_DropPlayerDeathNotification dropPlayerDeathNotification = 307;
+        S2C_DropLevelStartNotification dropLevelStartNotification = 308;
+        S2C_DropLevelEndNotification dropLevelEndNotification = 309;
+        S2C_DropGameOverNotification dropGameOverNotification = 310;
+        
+        // dance (401)
+        S2C_DanceMiniGameReadyNotification danceMiniGameReadyNotification = 401;
+        C2S_DanceReadyRequest danceReadyRequest = 402;
+        S2C_DanceReadyNotification danceReadyNotification = 403;
+        S2C_DanceStartNotification danceStartNotification = 404;
+        C2S_DanceTableCreateRequest danceTableCreateRequest = 405;
+        S2C_DanceTableNotification danceTableNotification = 406;
+        C2S_DanceKeyPressRequest danceKeyPressRequest = 407;
+        S2C_DanceKeyPressResponse danceKeyPressResponse = 408;
+        S2C_DanceKeyPressNotification danceKeyPressNotification = 409;
+        S2C_DanceGameOverNotification danceGameOverNotification = 410;
+        S2C_DanceCloseSocketNotification danceCloseSocketNotification = 411;
+        C2S_DanceTableCompleteRequest danceTableCompleteRequest = 412;
+        
+        // bomb (501~)
+        S2C_BombMiniGameReadyNotification bombMiniGameReadyNotification = 501;
+        C2S_BombGameReadyRequest bombGameReadyRequest = 502;
+        S2C_BombGameReadyNotification bombGameReadyNotification = 503;
+        S2C_BombMiniGameStartNotification bombMiniGameStartNotification = 504;
+        C2S_BombPlayerSyncRequest bombPlayerSyncRequest = 505;
+        S2C_BombPlayerSyncNotification bombPlayerSyncNotification = 506;
+        S2C_BombPlayerDeathNotification bombPlayerDeathNotification = 507;
+        C2S_BombMoveRequest bombMoveRequest = 508;
+        S2C_BombMoveNotification bombMoveNotification = 509;
+        S2C_BombGameOverNotification bombGameOverNotification = 510;
+
+        // dart (601~)
+        S2C_DartMiniGameReadyNotification dartMiniGameReadyNotification = 601;
+        C2S_DartGameReadyRequest dartGameReadyRequest = 602;
+        S2C_DartGameReadyNotification dartGameReadyNotification = 603;
+        S2C_DartMiniGameStartNotification dartMiniGameStartNotification = 604;
+        C2S_DartGameThrowRequest dartGameThrowRequest = 605;
+        S2C_DartGameThrowNotification dartGameThrowNotification = 606;
+        S2C_DartGameOverNotification dartGameOverNotification = 607;
+        C2S_DartPannelSyncRequest dartPannelSyncRequest = 608;
+        S2C_DartPannelSyncNotification dartPannelSyncNotification = 609;
+        C2S_DartSyncRequest dartSyncRequest = 610;
+        S2C_DartSyncNotification dartSyncNotification = 611;
+        C2S_DartPointRequest dartPointRequest = 612;
+        S2C_DartPointNotification dartPointNotification = 613;
+
     }
 }
